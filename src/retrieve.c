@@ -127,6 +127,59 @@ float get_time_delay(int iface_num) {
 }
 #endif
 
+inline unsigned long long calc_new_values(unsigned long long new, unsigned long long old) {
+    /* FIXME: WRAP_AROUND _might_ be wrong for libstatgrab, where the type is always long long */
+    return (new>=old) ? (unsigned long long)(new-old) : (unsigned long long)((
+#ifdef HAVE_LIBKSTAT
+            (input_method==KSTAT_IN) ?
+            WRAP_32BIT :
+#endif
+            WRAP_AROUND)
+            -old)+new;
+}
+
+t_iface_speed_stats convert2calced_values(t_iface_stats new, t_iface_stats old) {
+    t_iface_speed_stats calced_stats;
+    calced_stats.errors_in=calc_new_values(new.e_rec,old.e_rec);
+    calced_stats.errors_out=calc_new_values(new.e_send,old.e_send);
+    calced_stats.packets_out=calc_new_values(new.p_send,old.p_send);
+    calced_stats.packets_in=calc_new_values(new.p_rec,old.p_rec);
+    calced_stats.bytess=calc_new_values(new.send,old.send);
+    calced_stats.bytesr=calc_new_values(new.rec,old.rec);
+    return calced_stats;
+}
+
+inline void save_max(t_iface_stats *stats,t_iface_speed_stats *calced_stats,float multiplier) {
+    if (multiplier*calced_stats->errors_in > stats->max_erec)
+        calced_stats->max_erec=stats->max_erec=multiplier*calced_stats->errors_in;
+    else calced_stats->max_erec=stats->max_erec;
+    if (multiplier*calced_stats->errors_out>stats->max_esend)
+        calced_stats->max_esend=stats->max_esend=multiplier*calced_stats->errors_out;
+    else calced_stats->max_esend=stats->max_esend;
+    if (multiplier*(calced_stats->errors_out+calced_stats->errors_in)>stats->max_etotal)
+        calced_stats->max_etotal=stats->max_etotal=multiplier*(calced_stats->errors_in+calced_stats->errors_out);
+    else calced_stats->max_etotal=stats->max_etotal;
+
+    if (multiplier*calced_stats->packets_in>stats->max_prec)
+        calced_stats->max_prec=stats->max_prec=multiplier*calced_stats->packets_in;
+    else calced_stats->max_prec=stats->max_prec;
+    if (multiplier*calced_stats->packets_out>stats->max_psend)
+        calced_stats->max_psend=stats->max_psend=multiplier*calced_stats->packets_out;
+    else calced_stats->max_psend=stats->max_psend;
+    if (multiplier*(calced_stats->packets_out+calced_stats->packets_in)>stats->max_ptotal)
+        calced_stats->max_ptotal=stats->max_ptotal=multiplier*(calced_stats->packets_in+calced_stats->packets_out);
+    else calced_stats->max_ptotal=stats->max_ptotal;
+
+    if (multiplier*calced_stats->bytesr>stats->max_rec)
+        calced_stats->max_rec=stats->max_rec=multiplier*calced_stats->bytesr;
+    else calced_stats->max_rec=stats->max_rec;
+    if (multiplier*calced_stats->bytess>stats->max_send)
+        calced_stats->max_send=stats->max_send=multiplier*calced_stats->bytess;
+    else calced_stats->max_send=stats->max_send;
+    if (multiplier*(calced_stats->bytess+calced_stats->bytesr)>stats->max_total)
+        calced_stats->max_total=stats->max_total=multiplier*(calced_stats->bytess+calced_stats->bytesr);
+    else calced_stats->max_total=stats->max_total;
+}
 
 int process_if_data (int hidden_if, t_iface_stats tmp_if_stats,t_iface_stats *stats, char *name, int iface_number, char verbose, char iface_is_up) {
 #if HAVE_GETTIMEOFDAY
@@ -135,6 +188,7 @@ int process_if_data (int hidden_if, t_iface_stats tmp_if_stats,t_iface_stats *st
 	float multiplier=(float)1000/delay;
 #endif    
 	int local_if_count;
+    t_iface_speed_stats calced_stats;
     
     /* if_count starts at 1 for 1 interface, local_if_count starts at 0 */
     for (local_if_count=0;local_if_count<if_count;local_if_count++) {
@@ -155,6 +209,9 @@ int process_if_data (int hidden_if, t_iface_stats tmp_if_stats,t_iface_stats *st
         if (sumhidden || ((show_all_if>1 || iface_is_up) &&
             (show_all_if || show_iface(iface_list,name)))) {
             copy_iface_stats(&if_stats[local_if_count],tmp_if_stats);
+            if_stats[local_if_count].max_rec=if_stats[local_if_count].max_send=if_stats[local_if_count].max_total=0;
+            if_stats[local_if_count].max_prec=if_stats[local_if_count].max_psend=if_stats[local_if_count].max_ptotal=0;
+            if_stats[local_if_count].max_erec=if_stats[local_if_count].max_esend=if_stats[local_if_count].max_etotal=0;
             if_stats_total.send+=if_stats[local_if_count].send;
             if_stats_total.rec+=if_stats[local_if_count].rec;
             if_stats_total.p_send+=if_stats[local_if_count].p_send;
@@ -167,13 +224,15 @@ int process_if_data (int hidden_if, t_iface_stats tmp_if_stats,t_iface_stats *st
     }
 #if HAVE_GETTIMEOFDAY
     multiplier=(float)get_time_delay(local_if_count);
-#endif    
+#endif   
+    calced_stats=convert2calced_values(tmp_if_stats,if_stats[local_if_count]);
+    /* save new max values in both, calced (for output) and ifstats */
+    save_max(&if_stats[local_if_count],&calced_stats,multiplier);
     if (verbose) { /* any output at all? */
         /* cycle: show all interfaces, only those which are up, only up and not hidden */
-        if (
-            (show_all_if>1 || iface_is_up) && /* is it up or do we show all ifaces? */
+        if ((show_all_if>1 || iface_is_up) && /* is it up or do we show all ifaces? */
             (show_all_if || show_iface(iface_list,name))) {
-            print_values(5+iface_number-hidden_if,8,name,tmp_if_stats,if_stats[local_if_count],multiplier);
+            print_values(5+iface_number-hidden_if,8,name,calced_stats,multiplier);
 		} else
             hidden_if++; /* increase the opt cause we dont show this if */
     }
@@ -205,6 +264,10 @@ void finish_iface_stats (char verbose, t_iface_stats stats, int hidden_if, int i
 #else
 	float multiplier=(float)1000/delay;
 #endif    
+    t_iface_speed_stats calced_stats;
+    calced_stats=convert2calced_values(stats,if_stats_total);
+    /* save new max values in both, calced (for output) and final stats */
+    save_max(&if_stats_total,&calced_stats,multiplier);
 
     if (verbose) {
         /* output total ifaces stats */
@@ -215,7 +278,7 @@ void finish_iface_stats (char verbose, t_iface_stats stats, int hidden_if, int i
 #endif			
 			if (output_method==PLAIN_OUT || output_method==PLAIN_OUT_ONCE)
 				printf("%s------------------------------------------------------------------\n",output_method==PLAIN_OUT ? " " : "");
-        print_values(6+iface_number-hidden_if,8,"total",stats,if_stats_total,multiplier);
+        print_values(6+iface_number-hidden_if,8,"total",calced_stats,multiplier);
     }
     /* save the data in total-struct */
     copy_iface_stats(&if_stats_total,stats);
@@ -292,7 +355,6 @@ void get_iface_stats_proc (char verbose) {
 
 	FILE *f=NULL;
     char *buffer=NULL,*name=NULL;
-    unsigned long long buf;
     
 	int hidden_if=0,current_if_num=0;
 	t_iface_stats stats,tmp_if_stats; /* local struct, used to calc total values */
@@ -314,7 +376,7 @@ void get_iface_stats_proc (char verbose) {
         if (ptr==NULL) { deinit("wrong format of input stream\n"); }
 		/* set : to end_of_string and move to first char of "next" string (to first data) */
         *ptr++ = 0;
-        sscanf(ptr,"%llu%llu%llu%llu%llu%llu%llu%llu%llu%llu%llu",&tmp_if_stats.rec,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&buf,&buf,&buf,&buf,&buf,&tmp_if_stats.send,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
+        sscanf(ptr,"%llu%llu%llu%*i%*i%*i%*i%*i%llu%llu%llu",&tmp_if_stats.rec,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.send,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
         sscanf(buffer,"%s",name);
 		/* init new interfaces and add fetched data to old or new one */
 		hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose
@@ -382,11 +444,9 @@ void get_iface_stats_netstat (char verbose) {
     int current_if_num=0,hidden_if=0;
 	char *buffer=NULL,*name=NULL;
 #if NETSTAT_BSD	|| NETSTAT_BSD_BYTES || NETSTAT_SOLARIS || NETSTAT_NETBSD
-	char *str_buf=NULL;
     char *last_name=NULL;
 #endif	
 	FILE *f=NULL;
-	unsigned long long buf;
 
 	t_iface_stats stats,tmp_if_stats; /* local struct, used to calc total values */
     memset(&stats,0,(size_t)sizeof(t_iface_stats)); /* init it */
@@ -419,7 +479,6 @@ void get_iface_stats_netstat (char verbose) {
 		deinit("read of netstat failed: %s\n",strerror(errno));
 #endif
 #if NETSTAT_BSD || NETSTAT_BSD_BYTES || NETSTAT_SOLARIS || NETSTAT_NETBSD
-	str_buf=(char *)malloc(MAX_LINE_BUFFER);
     last_name=(char *)malloc(MAX_LINE_BUFFER);
     last_name[0]='\0'; /* init */
 	if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) deinit("read of netstat failed: %s\n",strerror(errno));
@@ -429,25 +488,25 @@ void get_iface_stats_netstat (char verbose) {
     while ( (fgets(buffer,MAX_LINE_BUFFER,f) != NULL && buffer[0]!='\n') ) {
         memset(&tmp_if_stats,0,(size_t)sizeof(t_iface_stats)); /* reinit it to zero */
 #ifdef NETSTAT_LINUX		
-        sscanf(buffer,"%s%llu%llu%llu%llu%llu%llu%llu%llu",name,&buf,&buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&buf,&buf,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
+        sscanf(buffer,"%s%*i%*i%llu%llu%*i%*i%llu%llu",name,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
 #endif
 #if NETSTAT_BSD_BYTES 
         if (count_tokens(buffer)>=10) /* including address */
-    		sscanf(buffer,"%s%llu%s%s%llu%llu%llu%llu%llu%llu",name,&buf,str_buf,str_buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send,&tmp_if_stats.send);
+    		sscanf(buffer,"%s%*i%*s%*s%llu%llu%llu%llu%llu%llu",name,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send,&tmp_if_stats.send);
         else /* w/o address */
-            sscanf(buffer,"%s%llu%s%llu%llu%llu%llu%llu%llu",name,&buf,str_buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send,&tmp_if_stats.send);
+            sscanf(buffer,"%s%*i%*s%llu%llu%llu%llu%llu%llu",name,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send,&tmp_if_stats.send);
 #endif
 #if NETSTAT_BSD	|| NETSTAT_SOLARIS	
         if (count_tokens(buffer)>=8) /* including address */
-		    sscanf(buffer,"%s%llu%s%s%llu%llu%llu%llu",name,&buf,str_buf,str_buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
+		    sscanf(buffer,"%s%*i%*s%*s%llu%llu%llu%llu",name,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
         else /* w/o address */
-            sscanf(buffer,"%s%llu%s%llu%llu%llu%llu",name,&buf,str_buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
+            sscanf(buffer,"%s%*i%*s%llu%llu%llu%llu",name,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
 #endif
 #if NETSTAT_NETBSD
         if (count_tokens(buffer)>=7) /* including address */
-            sscanf(buffer,"%s%llu%s%s%llu%llu%llu",name,&buf,str_buf,str_buf,&tmp_if_stats.rec,&tmp_if_stats.send,&tmp_if_stats.e_send);
+            sscanf(buffer,"%s%*i%*s%*s%llu%llu%llu",name,&tmp_if_stats.rec,&tmp_if_stats.send,&tmp_if_stats.e_send);
         else
-            sscanf(buffer,"%s%llu%s%llu%llu%llu",name,&buf,str_buf,&tmp_if_stats.rec,&tmp_if_stats.send,&tmp_if_stats.e_send);
+            sscanf(buffer,"%s%*i%*s%llu%llu%llu",name,&tmp_if_stats.rec,&tmp_if_stats.send,&tmp_if_stats.e_send);
         tmp_if_stats.e_rec=tmp_if_stats.e_send;
 #endif
 #if NETSTAT_BSD || NETSTAT_BSD_BYTES || NETSTAT_SOLARIS || NETSTAT_NETBSD
@@ -471,7 +530,6 @@ void get_iface_stats_netstat (char verbose) {
     /* clean buffers */
     free(buffer);
 #if NETSTAT_BSD || NETSTAT_NETBSD || NETSTAT_BSD_BYTES || NETSTAT_SOLARIS
-	free(str_buf);
     free(last_name);
 #endif	
     free(name);

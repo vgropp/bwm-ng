@@ -39,12 +39,12 @@ extern int if_count;
 extern char PROC_FILE[PATH_MAX];
 #endif
 extern unsigned int delay;
-extern char show_kb;
+extern char dynamic;
 extern char show_all_if;
-extern char show_bits;
-extern char show_packets;
 extern char sumhidden;
 extern int output_method;
+extern char output_unit;
+extern char output_type;
 extern int input_method;
 extern char *iface_list;
 #ifdef CSV

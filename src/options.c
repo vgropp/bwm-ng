@@ -72,17 +72,15 @@ inline void printhelp() {
 #else
     printf("\n");
 #endif    
-    printf("displays current ethernet interfaces load in KB/s or Packets/s\n\n");
+    printf("displays current ethernet interfaces stats\n\n");
     printf("Options:\n");
     print_help_line("-t <msec>","-t, --timeout <msec>","displays stats every <msec> (1msec = 1/1000sec)");
     print_help_line("","","default: 500");
     print_help_line("-d","-d, --dynamic","show values dynamicly (Byte KB or MB)");
-    print_help_line("-b","-b, --bits","show bits per second");
     print_help_line("-a [mode]","-a, --allif [mode]","where mode is one of:");
     print_help_line("","","0=show only up (and selected) interfaces");
     print_help_line("","","1=show all up interfaces (default)");
     print_help_line("","","2=show all and down interfaces");
-    print_help_line("-p","-p, --packets","show packets/s instead of KB/s");
     print_help_line("-I <list>","-I, --interfaces <list>","show only interfaces in <list> (comma seperated), or");
     print_help_line("","","if list is prefaced with %% show all but interfaces");
     print_help_line("","","in list");
@@ -102,6 +100,8 @@ inline void printhelp() {
 #endif    
 	printf("\nOutput:\n");
     print_help_line("-o <method>","-o, --output <method>","output method, one of: " OUTPUT_METHODS);
+    print_help_line("-u","-u, --unit <value>","unit to show. one of bytes, bits, packets, errors");
+    print_help_line("-T","-T, --type <value>","type of stats. one of rate, max");
 #ifdef CSV
     print_help_line("-C <char>","-C, --csvchar <char>","delimiter for csv");
 #endif    
@@ -118,6 +118,25 @@ inline void printhelp() {
     exit(0);
 }
 
+
+inline int str2output_unit(char *optarg) {
+    if (optarg) {
+        if (!strcasecmp(optarg,"bytes")) return BYTES_OUT;
+        if (!strcasecmp(optarg,"bits")) return BITS_OUT;
+        if (!strcasecmp(optarg,"packets")) return PACKETS_OUT;
+        if (!strcasecmp(optarg,"errors")) return ERRORS_OUT;
+    }
+    return BYTES_OUT;
+}
+
+inline int str2output_type(char *optarg) {
+    if (optarg) {
+        if (!strcasecmp(optarg,"rate")) return RATE_OUT;
+        if (!strcasecmp(optarg,"max")) return MAX_OUT;
+    }
+    return RATE_OUT;
+}
+                    
 
 inline int str2out_method(char *optarg) {
     if (optarg) {
@@ -213,13 +232,13 @@ char *token, *value;
     } else if( strcasecmp( token, "INPUT" ) == 0 ) {
         if (value) input_method=str2in_method(value);
     } else if( strcasecmp( token, "DYNAMIC" ) == 0 ) {
-        if (value) show_kb=value[0]=='0' ? 1 : 0;
-    } else if( strcasecmp( token, "BITS" ) == 0 ) {
-        if (value) show_bits=value[0]=='0' ? 1 : 0;
+        if (value) dynamic=value[0]=='0' ? 1 : 0;
+    } else if( strcasecmp( token, "UNIT" ) == 0 ) {
+        if (value) output_unit=str2output_unit(value);
+    } else if( strcasecmp( token, "TYPE" ) == 0 ) {
+        if (value) output_type=str2output_type(value);
     } else if( strcasecmp( token, "ALLIF" ) == 0 ) {
         if (value) show_all_if=value[0];
-    } else if( strcasecmp( token, "PACKETS" ) == 0 ) {
-        if (value) show_packets=value[0]=='0' ? 0 : 1;
     } else if( strcasecmp( token, "INTERFACES" ) == 0 ) {
         if (value) iface_list=strdup(value);
     } else if( strcasecmp( token, "OUTPUT" ) == 0 ) {
@@ -276,11 +295,11 @@ void get_cmdln_options(int argc, char *argv[]) {
 #endif
         {"input",1,0,'i'},
         {"dynamic",0,0,'d'},
-	{"bits",0,0,'b'},
         {"help", 0, 0, 'h'},
         {"version",0,0,'V'},
         {"allif",1,0,'a'},
-        {"packets",0,0,'p'},
+        {"unit",1,0,'u'},
+        {"type",1,0,'T'},
         {"interfaces",1,0,'I'},
         {"sumhidden",0,0,'S'},
         {"output",1,0,'o'},
@@ -400,17 +419,16 @@ void get_cmdln_options(int argc, char *argv[]) {
             case 'a':
                 if (optarg) show_all_if=atoi(optarg);
                 break;
-            case 'p':
-                show_packets=1;
-                break;
             case 't':
                 if ((optarg) && atol(optarg)>0) { delay=atol(optarg); }
                 break;
+            case 'T':
+                output_type=str2output_type(optarg);
             case 'd':
-                show_kb=0;
+                dynamic=1;
                 break;
-            case 'b':
-                show_bits=1;
+            case 'u':
+                output_unit=str2output_unit(optarg);
                 break;
 #if NETSTAT && ALLOW_NETSTATPATH
             case 'n':

@@ -65,7 +65,7 @@
 
 #define MAX_LINE_BUFFER 1024
 
-extern void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stats stats,float multiplier);
+extern void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float multiplier);
 extern int deinit(char *error_msg, ...);
 
 extern int if_count;
@@ -73,10 +73,11 @@ extern int if_count;
 extern char PROC_FILE[PATH_MAX];
 #endif
 extern unsigned int delay;
-extern char show_kb;
+extern char dynamic;
 extern char show_all_if;
 extern char sumhidden;
-extern char show_packets;
+extern char output_unit;
+extern char output_type;
 extern int output_method;
 extern unsigned int intput_method;
 extern char *iface_list;

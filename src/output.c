@@ -24,23 +24,18 @@
 #include "output.h"
 
 
-/* convert doube bytes/s value to some nice string */
-inline char *convert_bytes(double bytes,char * buffer, int buf_size) {
-    if (bytes<0) bytes=0;
-    if (bytes<1024 && !show_kb && !show_bits) 
-        snprintf(buffer,buf_size,"%12.2f  B/s",bytes);
-    else if (bytes<1024 && !show_kb && show_bits) 
-        snprintf(buffer,buf_size,"%12.2f  b/s",bytes*8);
-    else if ((bytes<1048576 || show_kb) && !show_bits) 
-        snprintf(buffer,buf_size,"%12.2f KB/s",bytes/1024);
-    else if ((bytes<1048576 || show_kb) && show_bits) 
-        snprintf(buffer,buf_size,"%12.2f Kb/s",bytes/1024*8);
-    else if (!show_bits)
-	snprintf(buffer,buf_size,"%12.2f MB/s",bytes/1048576);
-    else
-	snprintf(buffer,buf_size,"%12.2f Mb/s",bytes/1048576*8);
-    return buffer;
+inline char *output_type2str() {
+    switch (output_type) {
+        case RATE_OUT:
+            return "rate";
+            break;
+        case MAX_OUT:
+            return "max";
+            break;
+    }
+    return "";
 }
+
 
 inline char *input2str() {
     switch (input_method) {
@@ -99,7 +94,7 @@ int print_header(int option) {
 		case CURSES_OUT:
 	        erase();
 		    mvwprintw(stdscr,1,8,"bwm-ng v%i.%i%s (probing every %2.3fs), press 'q' to end this",MAJOR,MINOR,EXTRA,(float)delay/1000);
-            mvwprintw(stdscr,2,8,input2str());
+            mvwprintw(stdscr,2,8,"input: %s type: %s",input2str(),output_type2str());
             wprintw(stdscr,show_all_if2str());
 	        mvwprintw(stdscr,3,8,"%c       iface               Rx                Tx             Total",(char)IDLE_CHARS[option]);
 	        /* go to next char for next run */
@@ -148,145 +143,160 @@ int print_header(int option) {
 }
 
 
-inline unsigned long long calc_new_values(unsigned long long new, unsigned long long old) {
-    /* FIXME: WRAP_AROUND _might_ be wrong for libstatgrab, where the type is always long long */
-    return (new>=old) ? (unsigned long long)(new-old) : (unsigned long long)((
-#ifdef HAVE_LIBKSTAT
-            (input_method==KSTAT_IN) ?
-            WRAP_32BIT :
-#endif            
-            WRAP_AROUND)
-            -old)+new;
+inline unsigned long long direction2value(char mode,unsigned long long in, unsigned long long out) {
+    switch (mode) {
+        case 0:
+            return in;
+        case 1:
+            return out;
+        case 2: 
+            return in+out;
+    }
+    return 0;
+}
+
+inline double direction_max2value(char mode,double in, double out, double total) {
+    switch (mode) {
+        case 0:
+            return in;
+        case 1:
+            return out;
+        case 2:
+            return total;
+    }
+    return 0;
+}
+
+
+char *values2str(char mode,t_iface_speed_stats stats,float multiplier,char *str,int buf_size) {
+    char byte_char=' ';
+    double value=0;
+    if (
+#if !NETSTAT_BSD_BYTES && !NETSTAT_NETBSD && NETSTAT
+        input_method==NETSTAT_IN ||
+#endif
+        output_unit==PACKETS_OUT) {
+        switch (output_type) {
+            case RATE_OUT:
+                value=(double)direction2value(mode,stats.packets_in,stats.packets_out)*multiplier;
+                break;
+            case MAX_OUT:
+                value=(double)direction_max2value(mode,stats.max_prec,stats.max_psend,stats.max_ptotal);
+                break;
+        }
+        snprintf(str,buf_size,"%13.2f P/s",(double)value);
+    } else {
+        if (output_unit==BITS_OUT || output_unit==BYTES_OUT) {
+            if (output_unit==BYTES_OUT) byte_char='B';
+            switch (output_type) {
+                case RATE_OUT:
+                    value=(double)direction2value(mode,stats.bytesr,stats.bytess)*multiplier;
+                    break;
+                case MAX_OUT:
+                    value=(double)direction_max2value(mode,stats.max_rec,stats.max_send,stats.max_total);
+                    break;
+            }
+            if (output_unit==BITS_OUT) {
+                byte_char='b';
+                value*=8;
+            }
+            if (dynamic) {
+                if (value<1024)
+                    snprintf(str,buf_size,"%12.2f  %c/s",value,byte_char);
+                else
+                    if (value<1048576)
+                        snprintf(str,buf_size,"%12.2f K%c/s",value/1024,byte_char);
+                    else
+                        if (value<1073741824)
+                            snprintf(str,buf_size,"%12.2f M%c/s",value/1048576,byte_char);
+                        else
+                            snprintf(str,buf_size,"%12.2f G%c/s",value/1073741824,byte_char);
+            } else {
+                snprintf(str,buf_size,"%12.2f K%c/s",value/1024,byte_char);
+            }
+        }
+        if (output_unit==ERRORS_OUT) {
+            switch (output_type) {
+                case RATE_OUT:
+                    value=(double)direction2value(mode,stats.errors_in,stats.errors_out)*multiplier;
+                    break;
+                case MAX_OUT:
+                    value=(double)direction_max2value(mode,stats.max_erec,stats.max_esend,stats.max_etotal);
+                    break;
+            }
+            snprintf(str,buf_size,"%13.2f E/s",(double)value);
+        }
+    }
+   return str;
 }
 
 /* do the actual output */
-void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stats stats,float multiplier) {
-	unsigned long long packets_out,packets_in,bytess,bytesr,errors_in,errors_out;
+void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float multiplier) {
+    char buffer[50];
 #if CSV || HTML
 	FILE *tmp_out_file;
 #endif
-	errors_in=calc_new_values(new_stats.e_rec,stats.e_rec);
-	errors_out=calc_new_values(new_stats.e_send,stats.e_send);
-    packets_out=calc_new_values(new_stats.p_send,stats.p_send);
-    packets_in=calc_new_values(new_stats.p_rec,stats.p_rec);
-    bytess=calc_new_values(new_stats.send,stats.send);
-    bytesr=calc_new_values(new_stats.rec,stats.rec);
     switch (output_method) {
 #ifdef HAVE_CURSES		
         case CURSES_OUT:
             mvwprintw(stdscr,y,x,"%12s:",if_name); /* output the name */
-            if (
-#if !NETSTAT_BSD_BYTES && !NETSTAT_NETBSD && NETSTAT
-					(input_method==NETSTAT_IN) || 
-#endif					
-					show_packets) {
-                /* show packets/s if asked for or netstat input */
-				if (errors_in) wattron(stdscr, A_REVERSE);
-                wprintw(stdscr,"%13.2f P/s",(double)packets_in*multiplier);
-				if (errors_in) wattroff(stdscr, A_REVERSE);
-				wprintw(stdscr," ");
-				if (errors_out) wattron(stdscr, A_REVERSE);
-                wprintw(stdscr,"%13.2f P/s",(double)packets_out*multiplier);
-				if (errors_out) wattroff(stdscr, A_REVERSE);
-				wprintw(stdscr," ");
-				if (errors_out || errors_in) wattron(stdscr, A_REVERSE);
-                wprintw(stdscr,"%13.2f P/s",(double)(packets_out+packets_in)*multiplier);
-				if (errors_out || errors_in) wattroff(stdscr, A_REVERSE);
-            } else {
-                char bytes_buf[20];
-                /* output Bytes/s */
-				if (errors_in) wattron(stdscr, A_REVERSE);
-                wprintw(stdscr,"%s",convert_bytes((double)(bytesr*multiplier),bytes_buf,20));
-				if (errors_in) wattroff(stdscr, A_REVERSE);
-				wprintw(stdscr," ");
-				if (errors_out) wattron(stdscr, A_REVERSE);
-                wprintw(stdscr,"%s",convert_bytes((double)(bytess*multiplier),bytes_buf,20));
-				if (errors_out) wattroff(stdscr, A_REVERSE);
-				wprintw(stdscr," ");
-                /* print total (send+rec) of current iface */
-				if (errors_out || errors_in) wattron(stdscr, A_REVERSE);
-                wprintw(stdscr,"%s",convert_bytes((double)((bytess+bytesr)*multiplier),bytes_buf,20));
-				if (errors_out || errors_in) wattroff(stdscr, A_REVERSE);
-            }
+            if (stats.errors_in && output_unit!=ERRORS_OUT) wattron(stdscr, A_REVERSE);
+            wprintw(stdscr,"%s",values2str(0,stats,multiplier,buffer,49));
+            if (stats.errors_in && output_unit!=ERRORS_OUT) wattroff(stdscr, A_REVERSE);
+            wprintw(stdscr," ");
+            if (stats.errors_out && output_unit!=ERRORS_OUT) wattron(stdscr, A_REVERSE);
+            wprintw(stdscr,"%s",values2str(1,stats,multiplier,buffer,49));
+            if (stats.errors_out && output_unit!=ERRORS_OUT) wattroff(stdscr, A_REVERSE);
+            wprintw(stdscr," ");
+            if ((stats.errors_out || stats.errors_in) && output_unit!=ERRORS_OUT) wattron(stdscr, A_REVERSE);
+            wprintw(stdscr,"%s",values2str(2,stats,multiplier,buffer,49));
+            if ((stats.errors_out || stats.errors_in) && output_unit!=ERRORS_OUT) wattroff(stdscr, A_REVERSE);
             break;
 #endif
 		case PLAIN_OUT_ONCE:
         case PLAIN_OUT:
 			if (output_method==PLAIN_OUT) printf("\033[%d;2H",y);
             printf("%12s:",if_name); /* output the name */
-            if (
-#if !NETSTAT_BSD_BYTES && !NETSTAT_NETBSD && NETSTAT
-					(input_method==NETSTAT_IN) || 
-#endif					
-					show_packets) {
-                /* show packets/s if asked for or netstat input */
-                printf("%13.2f P/s ",(double)packets_in*multiplier);
-                printf("%13.2f P/s ",(double)packets_out*multiplier);
-                printf("%13.2f P/s\n",(double)(packets_out+packets_in)*multiplier);
-            } else {
-                char bytes_buf[20];
-                /* output Bytes/s */
-                printf("%s ",convert_bytes((double)(bytesr*multiplier),bytes_buf,20));
-                printf("%s ",convert_bytes((double)(bytess*multiplier),bytes_buf,20));
-                /* print total (send+rec) of current iface */
-                printf("%s\n",convert_bytes((double)((bytess+bytesr)*multiplier),bytes_buf,20));
-            }
+            printf("%s %s %s\n",
+                values2str(0,stats,multiplier,buffer,49),
+                values2str(1,stats,multiplier,buffer,49),
+                values2str(2,stats,multiplier,buffer,49));
             break;
 #ifdef HTML			
 		case HTML_OUT:
             tmp_out_file=out_file==NULL ? stdout : out_file;
 			fprintf(tmp_out_file,"<tr><td class='bwm-ng-name'>%12s:</td>",if_name);
-			if (
-#if !NETSTAT_BSD_BYTES && !NETSTAT_NETBSD && NETSTAT
-					(input_method==NETSTAT_IN) || 
-#endif					
-					show_packets) {
-				/* show packets/s if asked for or netstat input */
-                fprintf(tmp_out_file,"<td class='bwm-ng-out'>");
-				if (errors_in) fprintf(tmp_out_file,"<span class='bwm-ng-error'>"); else fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
-				fprintf(tmp_out_file,"%13.2f P/s</span> </td>",(double)packets_in*multiplier);
-                fprintf(tmp_out_file,"<td class='bwm-ng-in'>");
-				if (errors_out) fprintf(tmp_out_file,"<span class='bwm-ng-error'>"); else fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
-				fprintf(tmp_out_file,"%13.2f P/s</span> </td>",(double)packets_out*multiplier);
-                fprintf(tmp_out_file,"<td class='bwm-ng-total'>");
-				if (errors_out || errors_in) 
-					fprintf(tmp_out_file,"<span class='bwm-ng-error'>"); 
-				else 
-					fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
-				fprintf(tmp_out_file,"%13.2f P/s</span></td><tr>\n",(double)(packets_out+packets_in)*multiplier);
-            } else {
-                char bytes_buf[20];
-                /* output Bytes/s */
-                fprintf(tmp_out_file,"<td class='bwm-ng-out'>");
-				if (errors_in) fprintf(tmp_out_file,"<span class='bwm-ng-error'>"); else fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
-				fprintf(tmp_out_file,"%s</span> </td>",convert_bytes((double)(bytesr*multiplier),bytes_buf,20));
-                fprintf(tmp_out_file,"<td class='bwm-ng-in'>");
-				if (errors_out) fprintf(out_file,"<span class='bwm-ng-error'>"); else fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
-				fprintf(tmp_out_file,"%s</span> </td>",convert_bytes((double)(bytess*multiplier),bytes_buf,20));
-                /* print total (send+rec) of current iface */
-                fprintf(tmp_out_file,"<td class='bwm-ng-total'>");
-				if (errors_out || errors_in) 
-					fprintf(tmp_out_file,"<span class='bwm-ng-errors'>"); 
-				else 
-					fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
-				fprintf(tmp_out_file,"%s</span></td></tr>\n",convert_bytes((double)((bytess+bytesr)*multiplier),bytes_buf,20));
-            }
+			fprintf(tmp_out_file,"<td class='bwm-ng-in'>");
+            if (stats.errors_in && output_unit!=ERRORS_OUT) 
+                fprintf(tmp_out_file,"<span class='bwm-ng-error'>"); 
+            else 
+                fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
+            fprintf(tmp_out_file,"%s</span> </td>",values2str(0,stats,multiplier,buffer,49));
+            fprintf(tmp_out_file,"<td class='bwm-ng-out'>");
+            if (stats.errors_out && output_unit!=ERRORS_OUT) 
+                fprintf(tmp_out_file,"<span class='bwm-ng-error'>");
+            else
+                fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
+            fprintf(tmp_out_file,"%s</span> </td>",values2str(1,stats,multiplier,buffer,49));
+            fprintf(tmp_out_file,"<td class='bwm-ng-total'>");
+            if ((stats.errors_out || stats.errors_in) && output_unit!=ERRORS_OUT)
+                fprintf(tmp_out_file,"<span class='bwm-ng-error'>");
+            else
+                fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
+            fprintf(tmp_out_file,"%s</span></td><tr>\n",values2str(2,stats,multiplier,buffer,49));
             break;
 #endif
 #ifdef CSV
         case CSV_OUT:
 			tmp_out_file=out_file==NULL ? stdout : out_file;
             fprintf(tmp_out_file,"%i%c%s%c",(int)time(NULL),csv_char,if_name,csv_char);
-            if (
 #if !NETSTAT_BSD_BYTES && !NETSTAT_NETBSD && NETSTAT
-					!(input_method==NETSTAT_IN) && 
-#endif					
-					!show_packets) {
+			if (input_method!=NETSTAT_IN)
+#endif                    
                 /* output Bytes/s */
-                fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c",(double)(bytess*multiplier),csv_char,(double)(bytesr*multiplier),csv_char,(double)((bytess+bytesr)*multiplier),csv_char);
-            }
-            /* show packets/s if asked for or netstat input */
-            fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu\n",(double)packets_out*multiplier,csv_char,(double)packets_in*multiplier,csv_char,(double)(packets_out+packets_in)*multiplier,csv_char,errors_out,csv_char,errors_in);
+                fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c",(double)(stats.bytess*multiplier),csv_char,(double)(stats.bytesr*multiplier),csv_char,(double)((stats.bytess+stats.bytesr)*multiplier),csv_char);
+            /* show packets/s and errors/s */
+            fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu\n",(double)stats.packets_out*multiplier,csv_char,(double)stats.packets_in*multiplier,csv_char,(double)(stats.packets_out+stats.packets_in)*multiplier,csv_char,stats.errors_out,csv_char,stats.errors_in);
             break;
 #endif			
     }

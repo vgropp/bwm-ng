@@ -122,10 +122,10 @@ void handle_gui_input(char c) {
                 timeout(delay);
             }
             break;
-        case 'p':
+/*        case 'p':
         case 'P':
             show_packets=!show_packets;
-            break;
+            break;*/
         case 'a':
         case 'A':
             show_all_if++;
@@ -168,12 +168,22 @@ void handle_gui_input(char c) {
         case 'k':
         case 'K':
             /* switch kilobyte/autoassign */
-            show_kb=!show_kb;
+            dynamic=!dynamic;
             break;
-	case 'b':
-	    /* switch show bits */
-	    show_bits=!show_bits;
-	    break;
+        case 'u':
+        case 'U':
+            if (output_unit<4) 
+                output_unit++;
+            else 
+                output_unit=1;
+	        break;
+        case 't':
+        case 'T':
+            if (output_type<2)
+                output_type++;
+            else 
+                output_type=1;
+            break;
     }
 }	
 #endif
@@ -229,6 +239,9 @@ int main (int argc, char *argv[]) {
 	if (output_count==0) output_count=-1;
 	if (output_method==PLAIN_OUT && output_count==1) output_method=PLAIN_OUT_ONCE;
 	if (output_method==PLAIN_OUT) printf("\033[2J"); /* clear screen for plain out */
+    if_stats_total.max_rec=if_stats_total.max_send=if_stats_total.max_total=0;
+    if_stats_total.max_prec=if_stats_total.max_psend=if_stats_total.max_ptotal=0;
+    if_stats_total.max_esend=if_stats_total.max_erec=if_stats_total.max_etotal=0;
     while (1) { /* do the main loop */
 #ifdef HTML
         if (output_method==HTML_OUT && out_file_path) {

@@ -27,8 +27,9 @@
 /* for csv output and time() */
 #include <time.h>
 
-extern char show_kb;
-extern char show_bits;
+extern char output_unit;
+extern char output_type;
+extern char dynamic;
 extern char show_all_if;
 extern char show_packets;
 extern int output_method;

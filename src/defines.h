@@ -201,9 +201,9 @@
 
 /* build short options */
 #ifdef PROC_NET_DEV
-#define SHORT_OPTIONS_0 ":ht:f:dVa:pI:i:o:c:DS"
+#define SHORT_OPTIONS_0 ":ht:f:dVa:u:I:i:o:c:DST:"
 #else
-#define SHORT_OPTIONS_0 ":ht:dVa:pI:i:o:c:DS"
+#define SHORT_OPTIONS_0 ":ht:dVa:u:I:i:o:c:DST:"
 #endif
 
 #ifdef HTML
@@ -228,8 +228,20 @@
 #define SHORT_OPTIONS SHORT_OPTIONS_2
 #endif
 
+#define BYTES_OUT 1
+#define BITS_OUT 2
+#define PACKETS_OUT 3
+#define ERRORS_OUT 4
+
+#define RATE_OUT 1
+#define MAX_OUT 2
+/* planned for future 
+#define SUM_OUT 3
+#define AVERAGE_OUT 4
+*/
+
 #ifndef PATH_MAX
 #define PATH_MAX 4096
 #endif
 
-#define print_version printf("Bandwidth Monitor NG (bmw-ng) v%i.%i%s\nCopyright (C) 2004 Volker Gropp <bwmng@gropp.org>\n",MAJOR,MINOR,EXTRA); 
+#define print_version printf("Bandwidth Monitor NG (bmw-ng) v%i.%i%s\nCopyright (C) 2004,2005 Volker Gropp <bwmng@gropp.org>\n",MAJOR,MINOR,EXTRA); 

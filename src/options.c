@@ -175,7 +175,7 @@ int printhelp() {
 	printf("  -H, --htmlheader        show <html> and <meta> frame for html output\n");
 #endif
     printf("  -c <num>                number of query/output for plain & csv\n");
-    printg("                          (ie 1 for one single output)\n");
+    printf("                          (ie 1 for one single output)\n");
 #endif
     printf("\n");
     exit(0);

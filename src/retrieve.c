@@ -164,7 +164,7 @@ int process_if_data (int hidden_if, t_iface_stats tmp_if_stats,t_iface_stats *st
     multiplier=(float)get_time_delay(local_if_count);
 #endif    
     if (verbose) { /* any output at all? */
-        //cycle: show all interfaces, only those which are up, only up and not hidden
+        /* cycle: show all interfaces, only those which are up, only up and not hidden */
         if (
             (show_all_if>1 || iface_is_up) && /* is it up or do we show all ifaces? */
             (show_all_if || show_iface(iface_list,name))) {
@@ -461,7 +461,6 @@ void get_iface_stats_netstat (char verbose) {
 #endif
 #if NETSTAT_BSD || NETSTAT_BSD_BYTES || NETSTAT_SOLARIS || NETSTAT_NETBSD
         /* check if we have a new iface or if its only a second line of the same one */
-//        printf("%s\n",name);
         if (!strcmp(last_name,name)) continue; /* skip this line */
         strcpy(last_name,name);
 #endif
@@ -561,37 +560,6 @@ void get_iface_stats_sysctl (char verbose) {
 #endif
 
 
-/*
- * #include <kstat.h>
-#include <stdio.h>
-
-int main () {
-     kstat_ctl_t   *kc;
-     kstat_t       *ksp;
-     kstat_io_t     kio;
-     kstat_named_t *knp;
-     kstat_named_t *in_byte;
-//     ce_kstat_t stats;
-     int i;
-
-     kc = kstat_open();
-     for (ksp = kc->kc_chain;
-          ksp != NULL;
-          ksp = ksp->ks_next) {
-  if (strcmp(ksp->ks_class, "net") != 0)
-  continue;
- printf("interface %s:\n", ksp->ks_name);
- kstat_read(kc, ksp, NULL);
- in_byte=(kstat_named_t *)kstat_data_lookup(ksp, "rbytes");
- if (in_byte==NULL) continue;
- printf("rbytes: %lu\n",in_byte->value.ui32);
- knp = KSTAT_NAMED_PTR(ksp);
- for (i = 0; i < ksp->ks_ndata; i++)
-  printf("0.30s = %s %u\n", knp[i].name, knp[i].value.ul);
-  }
-     kstat_close(kc);
-}
-*/
 #if HAVE_LIBKSTAT
 void get_iface_stats_kstat (char verbose) {
     kstat_ctl_t   *kc;

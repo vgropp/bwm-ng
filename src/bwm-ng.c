@@ -23,77 +23,6 @@
 
 #include "bwm-ng.h"
 
-#if HAVE_SYS_VARARGS_H
-#include <sys/varargs.h> /* solaris */
-#else
-#include <stdarg.h>
-#endif
-
-extern void get_cmdln_options(int argc, char *argv[]);
-extern int print_header(int option);
-
-/* global vars and options */
-extern int if_count;
-#ifdef PROC_NET_DEV
-extern char PROC_FILE[PATH_MAX];
-#endif
-extern unsigned int delay;
-extern char show_kb;
-extern char show_all_if;
-extern char show_packets;
-extern char sumhidden;
-extern int output_method;
-extern unsigned int input_method;
-extern char *iface_list;
-#ifdef CSV
-extern char csv_char;
-#endif
-#if CSV || HTML
-extern FILE *out_file;
-extern char *out_file_path;
-#endif
-extern int output_count;
-extern char daemonize;
-#ifdef HTML
-extern int html_refresh;
-extern int html_header;
-#endif
-
-#ifdef IOCTL
-/* fd for check_if_up and ioctl */
-extern int skfd;
-#endif
-
-/* global buffer to store all data of interfaces in */
-extern t_iface_stats *if_stats;
-/* total struct */
-extern t_iface_stats if_stats_total;
-
-
-#ifdef PROC_NET_DEV
-extern void get_iface_stats_proc (char verbose);
-#endif
-
-#ifdef LIBSTATGRAB
-extern void get_iface_stats_libstat (char verbose);
-#endif
-
-#ifdef GETIFADDRS
-extern void get_iface_stats_getifaddrs (char verbose);
-#endif
-
-#ifdef SYSCTL
-extern void get_iface_stats_sysctl (char verbose);
-#endif
-
-#ifdef NETSTAT
-extern void get_iface_stats_netstat (char verbose);
-#endif
-
-#ifdef HAVE_LIBKSTAT
-extern void get_iface_stats_kstat (char verbose);
-#endif
-
 
 inline void get_iface_stats(char _n) {
 	switch (input_method) { 
@@ -140,7 +69,7 @@ void sigint(int sig) FUNCATTR_NORETURN;
 int deinit(char *error_msg, ...) {
     va_list    ap;
 #ifdef HAVE_CURSES	
-	if (output_method==CURSES_OUT) {
+	if (output_method==CURSES_OUT && myscr!=NULL) {
 		/* first close curses, so we dont leave mess behind */
 		endwin();
 		curs_set(1);
@@ -202,19 +131,19 @@ void handle_gui_input(char c) {
             show_all_if++;
             if (show_all_if>2) show_all_if=0;
             if (iface_list==NULL && show_all_if==1) show_all_if=2;
-            // get stats so all values are uptodate
+            /* get stats so all values are uptodate */
             get_iface_stats(0);
-            // a short sleep, else we get "nan" values due to very short 
-            // delay till next get_iface_stats
+            /* a short sleep, else we get "nan" values due to very short 
+               delay till next get_iface_stats */
             usleep(100);
             break;
         case 's':
         case 'S':
             sumhidden=!sumhidden;
-            // get stats so all values are uptodate
+            /* get stats so all values are uptodate */
             get_iface_stats(0);
-            // a short sleep, else we get "nan" values due to very short
-            // delay till next get_iface_stats
+            /* a short sleep, else we get "nan" values due to very short
+               delay till next get_iface_stats */
             usleep(100);
             break;
         case 'n':
@@ -247,7 +176,6 @@ void handle_gui_input(char c) {
 
 
 int main (int argc, char *argv[]) {
-	char c='\0'; /* used for getch */ 
 	unsigned char idle_chars_p=0;
 	char ch;
 
@@ -255,36 +183,17 @@ int main (int argc, char *argv[]) {
 	strcpy(PROC_FILE,PROC_NET_DEV);
 #endif	
 	get_cmdln_options(argc,argv);
-    if (output_method<0 || input_method<0) {
-        if (output_method<0)
-            printf("invalid output selected\n");
-        else 
-            printf("invalid input selected\n");
-#if CSV || HTML
-        /* close the out_file */
-        if (out_file!=NULL) fclose(out_file);
-        if (out_file_path!=NULL) free(out_file_path);
-#endif
-        if (if_stats!=NULL) free(if_stats);
-        /* free the opt iface_list */
-        if (iface_list!=NULL) free(iface_list);
-        exit(0);
-    }
+    if (output_method<0)
+        deinit("invalid output selected\n");
+    if (input_method<0)
+        deinit("invalid input selected\n");
 	memset(&if_stats_total,0,(size_t)sizeof(t_iface_stats));
 #ifdef HAVE_CURSES
 	if (output_method==CURSES_OUT) {
 		/* init curses */
-        if (initscr() == NULL) {
-            printf("failed to init curses: %s\n",strerror(errno));
-#if CSV || HTML
-            /* close the out_file */
-            if (out_file!=NULL) fclose(out_file);
-            if (out_file_path!=NULL) free(out_file_path);
-#endif
-            /* free the opt iface_list */
-            if (iface_list!=NULL) free(iface_list);
-            if (if_stats!=NULL) free(if_stats);
-            exit(0);
+        myscr=initscr();
+        if (myscr == NULL) {
+            deinit("failed to init curses: %s\n",strerror(errno));
         }
         cbreak(); 
 		noecho();
@@ -330,28 +239,25 @@ int main (int argc, char *argv[]) {
             );        
 		if (ch) idle_chars_p=print_header(idle_chars_p); /* output only if looping */
 		get_iface_stats(ch); /* do the actual work, get and print stats */
-		if ((
-#ifdef CSV					
-					output_method==CSV_OUT || 
-#endif					
-					output_method==PLAIN_OUT) && output_count>0) { 
-			output_count--;
-			if (output_count==0) break;
-		}
 #if HTML
         if (out_file && output_method==HTML_OUT && daemonize) { fclose(out_file); out_file=NULL; }
 #endif
+		if ((
+#ifdef CSV					
+			    output_method==CSV_OUT || 
+#endif					
+				output_method==PLAIN_OUT) && output_count>0) { 
+			output_count--;
+			if (output_count==0) break;
+		}
 #ifdef HAVE_CURSES		
 		if (output_method==CURSES_OUT) {
 			refresh();
 			handle_gui_input(getch());
-		} else {
+		} else 
 #endif			
 			usleep(delay*1000);
-#ifdef HAVE_CURSES			
-		}
-#endif		
-		c='\0'; /* not really needed, but i like it this way */
+
 		if (output_method==PLAIN_OUT_ONCE 
 #ifdef HTML				
 				|| (output_method==HTML_OUT && !daemonize)

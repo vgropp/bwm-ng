@@ -22,7 +22,8 @@
  *****************************************************************************/
 
 
-#include "bwm-ng.h"
+#include "defines.h"
+#include "types.h"
 
 #ifdef CONFIG_FILE
 #include <ctype.h>
@@ -33,7 +34,6 @@
 #include <sys/types.h>
 #endif
 #endif
-
 
 
 
@@ -50,6 +50,7 @@ char show_all_if=0;
 char show_packets=0;
 #ifdef HAVE_CURSES
 int output_method=CURSES_OUT;
+WINDOW *myscr=NULL;
 #else
 int output_method=PLAIN_OUT;
 #endif
@@ -96,4 +97,3 @@ unsigned int input_method=0;
 int html_refresh=5;
 int html_header=0;
 #endif
-

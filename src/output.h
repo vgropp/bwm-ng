@@ -21,7 +21,8 @@
  *                                                                            *
  *****************************************************************************/
 
-#include "bwm-ng.h"
+#include "defines.h"
+#include "types.h"
 
 /* for csv output and time() */
 #include <time.h>

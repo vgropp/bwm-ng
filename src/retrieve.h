@@ -21,7 +21,8 @@
  *                                                                            *
  *****************************************************************************/
 
-#include "bwm-ng.h"
+#include "defines.h"
+#include "types.h"
 
 
 #ifdef HAVE_LIBKSTAT

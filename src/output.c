@@ -35,6 +35,54 @@ inline char *convert_bytes(double bytes,char * buffer, int buf_size) {
     return buffer;
 }
 
+inline char *input2str() {
+    switch (input_method) {
+#ifdef SYSCTL
+        case SYSCTL_IN:
+            return "sysctl";
+            break;
+#endif
+#ifdef NETSTAT
+        case NETSTAT_IN:
+            return "netstat -i";
+            break;
+#endif
+#ifdef LIBSTATGRAB
+        case LIBSTAT_IN:
+            return "libstatgrab";
+            break;
+#endif
+#ifdef GETIFADDRS
+        case GETIFADDRS_IN:
+            return "getifaddrs";
+            break;
+#endif
+#ifdef PROC_NET_DEV
+        case PROC_IN:
+            return "/proc/net/dev";
+            break;
+#endif
+#if HAVE_LIBKSTAT
+        case KSTAT_IN:
+            return "kstat";
+            break;
+#endif
+    }
+    return "";
+}
+
+inline char *show_all_if2str() {
+    switch (show_all_if) {
+        case 1:
+            return " (all)";
+            break;
+        case 2:
+            return " (all and down)";
+            break;
+    }
+    return "";
+}
+
 int print_header(int option) {
 #if HTML
     FILE *tmp_out_file;
@@ -44,46 +92,8 @@ int print_header(int option) {
 		case CURSES_OUT:
 	        erase();
 		    mvwprintw(stdscr,1,8,"bwm-ng v%i.%i%s (probing every %2.3fs), press 'q' to end this",MAJOR,MINOR,EXTRA,(float)delay/1000);
-			switch (input_method) {
-#ifdef LIBSTATGRAB
-				case LIBSTAT_IN:
-					mvwprintw(stdscr,2,8,"libstatgrab");
-					break;
-#endif
-#ifdef GETIFADDRS
-				case GETIFADDRS_IN:
-			        mvwprintw(stdscr,2,8,"getifaddrs");
-					break;
-#endif
-#ifdef PROC_NET_DEV			
-				case PROC_IN:
-					mvwprintw(stdscr,2,8,"/proc/net/dev");
-					break;
-#endif
-#ifdef NETSTAT
-				case NETSTAT_IN:
-					mvwprintw(stdscr,2,8,"netstat -i");
-					break;
-#endif			
-#ifdef SYSCTL
-				case SYSCTL_IN:
-					mvwprintw(stdscr,2,8,"sysctl");
-					break;
-#endif					
-#if HAVE_LIBKSTAT
-                case KSTAT_IN:
-                    mvwprintw(stdscr,2,8,"kstat");
-                    break;
-#endif
-			}
-            switch (show_all_if) {
-                case 1:
-                     wprintw(stdscr," %s","(all)");
-                    break;
-                case 2:
-                     wprintw(stdscr," %s","(all and down)");
-                    break;
-            }
+            mvwprintw(stdscr,2,8,input2str());
+            wprintw(stdscr,show_all_if2str());
 	        mvwprintw(stdscr,3,8,"%c       iface               Rx                Tx             Total",(char)IDLE_CHARS[option]);
 	        /* go to next char for next run */
 	        option++;
@@ -102,46 +112,8 @@ int print_header(int option) {
 		        fprintf(tmp_out_file,"<title>bwm-ng stats</title>\n</head>\n<body>\n");
 			}
 	        fprintf(tmp_out_file,"<div class='bwm-ng-header'>bwm-ng bwm-ng v%i.%i%s (refresh %is); input: ",MAJOR,MINOR,EXTRA,html_refresh);
-			switch (input_method) {
-#ifdef SYSCTL
-				case SYSCTL_IN:
-					fprintf(tmp_out_file,"sysctl");
-					break;
-#endif				
-#ifdef NETSTAT				
-				case NETSTAT_IN:
-					fprintf(tmp_out_file,"netstat -i");
-					break;
-#endif					
-#ifdef LIBSTATGRAB
-				case LIBSTAT_IN:
-					fprintf(tmp_out_file,"libstatgrab");
-					break;
-#endif
-#ifdef GETIFADDRS
-				case GETIFADDRS_IN:
-					fprintf(tmp_out_file,"getifaddrs");
-					break;
-#endif
-#ifdef PROC_NET_DEV
-				case PROC_IN:
-					fprintf(tmp_out_file,"/proc/net/dev");
-					break;
-#endif
-#if HAVE_LIBKSTAT
-                case KSTAT_IN:
-                    fprintf(tmp_out_file,"kstat");
-                    break;
-#endif
-			}
-            switch (show_all_if) {
-                case 1:
-                     fprintf(tmp_out_file," %s","(all)");
-                    break;
-                case 2:
-                     fprintf(tmp_out_file," %s","(all and down)");
-                    break;
-            }
+            fprintf(tmp_out_file,input2str());
+            fprintf(tmp_out_file,show_all_if2str());
 	        fprintf(tmp_out_file,"</div><table class='bwm-ng-output'>");
 			fprintf(tmp_out_file,"<tr class='bwm-ng-head'><td class='bwm-ng-name'>Interface</td><td>Rx</td><td>Tx</td><td>Total</td></tr>");
 			break;
@@ -151,49 +123,8 @@ int print_header(int option) {
 			if (output_method==PLAIN_OUT) printf("\033[1;2H");
 	        printf("bwm-ng v%i.%i%s (delay %2.3fs); ",MAJOR,MINOR,EXTRA,(float)delay/1000);
 			if (output_method==PLAIN_OUT) printf("press 'ctrl-c' to end this\033[2;2H"); else printf("input: ");
-            switch (input_method) {
-#ifdef SYSCTL
-                case SYSCTL_IN:
-                    printf("sysctl");
-                    break;
-#endif
-#ifdef NETSTAT
-                case NETSTAT_IN:
-                    printf("netstat -i");
-                    break;
-#endif
-#ifdef LIBSTATGRAB
-                case LIBSTAT_IN:
-                    printf("libstatgrab");
-                    break;
-#endif
-#ifdef GETIFADDRS
-                case GETIFADDRS_IN:
-                    printf("getifaddrs");
-                    break;
-#endif
-#ifdef PROC_NET_DEV
-                case PROC_IN:
-                    printf("/proc/net/dev");
-                    break;
-#endif
-#if HAVE_LIBKSTAT
-                case KSTAT_IN:
-                    printf("kstat");
-                    break;
-#endif
-            }
-            switch (show_all_if) {
-                case 0:
-                    printf("\n");
-                    break;
-                case 1:
-                    printf(" %s\n","(all)");
-                    break;
-                case 2:
-                    printf(" %s\n","(all and down)");
-                    break;
-            }
+            printf(input2str());
+            printf("%s\n",show_all_if2str());
 			if (output_method==PLAIN_OUT) {
 				printf("\033[3;2H");
 				printf("%c",(char)IDLE_CHARS[option]); 

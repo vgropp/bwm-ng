@@ -53,8 +53,18 @@ static char* getToken(char** str, const char* delims)
 /******************************************************************************/
 
 
+inline void print_help_line(char *short_c,char * long_c,char *descr) {
+#ifdef LONG_OPTIONS
+    printf("  %-23s",long_c);
+#else
+    printf("  %-23s",short_c);
+#endif
+    printf(" %s\n",descr);
+}
+
 /* prints a helpscreen and exists */
-int printhelp() {
+inline void printhelp() FUNCATTR_NORETURN;
+inline void printhelp() {
     print_version;
     printf("USAGE: bwm-ng [OPTION] ...");
 #if CONFIG_FILE    
@@ -64,93 +74,51 @@ int printhelp() {
 #endif    
     printf("displays current ethernet interfaces load in KB/s or Packets/s\n\n");
     printf("Options:\n");
-#ifdef LONG_OPTIONS
-    printf("  -t, --timeout <msec>    displays stats every <msec> (1msec = 1/1000sec)\n");
-    printf("                          default: 500\n");
-    printf("  -d, --dynamic           show values dynamicly (Byte KB or MB)\n");
-    printf("  -a, --allif [mode]      where mode is one of:\n");
-    printf("                          0=show only up (and selected) interfaces\n");
-    printf("                          1=show all up interfaces (default)\n");
-    printf("                          2=show all and down interfaces\n");
-    printf("  -p, --packets           show packets/s instead of KB/s\n");
-    printf("  -I, --interfaces <list> show only interfaces in <list> (comma seperated), or\n");
-    printf("                          if list is prefaced with %% show all but interfaces\n");
-    printf("                          in list\n");
-    printf("  -S, --sumhidden         count hidden interfaces for total\n");
-    printf("  -D, --daemon            fork into background and daemonize\n");
-    printf("  -h, --help              displays this help\n");
-    printf("  -V, --version           print version info\n");
+    print_help_line("-t <msec>","-t, --timeout <msec>","displays stats every <msec> (1msec = 1/1000sec)");
+    print_help_line("","","default: 500");
+    print_help_line("-d","-d, --dynamic","show values dynamicly (Byte KB or MB)");
+    print_help_line("-a [mode]","-a, --allif [mode]","where mode is one of:");
+    print_help_line("","","0=show only up (and selected) interfaces");
+    print_help_line("","","1=show all up interfaces (default)");
+    print_help_line("","","2=show all and down interfaces");
+    print_help_line("-p","-p, --packets","show packets/s instead of KB/s");
+    print_help_line("-I <list>","-I, --interfaces <list>","show only interfaces in <list> (comma seperated), or");
+    print_help_line("","","if list is prefaced with %% show all but interfaces");
+    print_help_line("","","in list");
+    print_help_line("-S","-S, --sumhidden","count hidden interfaces for total");
+    print_help_line("-D","-D, --daemon","fork into background and daemonize");
+    print_help_line("-h","-h, --help","displays this help");
+    print_help_line("-V","-V, --version","print version info");
 	printf("\nInput:\n");
-	printf("  -i, --input <method>    input method, one of:" INPUT_METHODS "\n");
+	print_help_line("-i <method>","-i, --input <method>","input method, one of:" INPUT_METHODS);
 #ifdef PROC_NET_DEV
-    printf("  -f, --procfile <file>   filename to read raw data from. (" PROC_NET_DEV ")\n");
+    print_help_line("-f <file>","-f, --procfile <file>","filename to read raw data from. (" PROC_NET_DEV ")");
 #endif
 #if ALLOW_NETSTATPATH
 #ifdef NETSTAT
-    printf("  -n, --netstat <path>    use <path> as netstat binary\n");
+    print_help_line("-n <path>","-n, --netstat <path>","use <path> as netstat binary");
 #endif	
 #endif    
 	printf("\nOutput:\n");
-    printf("  -o, --output <method>   output method, one of: " OUTPUT_METHODS "\n");
+    print_help_line("-o <method>","-o, --output <method>","output method, one of: " OUTPUT_METHODS);
 #ifdef CSV
-    printf("  -C, --csvchar <char>    delimiter for csv\n");
+    print_help_line("-C <char>","-C, --csvchar <char>","delimiter for csv");
 #endif    
 #if CSV || HTML    
-	printf("  -F, --outfile <file>    output file for csv and html (default stdout)\n");
+	print_help_line("-F <file>","-F, --outfile <file>","output file for csv and html (default stdout)");
 #endif
 #ifdef HTML
-	printf("  -R, --htmlrefresh <num> meta refresh for html output\n");
-	printf("  -H, --htmlheader        show <html> and <meta> frame for html output\n");
+	print_help_line("-R <num>","-R, --htmlrefresh <num>","meta refresh for html output");
+	print_help_line("-H","-H, --htmlheader","show <html> and <meta> frame for html output");
 #endif
-    printf("  -c, --count <num>       number of query/output for plain & csv\n");
-    printf("                          (ie 1 for one single output)\n");
-#else
-    printf("  -t <msec>               displays stats every <msec> (1msec = 1/1000sec)\n");
-    printf("                          default: 500\n");
-    printf("  -d                      show values dynamicly (Byte KB or MB)\n");
-    printf("  -a, [mode]              where mode is one of:\n");
-    printf("                          0=show only up (and selected) interfaces\n");
-    printf("                          1=show all up interfaces (default)\n");
-    printf("                          2=show all and down interfaces\n");
-    printf("  -p                      show packets/s instead of KB/s\n");
-    printf("  -I <list>               show only interfaces in <list> (comma seperated), or\n");
-    printf("                          if list is prefaced with %% show all but interfaces\n");
-    printf("                          in list\n");
-    printf("  -S                      count hidden interfaces for total\n");
-    printf("  -D                      fork into background and daemonize\n");
-    printf("  -h                      displays this help\n");
-    printf("  -V                      print version info\n");
-    printf("\nInput:\n");
-    printf("  -i <method>             input method, one of:" INPUT_METHODS "\n");
-#ifdef PROC_NET_DEV
-    printf("  -f <file>               filename to read raw data from. (" PROC_NET_DEV ")\n");
-#endif
-#if ALLOW_NETSTATPATH    
-#ifdef NETSTAT
-    printf("  -n <path>               use <path> as netstat binary\n");
-#endif
-#endif    
-    printf("\nOutput:\n");
-    printf("  -o <method>             output method, one of: " OUTPUT_METHODS "\n");
-#ifdef CSV
-    printf("  -C <char>               delimiter for csv\n");
-#endif
-#if CSV || HTML
-    printf("  -F <file>               output file for csv (default stdout)\n");
-#endif
-#ifdef HTML
-    printf("  -R <num>                meta refresh for html output\n");
-	printf("  -H, --htmlheader        show <html> and <meta> frame for html output\n");
-#endif
-    printf("  -c <num>                number of query/output for plain & csv\n");
-    printf("                          (ie 1 for one single output)\n");
-#endif
+    print_help_line("-c <num>","-c, --count <num>","number of query/output for plain & csv");
+    print_help_line("","","(ie 1 for one single output)");
     printf("\n");
     exit(0);
 }
 
 
-int str2out_method(char *optarg) {
+inline int str2out_method(char *optarg) {
     if (optarg) {
         if (!strcasecmp(optarg,"plain")) return PLAIN_OUT;
 #ifdef HAVE_CURSES
@@ -170,7 +138,7 @@ int str2out_method(char *optarg) {
 }
 
 
-int str2in_method(char *optarg) {
+inline int str2in_method(char *optarg) {
     if (optarg) {
 #ifdef PROC_NET_DEV
         if (!strcasecmp(optarg,"proc")) return PROC_IN;
@@ -197,10 +165,10 @@ char *trim_whitespace(char *str) {
 char *dud = str;
 int i;
 
-   // beginning whitespace first
+   /* beginning whitespace first */
    while( isspace((int)*dud) )
       ++dud;
-   // now trailing whitespace
+   /* now trailing whitespace */
    i = strlen(dud) - 1;
    while( isspace((int)dud[i]) )
       --i;
@@ -289,11 +257,9 @@ char *token, *value;
 
 void get_cmdln_options(int argc, char *argv[]) {
 	int o;
-#ifdef CONFIG_FILE    
-#ifdef HAVE_GETPWUID
+#if CONFIG_FILE && HAVE_GETPWUID
     struct passwd *pwd_entry;
     char *str;
-#endif    
 #endif
 #ifdef LONG_OPTIONS
     int option_index = 0;
@@ -302,10 +268,8 @@ void get_cmdln_options(int argc, char *argv[]) {
 #ifdef PROC_NET_DEV
         {"procfile",1,0,'f'},
 #endif
-#if ALLOW_NETSTATPATH
-#ifdef NETSTAT
+#if NETSTAT && ALLOW_NETSTATPATH
         {"netstat",1,0,'n'},
-#endif
 #endif
         {"input",1,0,'i'},
         {"dynamic",0,0,'d'},
@@ -355,7 +319,8 @@ void get_cmdln_options(int argc, char *argv[]) {
         read_config(argv[optind]);
     }
 #endif
-    optind=1; //reset getopt again
+    /* reset getopt again  */
+    optind=1;
     /* get command line arguments, kinda ugly, wanna rewrite it? */
     while (1) {
 #ifdef LONG_OPTIONS
@@ -440,12 +405,10 @@ void get_cmdln_options(int argc, char *argv[]) {
             case 'd':
                 show_kb=0;
                 break;
-#if ALLOW_NETSTATPATH
-#ifdef NETSTAT                
+#if NETSTAT && ALLOW_NETSTATPATH
             case 'n':
                 if (optarg && (strlen(optarg)<PATH_MAX)) strcpy(NETSTAT_FILE,optarg);
                 break;
-#endif
 #endif                
             case 'V':
                 print_version;

@@ -74,8 +74,6 @@ extern t_iface_stats *if_stats;
 /* total struct */
 extern t_iface_stats if_stats_total;
 
-extern inline void init_double_types(struct inouttotal_double *in);
-
 #ifdef PROC_NET_DEV
 extern void get_iface_stats_proc (char verbose);
 #endif

@@ -32,6 +32,9 @@ inline char *output_type2str() {
         case MAX_OUT:
             return "max";
             break;
+        case SUM_OUT:
+            return "sum";
+            break;
     }
     return "";
 }
@@ -93,14 +96,14 @@ int print_header(int option) {
 #ifdef HAVE_CURSES
 		case CURSES_OUT:
 	        erase();
-		    mvwprintw(stdscr,1,8,"bwm-ng v%i.%i%s (probing every %2.3fs), press 'q' to end this",MAJOR,MINOR,EXTRA,(float)delay/1000);
-            mvwprintw(stdscr,2,8,"input: %s type: %s",input2str(),output_type2str());
+		    mvwprintw(stdscr,1,2,"bwm-ng v%i.%i%s (probing every %2.3fs), press 'q' to end this",MAJOR,MINOR,EXTRA,(float)delay/1000);
+            mvwprintw(stdscr,2,2,"input: %s type: %s",input2str(),output_type2str());
             wprintw(stdscr,show_all_if2str());
-	        mvwprintw(stdscr,3,8,"%c       iface               Rx                Tx             Total",(char)IDLE_CHARS[option]);
+	        mvwprintw(stdscr,3,2,"%c       iface                  Rx                   Tx                Total",(char)IDLE_CHARS[option]);
 	        /* go to next char for next run */
 	        option++;
 			if (option>3) option=0;
-	        mvwprintw(stdscr,4,8,"==================================================================");
+	        mvwprintw(stdscr,4,2,"===========================================================================");
 			break;
 #endif
 #ifdef HTML
@@ -131,9 +134,9 @@ int print_header(int option) {
 				printf("\033[3;2H");
 				printf("%c",(char)IDLE_CHARS[option]); 
 			} else printf(" ");
-			printf("       iface               Rx                Tx             Total\n");
+			printf("       iface                  Rx                   Tx                Total\n");
 			if (output_method==PLAIN_OUT) printf("\033[4;2H");
-	        printf("==================================================================\n");
+	        printf("===========================================================================\n");
 			/* go to next char for next run */
 			option++;
 			if (option>3) option=0;
@@ -168,15 +171,42 @@ inline double direction_max2value(char mode,struct inouttotal_double stats) {
 }
 
 
+inline char *dyn_byte_value2str(double value,char *str,int buf_size) {
+    if (dynamic) {
+        if (value<1024)
+            snprintf(str,buf_size,"%15.2f  ",value);
+        else
+            if (value<1048576)
+                snprintf(str,buf_size,"%15.2f K",value/1024);
+            else
+                if (value<1073741824)
+                    snprintf(str,buf_size,"%15.2f M",value/1048576);
+                else
+                    snprintf(str,buf_size,"%15.2f G",value/1073741824);
+    } else {
+        snprintf(str,buf_size,"%15.2f K",value/1024);
+    }
+    return str;
+}
+
 char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,float multiplier,char *str,int buf_size) {
     char byte_char=' ';
+    char speed[3];
     double value=0;
+    char *str_buf=NULL;
+    if (output_type==RATE_OUT || output_type==MAX_OUT) 
+        strcpy(speed,"/s"); 
+    else 
+        strcpy(speed,"  ");
     if (
 #if !NETSTAT_BSD_BYTES && !NETSTAT_NETBSD && NETSTAT
         input_method==NETSTAT_IN ||
 #endif
         output_unit==PACKETS_OUT) {
         switch (output_type) {
+            case SUM_OUT:
+                value=direction2value(mode,full_stats.sum.packets);
+                break;
             case RATE_OUT:
                 value=(double)direction2value(mode,stats.packets)*multiplier;
                 break;
@@ -184,50 +214,48 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
                 value=(double)direction_max2value(mode,full_stats.max.packets);
                 break;
         }
-        snprintf(str,buf_size,"%13.2f P/s",(double)value);
+        snprintf(str,buf_size,"%16.2f P%s",(double)value,speed);
     } else {
-        if (output_unit==BITS_OUT || output_unit==BYTES_OUT) {
-            if (output_unit==BYTES_OUT) byte_char='B';
-            switch (output_type) {
-                case RATE_OUT:
-                    value=(double)direction2value(mode,stats.bytes)*multiplier;
-                    break;
-                case MAX_OUT:
-                    value=(double)direction_max2value(mode,full_stats.max.bytes);
-                    break;
-            }
-            if (output_unit==BITS_OUT) {
-                byte_char='b';
-                value*=8;
-            }
-            if (dynamic) {
-                if (value<1024)
-                    snprintf(str,buf_size,"%12.2f  %c/s",value,byte_char);
-                else
-                    if (value<1048576)
-                        snprintf(str,buf_size,"%12.2f K%c/s",value/1024,byte_char);
-                    else
-                        if (value<1073741824)
-                            snprintf(str,buf_size,"%12.2f M%c/s",value/1048576,byte_char);
-                        else
-                            snprintf(str,buf_size,"%12.2f G%c/s",value/1073741824,byte_char);
-            } else {
-                snprintf(str,buf_size,"%12.2f K%c/s",value/1024,byte_char);
-            }
-        }
-        if (output_unit==ERRORS_OUT) {
-            switch (output_type) {
-                case RATE_OUT:
-                    value=(double)direction2value(mode,stats.errors)*multiplier;
-                    break;
-                case MAX_OUT:
-                    value=(double)direction_max2value(mode,full_stats.max.errors);
-                    break;
-            }
-            snprintf(str,buf_size,"%13.2f E/s",(double)value);
+        switch (output_unit) {
+            case BITS_OUT:
+            case BYTES_OUT:
+                if (output_unit==BYTES_OUT) byte_char='B';
+                switch (output_type) {
+                    case SUM_OUT:
+                        value=direction2value(mode,full_stats.sum.bytes);
+                        break;
+                    case RATE_OUT:
+                        value=(double)direction2value(mode,stats.bytes)*multiplier;
+                        break;
+                    case MAX_OUT:
+                        value=(double)direction_max2value(mode,full_stats.max.bytes);
+                        break;
+                }
+                if (output_unit==BITS_OUT) {
+                    byte_char='b';
+                    value*=8;
+                }
+                str_buf=(char *)malloc(buf_size);
+                snprintf(str,buf_size,"%s%c%s",dyn_byte_value2str(value,str_buf,buf_size),byte_char,speed);
+                break;
+            case ERRORS_OUT:
+                switch (output_type) {
+                    case SUM_OUT:
+                        value=direction2value(mode,full_stats.sum.errors);
+                        break;
+                    case RATE_OUT:
+                        value=(double)direction2value(mode,stats.errors)*multiplier;
+                        break;
+                    case MAX_OUT:
+                        value=(double)direction_max2value(mode,full_stats.max.errors);
+                        break;
+                }
+                snprintf(str,buf_size,"%16.2f E%s",(double)value,speed);
+                break;
         }
     }
-   return str;
+    if (str_buf!=NULL) free(str_buf);
+    return str;
 }
 
 /* do the actual output */

@@ -143,6 +143,12 @@ t_iface_speed_stats convert2calced_values(t_iface_speed_stats new, t_iface_speed
 }
 
 
+inline void save_sum(struct inout_long *stats,struct inout_long new_stats_values,struct inout_long old_stats_values) {
+    stats->in+=calc_new_values(new_stats_values.in,old_stats_values.in);
+    stats->out+=calc_new_values(new_stats_values.out,old_stats_values.out);
+}
+
+    
 inline void save_max(struct inouttotal_double *stats,struct inout_long calced_stats,float multiplier) {
     if (multiplier*calced_stats.in > stats->in)
         stats->in=multiplier*calced_stats.in;
@@ -173,7 +179,9 @@ int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_spe
     if (local_if_count==if_count) {
         /* iface not found, seems like there is a new one! */
         if_count++;
+        /* alloc and init */
         if_stats=(t_iface_stats*)realloc(if_stats,sizeof(t_iface_stats)*if_count);
+        memset(&if_stats[local_if_count],0,(size_t)sizeof(t_iface_stats));
         /* copy the iface name or add a dummy one */
         if (name[0]!='\0')
             if_stats[if_count-1].if_name=(char*)strdup(name);
@@ -191,10 +199,6 @@ int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_spe
             if_stats_total.data.errors.out+=tmp_if_stats.errors.out;
             if_stats_total.data.errors.in+=tmp_if_stats.errors.in;
         }
-        /* init max values with 0 */
-        init_double_types(&if_stats[local_if_count].max.bytes);
-        init_double_types(&if_stats[local_if_count].max.packets);
-        init_double_types(&if_stats[local_if_count].max.errors);
     }
 #if HAVE_GETTIMEOFDAY
     multiplier=(float)get_time_delay(local_if_count);
@@ -205,11 +209,14 @@ int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_spe
     save_max(&if_stats[local_if_count].max.bytes,calced_stats.bytes,multiplier);
     save_max(&if_stats[local_if_count].max.errors,calced_stats.errors,multiplier);
     save_max(&if_stats[local_if_count].max.packets,calced_stats.packets,multiplier);
+    save_sum(&if_stats[local_if_count].sum.bytes,tmp_if_stats.bytes,if_stats[local_if_count].data.bytes);
+    save_sum(&if_stats[local_if_count].sum.packets,tmp_if_stats.packets,if_stats[local_if_count].data.packets);
+    save_sum(&if_stats[local_if_count].sum.errors,tmp_if_stats.errors,if_stats[local_if_count].data.errors);
     if (verbose) { /* any output at all? */
         /* cycle: show all interfaces, only those which are up, only up and not hidden */
         if ((show_all_if>1 || iface_is_up) && /* is it up or do we show all ifaces? */
             (show_all_if || show_iface(iface_list,name))) {
-            print_values(5+iface_number-hidden_if,8,name,calced_stats,multiplier,if_stats[local_if_count]);
+            print_values(5+iface_number-hidden_if,2,name,calced_stats,multiplier,if_stats[local_if_count]);
 		} else
             hidden_if++; /* increase the opt cause we dont show this if */
     }
@@ -246,17 +253,20 @@ void finish_iface_stats (char verbose, t_iface_speed_stats stats, int hidden_if,
     save_max(&if_stats_total.max.bytes,calced_stats.bytes,multiplier);
     save_max(&if_stats_total.max.errors,calced_stats.errors,multiplier);
     save_max(&if_stats_total.max.packets,calced_stats.packets,multiplier);
+    save_sum(&if_stats_total.sum.bytes,stats.bytes,if_stats_total.data.bytes);
+    save_sum(&if_stats_total.sum.packets,stats.packets,if_stats_total.data.packets);
+    save_sum(&if_stats_total.sum.errors,stats.errors,if_stats_total.data.errors);
 
     if (verbose) {
         /* output total ifaces stats */
 #ifdef HAVE_CURSES		
         if (output_method==CURSES_OUT)
-            mvwprintw(stdscr,5+iface_number-hidden_if,8,"------------------------------------------------------------------");
+            mvwprintw(stdscr,5+iface_number-hidden_if,2,"---------------------------------------------------------------------------");
         else 
 #endif			
 			if (output_method==PLAIN_OUT || output_method==PLAIN_OUT_ONCE)
-				printf("%s------------------------------------------------------------------\n",output_method==PLAIN_OUT ? " " : "");
-        print_values(6+iface_number-hidden_if,8,"total",calced_stats,multiplier,if_stats_total);
+				printf("%s---------------------------------------------------------------------------\n",output_method==PLAIN_OUT ? " " : "");
+        print_values(6+iface_number-hidden_if,2,"total",calced_stats,multiplier,if_stats_total);
     }
     /* save the data in total-struct */
     if_stats_total.data=stats;

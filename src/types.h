@@ -51,6 +51,7 @@ struct iface_stats {
     char    *if_name;
     t_iface_speed_stats data;
     struct double_types max;
+    struct iface_speed_stats sum;
 #if HAVE_GETTIMEOFDAY
     struct timeval time;
 #endif

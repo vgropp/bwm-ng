@@ -101,7 +101,7 @@ inline void printhelp() {
 	printf("\nOutput:\n");
     print_help_line("-o <method>","-o, --output <method>","output method, one of: " OUTPUT_METHODS);
     print_help_line("-u","-u, --unit <value>","unit to show. one of bytes, bits, packets, errors");
-    print_help_line("-T","-T, --type <value>","type of stats. one of rate, max");
+    print_help_line("-T","-T, --type <value>","type of stats. one of rate, max, sum");
 #ifdef CSV
     print_help_line("-C <char>","-C, --csvchar <char>","delimiter for csv");
 #endif    
@@ -133,6 +133,7 @@ inline int str2output_type(char *optarg) {
     if (optarg) {
         if (!strcasecmp(optarg,"rate")) return RATE_OUT;
         if (!strcasecmp(optarg,"max")) return MAX_OUT;
+        if (!strcasecmp(optarg,"sum")) return SUM_OUT;
     }
     return RATE_OUT;
 }

@@ -238,8 +238,8 @@
 
 #define RATE_OUT 1
 #define MAX_OUT 2
-/* planned for future 
 #define SUM_OUT 3
+/* planned for future 
 #define AVERAGE_OUT 4
 */
 

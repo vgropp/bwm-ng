@@ -179,7 +179,7 @@ void handle_gui_input(char c) {
 	        break;
         case 't':
         case 'T':
-            if (output_type<2)
+            if (output_type<3)
                 output_type++;
             else 
                 output_type=1;
@@ -201,6 +201,7 @@ int main (int argc, char *argv[]) {
         deinit("invalid output selected\n");
     if (input_method<0)
         deinit("invalid input selected\n");
+    /* init total stats to zero */
 	memset(&if_stats_total,0,(size_t)sizeof(t_iface_stats));
 #ifdef HAVE_CURSES
 	if (output_method==CURSES_OUT) {
@@ -239,12 +240,6 @@ int main (int argc, char *argv[]) {
 	if (output_count==0) output_count=-1;
 	if (output_method==PLAIN_OUT && output_count==1) output_method=PLAIN_OUT_ONCE;
 	if (output_method==PLAIN_OUT) printf("\033[2J"); /* clear screen for plain out */
-    init_double_types(&if_stats_total.max.bytes);
-    init_double_types(&if_stats_total.max.packets);
-    init_double_types(&if_stats_total.max.errors);
-    if_stats_total.data.bytes.out=if_stats_total.data.bytes.in=0;
-    if_stats_total.data.packets.out=if_stats_total.data.packets.in=0;
-    if_stats_total.data.errors.out=if_stats_total.data.errors.out=0;
     while (1) { /* do the main loop */
 #ifdef HTML
         if (output_method==HTML_OUT && out_file_path) {

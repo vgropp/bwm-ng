@@ -82,7 +82,7 @@ Input:
 Output:
   -o, --output <method>   output method, one of: plain, curses, csv, html
   -u, --unit <value>      unit to show. one of bytes, bits, packets, errors
-  -T, --type <value>      type of stats. one of rate, max
+  -T, --type <value>      type of stats. one of rate, max, sum
   -C, --csvchar <char>    delimiter for csv
   -F, --outfile <file>    output file for csv and cvs (default stdout)
   -H, --htmlrefresh <num> meta refresh for html output
@@ -124,7 +124,6 @@ Todo:
   - Docs and manpage
   - try to avoid kmod, like net-tools do, for socket() for ioctl
   - show the avg of last x seconds (like load avg in uptime)
-  - sum and show amount of bytes since startup (NOT bytes per sec)
   - mysql output
   - whatever you can think of
 

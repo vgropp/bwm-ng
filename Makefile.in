@@ -6,7 +6,8 @@ prefix = @prefix@
 exec_prefix = @exec_prefix@
 bindir = @bindir@
 OBJS = src/bwm-ng.o src/retrieve.o src/output.o src/options.o
-TARGET = src/bwm-ng
+BINARY = bwm-ng
+TARGET = src/$(BINARY)
 STRIP = @STRIP@
 
 all:	$(OBJS)
@@ -27,3 +28,6 @@ real-clean: clean
 config:
 	cd configsrc && autoconf
 	cp configsrc/configure ./
+
+uninstall:
+	rm $(bindir)/$(BINARY)

@@ -96,18 +96,11 @@
 #define MINOR 5
 #define EXTRA "-pre1"
 
-#define WRAP_AROUND 4294967296ull
+#define WRAP_AROUND ULONG_MAX
 
 #ifdef SYS_64BIT 
 #undef WRAP_AROUND
 #define WRAP_AROUND 18446744073709551616ull
-#else
-#ifdef __WORDSIZE
-#if __WORDSIZE == 64
-#undef WRAP_AROUND
-#define WRAP_AROUND 18446744073709551616ull
-#endif
-#endif
 #endif
 
 #ifdef CURSES

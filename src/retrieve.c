@@ -168,15 +168,13 @@ void get_iface_stats_libstat (char verbose) {
         deinit("libstatgrab error!\n");
     }
 	
-	while (num_network_stats>current_if_num) {
+	for (current_if_num=0;current_if_num<num_network_stats;current_if_num++) {
 	    tmp_if_stats.bytes.in=network_stats->rx;
 		tmp_if_stats.bytes.out=network_stats->tx;
 	    tmp_if_stats.packets.in=network_stats->ipackets;
 		tmp_if_stats.packets.out=network_stats->opackets;
 	    tmp_if_stats.errors.in=network_stats->ierrors;
 		tmp_if_stats.errors.out=network_stats->oerrors;
-		network_stats++;
-
 		hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, network_stats->interface_name, current_if_num, verbose
 #ifdef IOCTL
 				,check_if_up(network_stats->interface_name)
@@ -184,7 +182,7 @@ void get_iface_stats_libstat (char verbose) {
 				,1
 #endif
 				);
-		current_if_num++;
+        network_stats++;
 	}
 	finish_iface_stats (verbose, stats, hidden_if,current_if_num);
 

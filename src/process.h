@@ -25,54 +25,10 @@
 #include "types.h"
 
 
-#ifdef HAVE_LIBKSTAT
-#include <kstat.h>
-#endif
-
-#ifdef GETIFADDRS
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <net/if.h>
-#include <ifaddrs.h>
-#endif
-
-#ifdef SYSCTL
-#ifndef GETIFADDRS
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <net/if.h>
-#endif
-
-#include <sys/param.h> /* netbsd fix */
-#include <sys/sysctl.h>
-#include <net/route.h>
-#include <net/if_dl.h>
-#endif
-
-
-#ifdef IOCTL
-/* following only for check_if_up and ioctl */
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
-#endif
-
-
-#ifdef LIBSTATGRAB
-#include <statgrab.h>
-#endif
-
-#define MAX_LINE_BUFFER 1024
-
-extern int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_speed_stats *stats, char *name, int iface_number,char verbose, char iface_is_up);
-extern void finish_iface_stats (char verbose, t_iface_speed_stats stats, int hidden_if, int iface_number);
+extern void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float multiplier,t_iface_stats full_stats);
 extern int deinit(char *error_msg, ...);
 
 extern int if_count;
-#ifdef PROC_NET_DEV
-extern char PROC_FILE[PATH_MAX];
-#endif
 extern unsigned int delay;
 extern char dynamic;
 extern char show_all_if;
@@ -83,9 +39,7 @@ extern int output_method;
 extern int input_method;
 extern char *iface_list;
 
-
-#ifdef IOCTL
-/* fd for check_if_up and ioctl */
-int skfd = -1;
-#endif
-
+/* global buffer to store all data of interfaces in */
+t_iface_stats *if_stats=NULL;
+/* total struct */
+t_iface_stats if_stats_total;

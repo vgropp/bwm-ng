@@ -27,7 +27,7 @@ MacOS X 10.3
 MacOS X 10.1, 10.2 (--without-getifaddrs)
 SunOS 5.9 sparc Solaris 9
 OpenBSD 3.4
-NetBSD 1.6.1
+NetBSD 1.6.1, 2.0
 
 please notify me of working or not working platforms.
 
@@ -82,7 +82,7 @@ Input:
 Output:
   -o, --output <method>   output method, one of: plain, curses, csv, html
   -C, --csvchar <char>    delimiter for csv
-  -F, --csvfile <file>    output file for csv (default stdout)
+  -F, --outfile <file>    output file for csv and cvs (default stdout)
   -H, --htmlrefresh <num> meta refresh for html output
   -H, --htmlheader        show <html> and <meta> frame for html output
   -c, --count <num>       number of query/output for plain & csv 

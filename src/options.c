@@ -94,7 +94,9 @@ int printhelp() {
     printf("  -o, --output <method>   output method, one of: " OUTPUT_METHODS "\n");
 #ifdef CSV
     printf("  -C, --csvchar <char>    delimiter for csv\n");
-	printf("  -F, --csvfile <file>    output file for csv (default stdout)\n");
+#endif    
+#if CSV || HTML    
+	printf("  -F, --outfile <file>    output file for csv and html (default stdout)\n");
 #endif
 #ifdef HTML
 	printf("  -R, --htmlrefresh <num> meta refresh for html output\n");
@@ -132,6 +134,8 @@ int printhelp() {
     printf("  -o <method>             output method, one of: " OUTPUT_METHODS "\n");
 #ifdef CSV
     printf("  -C <char>               delimiter for csv\n");
+#endif
+#if CSV || HTML
     printf("  -F <file>               output file for csv (default stdout)\n");
 #endif
 #ifdef HTML
@@ -162,7 +166,7 @@ int str2out_method(char *optarg) {
         if (!strcasecmp(optarg,"html")) return HTML_OUT;
 #endif
     }
-    return 0;
+    return -1;
 }
 
 
@@ -184,7 +188,7 @@ int str2in_method(char *optarg) {
         if (!strcasecmp(optarg,"sysctl")) return SYSCTL_IN;
 #endif
     }
-    return 0;
+    return -1;
 }
 
 
@@ -252,10 +256,14 @@ char *token, *value;
 #ifdef CSV
     } else if( strcasecmp( token, "CSVCHAR" ) == 0 ) {
         if (value) csv_char=value[0];
-    } else if( strcasecmp( token, "CSVFILE" ) == 0 ) {
+#endif
+#if CSV || HTML
+    } else if( strcasecmp( token, "OUTFILE" ) == 0 ) {
         if (value) { 
-            if (csv_file) fclose(csv_file);
-            csv_file=fopen(value,"a"); 
+            if (out_file) fclose(out_file);
+            out_file=fopen(value,"a"); 
+            if (out_file_path) free(out_file_path);
+            out_file_path=strdup(value);
         }
 #endif
     } else if( strcasecmp( token, "COUNT" ) == 0 ) {
@@ -381,13 +389,17 @@ void get_cmdln_options(int argc, char *argv[]) {
 			case 'c':
 				if (optarg) output_count=atol(optarg);
 				break;
-#ifdef CSV
+#if CSV || HTML
             case 'F':
                 if (optarg) { 
-                    if (csv_file) fclose(csv_file);
-                    csv_file=fopen(optarg,"a"); 
+                    if (out_file) fclose(out_file);
+                    out_file=fopen(optarg,"a"); 
+                    if (out_file_path) free(out_file_path);
+                    out_file_path=strdup(optarg);
                 }
                 break;
+#endif
+#ifdef CSV
 			case 'C':
 				if (optarg) csv_char=optarg[0];
 				break;

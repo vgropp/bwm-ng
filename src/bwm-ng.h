@@ -95,7 +95,7 @@
 
 #define MAJOR 0
 #define MINOR 5
-#define EXTRA "-pre1-cvs"
+#define EXTRA "-pre2-cvs"
 
 #define WRAP_AROUND ULONG_MAX
 #define WRAP_32BIT 4294967296ul

@@ -34,7 +34,9 @@ extern unsigned int input_method;
 extern char *iface_list;
 #ifdef CSV
 extern char csv_char;
-extern FILE *csv_file;
+#endif
+#if CSV || HTML
+extern FILE *out_file;
 #endif
 #ifdef HTML
 extern int html_refresh;

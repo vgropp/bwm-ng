@@ -47,7 +47,10 @@ extern unsigned int input_method;
 extern char *iface_list;
 #ifdef CSV
 extern char csv_char;
-extern FILE *csv_file;
+#endif
+#if CSV || HTML
+extern FILE *out_file;
+extern char *out_file_path;
 #endif
 extern int output_count;
 extern char daemonize;
@@ -153,9 +156,10 @@ int deinit(char *error_msg, ...) {
 	if (if_stats!=NULL) free(if_stats);
 	/* free the opt iface_list */
 	if (iface_list!=NULL) free(iface_list);
-#ifdef CSV	
-	/* close the csv_file */
-	if (csv_file!=NULL) fclose(csv_file);
+#if CSV || HTML
+	/* close the out_file */
+	if (out_file!=NULL) fclose(out_file);
+    if (out_file_path!=NULL) free(out_file_path);
 #endif	
 	/* output errormsg if given */
 	if (error_msg!=NULL) {
@@ -251,14 +255,35 @@ int main (int argc, char *argv[]) {
 	strcpy(PROC_FILE,PROC_NET_DEV);
 #endif	
 	get_cmdln_options(argc,argv);
+    if (output_method<0 || input_method<0) {
+        if (output_method<0)
+            printf("invalid output selected\n");
+        else 
+            printf("invalid input selected\n");
+#if CSV || HTML
+        /* close the out_file */
+        if (out_file!=NULL) fclose(out_file);
+        if (out_file_path!=NULL) free(out_file_path);
+#endif
+        if (if_stats!=NULL) free(if_stats);
+        /* free the opt iface_list */
+        if (iface_list!=NULL) free(iface_list);
+        exit(0);
+    }
 	memset(&if_stats_total,0,(size_t)sizeof(t_iface_stats));
 #ifdef HAVE_CURSES
 	if (output_method==CURSES_OUT) {
 		/* init curses */
         if (initscr() == NULL) {
             printf("failed to init curses: %s\n",strerror(errno));
+#if CSV || HTML
+            /* close the out_file */
+            if (out_file!=NULL) fclose(out_file);
+            if (out_file_path!=NULL) free(out_file_path);
+#endif
             /* free the opt iface_list */
             if (iface_list!=NULL) free(iface_list);
+            if (if_stats!=NULL) free(if_stats);
             exit(0);
         }
         cbreak(); 
@@ -292,18 +317,18 @@ int main (int argc, char *argv[]) {
 	if (output_method==PLAIN_OUT && output_count==1) output_method=PLAIN_OUT_ONCE;
 	if (output_method==PLAIN_OUT) printf("\033[2J"); /* clear screen for plain out */
     while (1) { /* do the main loop */
-		if (
-#ifdef HTML				
-				output_method!=HTML_OUT && 
-#endif				
-				output_method!=PLAIN_OUT_ONCE) 
-			idle_chars_p=print_header(idle_chars_p); /* output only if looping */
-		/* use a var to surpress pedantic warning with gcc */
-		ch=!( output_method==PLAIN_OUT_ONCE
 #ifdef HTML
-                    || output_method==HTML_OUT
+        if (output_method==HTML_OUT && out_file_path) {
+            if (out_file) fclose(out_file);
+            out_file=fopen(out_file_path,"w");
+        }
 #endif
-			);				
+        ch=!(output_method==PLAIN_OUT_ONCE
+#ifdef HTML
+                    || (output_method==HTML_OUT && !daemonize)
+#endif
+            );        
+		if (ch) idle_chars_p=print_header(idle_chars_p); /* output only if looping */
 		get_iface_stats(ch); /* do the actual work, get and print stats */
 		if ((
 #ifdef CSV					
@@ -313,6 +338,9 @@ int main (int argc, char *argv[]) {
 			output_count--;
 			if (output_count==0) break;
 		}
+#if HTML
+        if (out_file && output_method==HTML_OUT && daemonize) { fclose(out_file); out_file=NULL; }
+#endif
 #ifdef HAVE_CURSES		
 		if (output_method==CURSES_OUT) {
 			refresh();
@@ -326,16 +354,20 @@ int main (int argc, char *argv[]) {
 		c='\0'; /* not really needed, but i like it this way */
 		if (output_method==PLAIN_OUT_ONCE 
 #ifdef HTML				
-				|| output_method==HTML_OUT
+				|| (output_method==HTML_OUT && !daemonize)
 #endif
 				) break; /* dont loop when we have plain output */
+#ifdef HTML
+        if (output_method==HTML_OUT && html_header) 
+            fprintf(out_file==NULL ? stdout : out_file,"</table>\n</body>\n</html>\n");
+#endif        
     }
 #ifdef HTML	
 	/* do we need to output for html? */
-	if (output_method==HTML_OUT) {
+	if (output_method==HTML_OUT && !daemonize) {
 		print_header(0);
 		get_iface_stats(1);
-		if (html_header) printf("</table>\n</body>\n</html>\n");
+        if (html_header) fprintf(out_file==NULL ? stdout : out_file,"</table>\n</body>\n</html>\n");
 	}
 #endif	
 	/* do we need to output for plain? */

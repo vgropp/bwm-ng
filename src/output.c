@@ -36,6 +36,9 @@ inline char *convert_bytes(double bytes,char * buffer, int buf_size) {
 }
 
 int print_header(int option) {
+#if HTML
+    FILE *tmp_out_file;
+#endif    
 	switch (output_method) {
 #ifdef HAVE_CURSES
 		case CURSES_OUT:
@@ -90,56 +93,57 @@ int print_header(int option) {
 #endif
 #ifdef HTML
 		case HTML_OUT:
+            tmp_out_file=out_file==NULL ? stdout : out_file;
 			if (html_header) {
-		        printf("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n<head>\n");
-		        printf("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n");
-		        printf("<META HTTP-EQUIV=Refresh CONTENT=\"%i\">\n",html_refresh);
-		        printf("<link rel=\"stylesheet\" href=\"bwm-ng.css\" type=\"text/css\" media=\"screen,projection,print\">\n");
-		        printf("<title>bwm-ng stats</title>\n</head>\n<body>\n");
+		        fprintf(tmp_out_file,"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n<head>\n");
+		        fprintf(tmp_out_file,"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n");
+		        fprintf(tmp_out_file,"<META HTTP-EQUIV=Refresh CONTENT=\"%i\">\n",html_refresh);
+		        fprintf(tmp_out_file,"<link rel=\"stylesheet\" href=\"bwm-ng.css\" type=\"text/css\" media=\"screen,projection,print\">\n");
+		        fprintf(tmp_out_file,"<title>bwm-ng stats</title>\n</head>\n<body>\n");
 			}
-	        printf("<div class='bwm-ng-header'>bwm-ng bwm-ng v%i.%i%s (refresh %is); input: ",MAJOR,MINOR,EXTRA,html_refresh);
+	        fprintf(tmp_out_file,"<div class='bwm-ng-header'>bwm-ng bwm-ng v%i.%i%s (refresh %is); input: ",MAJOR,MINOR,EXTRA,html_refresh);
 			switch (input_method) {
 #ifdef SYSCTL
 				case SYSCTL_IN:
-					printf("sysctl");
+					fprintf(tmp_out_file,"sysctl");
 					break;
 #endif				
 #ifdef NETSTAT				
 				case NETSTAT_IN:
-					printf("netstat -i");
+					fprintf(tmp_out_file,"netstat -i");
 					break;
 #endif					
 #ifdef LIBSTATGRAB
 				case LIBSTAT_IN:
-					printf("libstatgrab");
+					fprintf(tmp_out_file,"libstatgrab");
 					break;
 #endif
 #ifdef GETIFADDRS
 				case GETIFADDRS_IN:
-					printf("getifaddrs");
+					fprintf(tmp_out_file,"getifaddrs");
 					break;
 #endif
 #ifdef PROC_NET_DEV
 				case PROC_IN:
-					printf("/proc/net/dev");
+					fprintf(tmp_out_file,"/proc/net/dev");
 					break;
 #endif
 #if HAVE_LIBKSTAT
                 case KSTAT_IN:
-                    printf("kstat");
+                    fprintf(tmp_out_file,"kstat");
                     break;
 #endif
 			}
             switch (show_all_if) {
                 case 1:
-                     printf(" %s","(all)");
+                     fprintf(tmp_out_file," %s","(all)");
                     break;
                 case 2:
-                     printf(" %s","(all and down)");
+                     fprintf(tmp_out_file," %s","(all and down)");
                     break;
             }
-	        printf("</div><table class='bwm-ng-output'>");
-			printf("<tr class='bwm-ng-head'><td class='bwm-ng-name'>Interface</td><td>Rx</td><td>Tx</td><td>Total</td></tr>");
+	        fprintf(tmp_out_file,"</div><table class='bwm-ng-output'>");
+			fprintf(tmp_out_file,"<tr class='bwm-ng-head'><td class='bwm-ng-name'>Interface</td><td>Rx</td><td>Tx</td><td>Total</td></tr>");
 			break;
 #endif			
 		case PLAIN_OUT_ONCE:
@@ -220,8 +224,8 @@ inline unsigned long long calc_new_values(unsigned long long new, unsigned long 
 /* do the actual output */
 void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stats stats,float multiplier) {
 	unsigned long long packets_out,packets_in,bytess,bytesr,errors_in,errors_out;
-#ifdef CSV	
-	FILE *out_file;
+#if CSV || HTML
+	FILE *tmp_out_file;
 #endif
 	errors_in=calc_new_values(new_stats.e_rec,stats.e_rec);
 	errors_out=calc_new_values(new_stats.e_send,stats.e_send);
@@ -292,58 +296,59 @@ void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stat
             break;
 #ifdef HTML			
 		case HTML_OUT:
-			printf("<tr><td class='bwm-ng-name'>%12s:</td>",if_name);
+            tmp_out_file=out_file==NULL ? stdout : out_file;
+			fprintf(tmp_out_file,"<tr><td class='bwm-ng-name'>%12s:</td>",if_name);
 			if (
 #if !NETSTAT_BSD_BYTES && !NETSTAT_NETBSD && NETSTAT
 					(input_method==NETSTAT_IN) || 
 #endif					
 					show_packets) {
 				/* show packets/s if asked for or netstat input */
-                printf("<td class='bwm-ng-out'>");
-				if (errors_in) printf("<span class='bwm-ng-error'>"); else printf("<span class='bwm-ng-dummy'>");
-				printf("%13.2f P/s</span> </td>",(double)packets_in*multiplier);
-                printf("<td class='bwm-ng-in'>");
-				if (errors_out) printf("<span class='bwm-ng-error'>"); else printf("<span class='bwm-ng-dummy'>");
-				printf("%13.2f P/s</span> </td>",(double)packets_out*multiplier);
-                printf("<td class='bwm-ng-total'>");
+                fprintf(tmp_out_file,"<td class='bwm-ng-out'>");
+				if (errors_in) fprintf(tmp_out_file,"<span class='bwm-ng-error'>"); else fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
+				fprintf(tmp_out_file,"%13.2f P/s</span> </td>",(double)packets_in*multiplier);
+                fprintf(tmp_out_file,"<td class='bwm-ng-in'>");
+				if (errors_out) fprintf(tmp_out_file,"<span class='bwm-ng-error'>"); else fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
+				fprintf(tmp_out_file,"%13.2f P/s</span> </td>",(double)packets_out*multiplier);
+                fprintf(tmp_out_file,"<td class='bwm-ng-total'>");
 				if (errors_out || errors_in) 
-					printf("<span class='bwm-ng-error'>"); 
+					fprintf(tmp_out_file,"<span class='bwm-ng-error'>"); 
 				else 
-					printf("<span class='bwm-ng-dummy'>");
-				printf("%13.2f P/s</span></td><tr>\n",(double)(packets_out+packets_in)*multiplier);
+					fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
+				fprintf(tmp_out_file,"%13.2f P/s</span></td><tr>\n",(double)(packets_out+packets_in)*multiplier);
             } else {
                 char bytes_buf[20];
                 /* output Bytes/s */
-                printf("<td class='bwm-ng-out'>");
-				if (errors_in) printf("<span class='bwm-ng-error'>"); else printf("<span class='bwm-ng-dummy'>");
-				printf("%s</span> </td>",convert_bytes((double)(bytesr*multiplier),bytes_buf,20));
-                printf("<td class='bwm-ng-in'>");
-				if (errors_out) printf("<span class='bwm-ng-error'>"); else printf("<span class='bwm-ng-dummy'>");
-				printf("%s</span> </td>",convert_bytes((double)(bytess*multiplier),bytes_buf,20));
+                fprintf(tmp_out_file,"<td class='bwm-ng-out'>");
+				if (errors_in) fprintf(tmp_out_file,"<span class='bwm-ng-error'>"); else fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
+				fprintf(tmp_out_file,"%s</span> </td>",convert_bytes((double)(bytesr*multiplier),bytes_buf,20));
+                fprintf(tmp_out_file,"<td class='bwm-ng-in'>");
+				if (errors_out) fprintf(out_file,"<span class='bwm-ng-error'>"); else fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
+				fprintf(tmp_out_file,"%s</span> </td>",convert_bytes((double)(bytess*multiplier),bytes_buf,20));
                 /* print total (send+rec) of current iface */
-                printf("<td class='bwm-ng-total'>");
+                fprintf(tmp_out_file,"<td class='bwm-ng-total'>");
 				if (errors_out || errors_in) 
-					printf("<span class='bwm-ng-errors'>"); 
+					fprintf(tmp_out_file,"<span class='bwm-ng-errors'>"); 
 				else 
-					printf("<span class='bwm-ng-dummy'>");
-				printf("%s</span></td></tr>\n",convert_bytes((double)((bytess+bytesr)*multiplier),bytes_buf,20));
+					fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
+				fprintf(tmp_out_file,"%s</span></td></tr>\n",convert_bytes((double)((bytess+bytesr)*multiplier),bytes_buf,20));
             }
             break;
 #endif
 #ifdef CSV
         case CSV_OUT:
-			out_file=csv_file==NULL ? stdout : csv_file;
-            fprintf(out_file,"%i%c%s%c",(int)time(NULL),csv_char,if_name,csv_char);
+			tmp_out_file=out_file==NULL ? stdout : out_file;
+            fprintf(tmp_out_file,"%i%c%s%c",(int)time(NULL),csv_char,if_name,csv_char);
             if (
 #if !NETSTAT_BSD_BYTES && !NETSTAT_NETBSD && NETSTAT
 					!(input_method==NETSTAT_IN) && 
 #endif					
 					!show_packets) {
                 /* output Bytes/s */
-                fprintf(out_file,"%.2f%c%.2f%c%.2f%c",(double)(bytess*multiplier),csv_char,(double)(bytesr*multiplier),csv_char,(double)((bytess+bytesr)*multiplier),csv_char);
+                fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c",(double)(bytess*multiplier),csv_char,(double)(bytesr*multiplier),csv_char,(double)((bytess+bytesr)*multiplier),csv_char);
             }
             /* show packets/s if asked for or netstat input */
-            fprintf(out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu\n",(double)packets_out*multiplier,csv_char,(double)packets_in*multiplier,csv_char,(double)(packets_out+packets_in)*multiplier,csv_char,errors_out,csv_char,errors_in);
+            fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu\n",(double)packets_out*multiplier,csv_char,(double)packets_in*multiplier,csv_char,(double)(packets_out+packets_in)*multiplier,csv_char,errors_out,csv_char,errors_in);
             break;
 #endif			
     }

@@ -56,7 +56,10 @@ int output_method=PLAIN_OUT;
 char *iface_list=NULL;
 #ifdef CSV
 char csv_char=';';
-FILE *csv_file=NULL;
+#endif
+#if CSV || HTML
+FILE *out_file=NULL;
+char *out_file_path=NULL;
 #endif
 int output_count=-1;
 char daemonize=0;

@@ -143,7 +143,7 @@ int print_header(int option) {
 
 inline unsigned long long calc_new_values(unsigned long long new, unsigned long long old) {
     /* FIXME: WRAP_AROUND _might_ be wrong for libstatgrab, where the type is always long long */
-    return ((unsigned long long)(new-old) >= 0) ? (unsigned long long)(new-old) : (unsigned long long)((
+    return (new>=old) ? (unsigned long long)(new-old) : (unsigned long long)((
 #ifdef HAVE_LIBKSTAT
             (input_method==KSTAT_IN) ?
             WRAP_32BIT :

@@ -67,25 +67,25 @@ char daemonize=0;
 char sumhidden=0;
 
 #ifdef PROC_NET_DEV
-unsigned int input_method=PROC_IN;
+int input_method=PROC_IN;
 #else
 #ifdef GETIFADDRS
-unsigned int input_method=GETIFADDRS_IN;
+int input_method=GETIFADDRS_IN;
 #else
 #ifdef LIBSTATGRAB
-unsigned int input_method=LIBSTAT_IN;
+int input_method=LIBSTAT_IN;
 #else
 #ifdef SYSCTL
-unsigned int input_method=SYSCTL_IN;
+int input_method=SYSCTL_IN;
 #else
 #if HAVE_LIBKSTAT
-unsigned int input_method=KSTAT_IN;
+int input_method=KSTAT_IN;
 #else
 #ifdef NETSTAT
-unsigned int input_method=NETSTAT_IN;
+int input_method=NETSTAT_IN;
 #else
 #error "NO INPUT DEFINED!"
-unsigned int input_method=0;
+int input_method=0;
 #endif
 #endif 
 #endif

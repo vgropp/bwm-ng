@@ -16,7 +16,7 @@ bwm-ng:
 	${STRIP}
 
 install: all
-	cp ${TARGET} $(bindir)
+	install -D ${TARGET} $(bindir)
 
 clean:
 	@( cd src ; $(MAKE) clean )

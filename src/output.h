@@ -31,7 +31,7 @@ extern char show_kb;
 extern char show_all_if;
 extern char show_packets;
 extern int output_method;
-extern unsigned int input_method;
+extern int input_method;
 extern char *iface_list;
 #ifdef CSV
 extern char csv_char;

@@ -62,11 +62,11 @@ inline void get_iface_stats(char _n) {
 
 
 /* clear stuff */
-int deinit(char *error_msg, ...) FUNCATTR_NORETURN;
+void deinit(char *error_msg, ...) FUNCATTR_NORETURN;
 void sigint(int sig) FUNCATTR_NORETURN;
 
 
-int deinit(char *error_msg, ...) {
+void deinit(char *error_msg, ...) {
     va_list    ap;
 #ifdef HAVE_CURSES	
 	if (output_method==CURSES_OUT && myscr!=NULL) {

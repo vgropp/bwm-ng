@@ -20,7 +20,7 @@ For info about libstatgrab please refer to http://www.i-scream.org/libstatgrab/
 Platforms
 ---------
 
-Tested and running on:
+sucessfully tested on:
 Linux 2.4, Linux 2.6
 freeBSD 4.8, freeBSD 5.3
 MacOS X 10.3 
@@ -28,6 +28,7 @@ MacOS X 10.1, 10.2 (--without-getifaddrs)
 SunOS 5.9 sparc Solaris 9
 OpenBSD 3.4
 NetBSD 1.6.1, 2.0
+IRIX64 6.5
 
 please notify me of working or not working platforms.
 
@@ -115,7 +116,7 @@ Bugs/Known Problems:
   - configure detects getifaddrs, but doesnt work in MacOS X 10.2 or earlier
     (looks like getifaddrs is simply not working in < 10.3)
   - curses output coredumps on netbsd 1.6.1 (maybe others) with unknown TERM
-    set (and configfile support compiled in)
+    set and configfile support compiled in
   - no other yet, wow ;) (please report if you found one)
  
 Todo:

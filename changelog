@@ -1,0 +1,52 @@
+  ..-..-.... 0.5: pre1:
+                  - fixed invalid option msg showed up twice
+                  - added --sumhidden, by default hidden ifaces dont count for
+                    total anymore
+                  - added show iface cycle for gui (curses yet) mode: 
+                    up and not hidden, up and hidden, all
+                  - if ifacelist (-I) is prefaced with % it behaves like a
+                    blacklist
+                  - get_options (long_options) cleanup
+  12-20-2004 0.4: pre1:
+                  - get_iface_stats cleanup
+                  - plain and csv output added
+                  - splited the big bwm-ng.c
+                  - interface list added (whitelist)
+                  - -lncurses instead of -lcurses, hope this will work on more
+                    boxes
+                  pre2:
+                  - html output added, bwm-ng.css prolly needs alot of tweaking
+                  pre3:
+                  - added BSD support via sysctl (only fbsd tested yet)
+                  - fixed gcc warnings on old/non x86 systems
+                  - added errors output (inverse in curses)
+                  - added libstatgrap support 
+                  - another get_iface_stats cleanup/split
+                  - Makefile edit (added options)
+                  - fixed removed interfaces can cause a blank line
+                  - added -D__CURSES, if not defined, you can build without
+                    libcurses
+                  - changed plain output with count>1 to almost the same as
+                    curses output except inputkeys and errors support
+                  - added -D__HTML and -D__CSV to select output at compiletime
+                  pre4 and final:
+                  - added configure script and config.h
+                  - changed input_method handling (cycling while running works 
+                    now for all methods)
+                  - sysctl input added (mostly for BSD), the old sysctl was
+                    getiffaddrs() actually
+                  - netstat input for BSD fixed
+                  - html cleanup and <html> header is now opt: --htmlheader
+                  - using real time elapsed since last probe to calc byte/s
+                    old method is backup if no gettimeofday is available
+                  - switched in and out in plain, curses and html output
+                  - support for configfiles added
+  09-16-2004 0.3: - cosmetic changes, KB/s is now default (again)
+                  - netstat input added
+                  - packet output added
+                  - show only-up-interfaces or all
+  09-07-2004 0.2: - rewrote parsing
+                  - cosmetic changes
+                  - changed to dynamic allocated and displayed interfaces
+                  - possible to auto switch Byte KB and MB per second
+  09-07-2004 0.1: - initial release, almost if not all features of old bwm

@@ -1,0 +1,29 @@
+LIBS = @LIBS@
+CC = @CC@
+CFLAGS = @CFLAGS@
+CPPFLAGS = @CPPFLAGS@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+OBJS = src/bwm-ng.o src/retrieve.o src/output.o src/options.o
+TARGET = src/bwm-ng
+STRIP = @STRIP@
+
+all:	$(OBJS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LIBS) -o ${TARGET} $(OBJS)
+	${STRIP}
+
+install: all
+	cp ${TARGET} $(bindir)
+
+clean:
+	-rm -f *~ src/*.o ${TARGET}
+
+real-clean: clean
+	-rm -f config.h Makefile config.log
+	-rm -fr configsrc/autom4te.cache
+	-rm -f configsrc/configure configure config.status
+
+config:
+	cd configsrc && autoconf
+	cp configsrc/configure ./

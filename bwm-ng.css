@@ -1,0 +1,51 @@
+
+BODY {
+    font:      10pt Arial, Helvetica, sans-serif;
+    text-decoration: none;
+}
+
+
+.bwm-ng-output {
+	padding: 3px 10px 0.5ex 10px;
+	margin: 10px;
+	width: 50ex;
+	border-width: 1px;
+	border-style: solid;
+}
+
+.bwm-ng-header {
+	margin: 10px;
+	font: 12pt Arial, Helvetica, sans-serif;
+	font-weight: bold;
+}
+
+.bwm-ng-head {
+	font-weight: bold;
+}
+
+.bwm-ng-name {
+    margin-left: 10px;
+	width: 10ex;
+    font-weight: bold;
+}
+
+.bwm-ng-in {
+	width: 10ex;
+}
+
+.bwm-ng-out {
+    width: 10ex;
+}
+
+.bwm-ng-total {
+	width: 10ex;
+    font-weight: bold;
+}
+
+.bwm-ng-errors {
+    color: #FF0000;
+}
+
+.bwm-ng-dummy {
+}
+

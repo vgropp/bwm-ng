@@ -1,0 +1,4 @@
+DYNAMIC=1
+PACKETS=0
+PROCFILE=/proc/dev/net
+OUTPUT=plain

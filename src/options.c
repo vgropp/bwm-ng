@@ -347,7 +347,7 @@ void get_cmdln_options(int argc, char *argv[]) {
         read_config(argv[optind]);
     }
 #endif
-    optind=0; //reset getopt again
+    optind=1; //reset getopt again
     /* get command line arguments, kinda ugly, wanna rewrite it? */
     while (1) {
 #ifdef LONG_OPTIONS

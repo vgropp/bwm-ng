@@ -111,7 +111,6 @@ Bugs/Known Problems:
  
 Todo:
   - Docs
-  - try to avoid kmod, like net-tools do, for socket() for ioctl
   - maybe change sscanf() use in retrieve.c to gettoken()
   - checking options to be valid
   - mysql output (ipac-ng compatible)

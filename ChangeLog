@@ -13,6 +13,8 @@
 	* process.c: fixed avg was wrong on startup and when delay was changed
 	while running
 
+	* retrieve.c: small cleanup of check_if_up().
+
 
 02-20-2005	(0.5)	Volker Gropp <bwmng(at)gropp.org>
 	
@@ -51,7 +53,7 @@
 	* bwm-ng.1: added manpage
 	
 	* configure.in: added configure --disable-extendedstats to compile w/o
-    avg, sum and max
+	avg, sum and max
 	
 	* fixed: compile on MacOSX 10.1
 	
@@ -71,7 +73,7 @@
 	up and not hidden, up and hidden, all
 	
 	* process.c: if ifacelist (-I) is prefaced with % it behaves like a
-    blacklist
+	blacklist
 	
 	* options.c: get_options (long_options) cleanup
 	

@@ -52,19 +52,22 @@ long count_tokens(char *in_str) {
 /* test whether the iface is up or not */
 char check_if_up(char *ifname) {
     struct ifreq ifr;
+    /* check if we already opened the file descriptor
+     * if not open it now */
     if (skfd < 0) {
-        /* maybe check some /proc file first like net-tools do */
         if ((skfd =  socket(AF_UNIX, SOCK_DGRAM, 0)) < 0) {
             deinit("socket error: %s\n",strerror(errno));
         }
     }
+    /* setup the struct */
     strncpy(ifr.ifr_name, ifname,sizeof(ifr.ifr_name));
 	ifr.ifr_name[sizeof(ifr.ifr_name)-1]='\0';
+    /* lookup the status */
     if (ioctl(skfd, SIOCGIFFLAGS, &ifr) < 0) {
-        return 0; /* return if as down if there was some error */
+        return 0; /* return if as down if there was an error */
     }
-    if (ifr.ifr_flags & IFF_UP) return 1; /* check against IFF_UP and return */
-        else return 0;
+    /* check against IFF_UP and return */
+    return (ifr.ifr_flags & IFF_UP);
 }
 #endif
 

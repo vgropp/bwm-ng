@@ -114,7 +114,7 @@ Bugs/Known Problems:
   - no other yet, wow ;) (please report if you found one)
  
 Todo:
-  - Docs and manpage
+  - Docs
   - try to avoid kmod, like net-tools do, for socket() for ioctl
   - mysql output
   - setting which stats to output for csv/sql

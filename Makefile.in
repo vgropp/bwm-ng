@@ -5,6 +5,7 @@ CPPFLAGS = @CPPFLAGS@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 bindir = @bindir@
+mandir = @mandir@/man8
 BINARY = bwm-ng
 TARGET = src/$(BINARY)
 STRIP = @STRIP@
@@ -16,7 +17,9 @@ bwm-ng:
 	${STRIP}
 
 install: all
-	install -D ${TARGET} $(bindir)
+	install -D ${TARGET} $(bindir)/$(BINARY)
+	install -D bwm-ng.8 $(mandir)/bwm-ng.8
+	mandb
 
 clean:
 	@( cd src ; $(MAKE) clean )

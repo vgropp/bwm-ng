@@ -1,0 +1,242 @@
+.TH bwm-ng 8 "2005-02-18" "" "Bandwidth Monitor NG"
+.\"
+.\" Man page written by Volker Gropp <bwmng@gropp.org> (Feb 2005)
+.\" It was inspired by the iptables manpage
+.\" 
+.\"	This program is free software; you can redistribute it and/or modify
+.\"	it under the terms of the GNU General Public License as published by
+.\"	the Free Software Foundation; either version 2 of the License, or
+.\"	(at your option) any later version.
+.\"
+.\"	This program is distributed in the hope that it will be useful,
+.\"	but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\"	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\"	GNU General Public License for more details.
+.\"
+.\"	You should have received a copy of the GNU General Public License
+.\"	along with this program; if not, write to the Free Software
+.\"	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+.\"
+.\"
+.SH NAME
+bwm-ng \- Bandwidth Monitor NG (Next Generation), a live bandwidth monitor
+.SH SYNOPSIS
+.BI "bwm-ng ["options "] ... ["configfile "]"
+.SH DESCRIPTION
+.B bwm-ng
+can be used to monitor the current Bandwidth of all or some specific 
+Interfaces. It shows total of in and out as well as total of all
+Interfaces. Several different output methods are supported (curses,
+plain, csv and html).
+
+\fBbwm-ng\fP is not limited in the number of interfaces and can handle
+new ones dynamically while its running or hide those which are not up.
+
+
+.SH INPUT METHODS
+The used input methods pretty much depends on your OS and system.
+You can choose the prefered either at start or in curses during runtime.
+Each method can only be used if 
+.B bwm-ng 
+was compiled with support for it.
+
+Currently supported are:
+.RS
+.TP .4i
+.BR "proc" :
+This is the default for \fILinux\fP based systems. It parses the special 
+procfs file \fB/proc/net/dev\fP. This should be used if in doubt in 
+\fILinux\fP.
+.TP
+.BR "getifaddrs" :
+This is the default on \fIBSD\fP systems like \fIFreeBSD\fP, \fINetBSD\fP, 
+\fIOpenBSD\fP and recent \fIMac OS X (>=10.3)\fP. This should be used if in 
+doubt on those systems. It uses the getifaddrs systemcall.
+.TP
+.BR "kstat" :
+This is the default for \fISolaris\fP. It uses the kstat systemcall.
+.TP
+.BR "sysctl" :
+This is the default on Systems like \fIIRIX\fP and other \fIUNIX\fP. It can 
+be used on many other systems like early \fIMac OS X\fP as well. It uses the 
+sysctl systemcall.
+.TP
+.BR "netstat" :
+This is a Backup for systems without the above, or other problems.
+.TP
+.BR "libstatgrab" :
+.B bwm-ng
+can use the external library libstatgrab to gather the data. please 
+refer to \fIhttp://www.i-scream.org/libstatgrab/\fP for more info about
+this.
+.RE
+
+.SH OUTPUT METHODS
+You can select several different ways to output the data gathered by 
+\fBbwm-ng\fP.
+
+You can use one of:
+
+.RS
+.TP .4i
+.BR "curses" :
+This is the default output method. Usually this fits you the most.
+In \fIcurses\fP mode you can control \fBbwm-ng\fP with severy keys. 
+Press 'h' for a online help. To quit using this mode either press 'q'
+or ctrl-c.
+.TP
+.BR "plain" :
+\fIPlain\fP or \fIASCII\fP is mostly a backup if curses is not 
+available. You cannot control \fBbwm-ng\fP at all in this mode. To 
+quit press ctrl-c. 
+But for one single single output using 
+.ns bwm-ng -o plain -c 1
+this is the mode that fits the best.
+.TP
+.BR "csv" :
+\fICSV\fP is designed to use with scripts for easy parsing. For a list
+of those elements please take a look at README - Specs section.
+To skip the first output with only zeros use 
+.nf 
+bwm-ng -o csv -c 0
+.fi
+.TP
+.BR "html" :
+This is designed for use in the WWW. It uses the CSS file bwm-nd.css in 
+current working dir. "--htmlrefresh" only affects the refresh of the page
+by the browser. For best results use the same value for --timeout and 
+--htmlrefresh.
+.RE
+
+.SH OPTIONS
+The options that are recognized by
+.B bwm-ng
+can be divided into 3 different groups. The long versions can only be used
+if bwm-ng was compiled with getopt_long.
+
+.SS INPUT
+These options specify the method to gather the data as well as different
+options for them. 
+.TP
+.BI "-i, --input " "method"
+selects which method to use. It can be one of the above (see 
+\fBINPUT METHODS\fP) if support for it was compiled in.
+.TP
+.BI "-f, --procfile " "filename"
+selects the file to parse in \fBproc input method\fP. This is usually 
+\fI/proc/net/dev\fP.
+.TP
+.BI "-n, --netstat " "path"
+specifies the binary to execute for \fBnetstat intput method\fP. Because
+this may be a security flaw support for this option is \fInot\fP compiled
+in 
+.B bwm-ng 
+by default.
+
+.SS OUTPUT
+These options select the way to output the data and several options for
+the output.
+.TP
+.BI "-o, --output " "method"
+selects which method to use for otput. It can be one of the above (see
+\fBOUTPUT METHODS\fP) if support for it was compiled in.
+.TP
+.BI "-u, --unit " "value"
+selects which unit to show. It can be one of \fIbytes\fP, \fIbits\fP,
+\fIpackets\fP or \fIerrors\fP.
+.TP
+.BI "-T, --type " "value"
+specifies the type of stats to show. Use one of \fIrate\fP for the current
+rate/s, \fImax\fP for the maximal value achieved since startup of 
+\fBbwm-ng\fP, \fIsum\fP for the total sum counted since startup of 
+\fBbwm-ng\fP or \fIavg\fP for the average over the last 30 seconds.
+.TP
+.BI "-c, --count " "number"
+number of outputs for \fIPlain\fP and \fICSV\fP output mode. Use '1' for
+once single output. Using '0' in \fICSV\fP mode will skip first output
+that always consists of zero values.
+.TP
+.BI "-C, --csvchar " "char"
+specifies the delimiter char for \fICSV\fP mode. The default is ';'.
+.TP
+.BI "-F, --outfile " "filename"
+specifies the use of a \fIoutfile\fP instead of \fIstdout\fP. This option
+only affects \fICSV\fP and \fIHTML\fP mode.
+.TP
+.BI "-R, --htmlrefresh " "seconds"
+sets the \fIHTML\fP Meta refresh field to seconds in \fIHTML\fP mode. 
+This will result in a reload of the page every \fIn\fP seconds by
+the browser. If set this you want to use \fI--htmlheader\fP aswell.
+.TP
+.BI "-H, --htmlheader " ""
+if this option is used, \fBbwm-ng\fP will print the correct \fIHTML\fP
+header (<html></html>) including Meta fields before and after data. 
+This is only useful in \fIHTML\fP mode.
+
+.SS OTHER
+These options specify the general behavior of \fBbwm-ng\fP.
+.TP
+.BI "-t, --timeout " "msec"
+displays and gathers stats every \fIn\fP msec (1msec = 1/1000sec). The
+default is 500msec.
+.TP
+.BI "-d, --dynamic [" "value"]
+shows bytes and bits with dynamic unit like K, M or G (Kilo, Mega, Giga).
+\fIvalue\fP can be 0 (off) or 1 (on), without a value '1' is used.
+.TP
+.BI "-a, --allif [" "mode"]
+specifies whether only up and selected interfaces (\fImode\fP=0), all which
+are up but maybe not selected (\fImode\fP=1) or all, even down and not 
+selected interfaces (\fImode\fP=2). If no interface list given 
+(\fI--interfaces\fP) \fImode\fP=1 and \fImode\fP=2 are the same.
+.TP
+.BI "-I, --interfaces " "list"
+show only interfaces which are in this comma seperated list (\fBwhitelist\fP). 
+If the list is prefixed by a '%' its meaning is negated and interfaces in this
+list are hidden from output (\fBblacklist\fP). (Example: %eth0,tun0)
+.TP
+.BI "-S, --sumhidden [" "value"]
+if given and the optional value is not 0, count also hidden and not shown
+interfaces for total value.
+.TP
+.BI "-D, --daemon [" "value"]
+fork into background and daeonize if given and the optional value is not 0.
+This only affects \fIHTML\fP and \fICSV\fP mode and \fI--outfile\fP is 
+required.
+.TP
+.BI "-h, --help " ""
+show a help of command line options.
+.TP
+.BI "-V, --version " ""
+print version info
+
+.SH CONFIGFILE
+The behavior of \fBbwm-ng\fP can be also controlled by a \fIconfigfile\fP. 
+By default \fBbwm-ng\fP first reads /etc/bwm-ng.conf and then 
+~/.bwm-ng.conf. If specified in commandline \fBbwm-ng\fP skips those.
+It consists of the same long-options as used for commandline as keys 
+followed by a '=' and the value. Lines starting with a # or not known
+key will be ignored.
+
+For example:
+.nf
+DYNAMIC=1
+UNIT=bits
+PROCFILE=/proc/dev/net
+OUTPUT=plain
+.fi
+
+.SH OTHER FILES
+.BR "bwm-ng.css" 
+the CSS file used for html output.
+
+.SH SEE ALSO
+bwm-ng.conf-example for an example of the configfile, README for other 
+comments and hints about bwm-ng.
+.br
+\fIhttp://www.gropp.org/\fP for new version or further help and links.
+.SH AUTHORS
+Volker Gropp <bwmng@gropp.org> wrote bwm-ng and is current maintainer. 
+.br 
+For further Authors please refer to AUTHORS file which should come 
+with \fBbwm-ng\fP.

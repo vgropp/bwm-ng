@@ -33,6 +33,7 @@
                   - fixed /etc/bwm-ng.conf and ~/.bwm-ng.conf were not
                     skipped if configfile was specified in cmdline
                   - added optional argument for -D, -S and -d
+                  - added manpage  
   12-20-2004 0.4: pre1:
                   - get_iface_stats cleanup
                   - plain and csv output added

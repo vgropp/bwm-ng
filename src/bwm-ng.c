@@ -76,7 +76,9 @@ void deinit(char *error_msg, ...) {
 	if (output_method==CURSES_OUT && myscr!=NULL) {
 		/* first close curses, so we dont leave mess behind */
 		endwin();
+#if HAVE_CURS_SET        
 		curs_set(1);
+#endif        
 	}
 #endif	
 #ifdef IOCTL

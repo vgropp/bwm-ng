@@ -66,6 +66,12 @@
 
 #ifdef HAVE_CURSES
 #include <curses.h>
+#ifndef ACS_VLINE
+#define ACS_VLINE '|'
+#endif
+#ifndef ACS_HLINE
+#define ACS_HLINE '-'
+#endif
 #endif
 
 #ifdef LONG_OPTIONS

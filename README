@@ -55,8 +55,16 @@ to install use as root:
 make install
 
 use ./configure --help for a list of options
+
+
+MacOS X hints:
+
 getifaddrs is broken in MacOS X 10.1 and 10.2, therefor please use 
 ./configure --without-getifaddrs
+
+To avoid warnings about long-double, use the flag
+CFLAGS="-Wno-long-double ....(other options here)"
+in addition to the normal compilation options.
 
 
 Specs

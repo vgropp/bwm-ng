@@ -23,6 +23,30 @@
 
 #include "retrieve.h"
 
+#if NETSTAT_BSD || NETSTAT_SOLARIS || NETSTAT_BSD_BYTES || NETSTAT_NETBSD
+/* counts the tokens in a string */
+long count_tokens(char *in_str) {
+    long tokens=0;
+    long i=0;
+    char in_a_token=0;
+    char *str;
+
+    if (in_str==NULL) return 0;
+    str=in_str;
+    while (str[i]!='\0') {
+        if (str[i]>32) {
+            if (!in_a_token) {
+                tokens++;
+                in_a_token=1;
+            }
+        } else {
+            if (in_a_token) in_a_token=0;
+        }
+        i++;
+    }
+    return tokens;
+}
+#endif
 
 #ifdef IOCTL
 /* test whether the iface is up or not */

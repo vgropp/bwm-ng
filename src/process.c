@@ -53,29 +53,6 @@ short show_iface(char *instr, char *searchstr,char iface_is_up) {
 }
 
 
-/* counts the tokens in a string */
-long count_tokens(char *in_str) {
-    long tokens=0;
-    long i=0;
-    char in_a_token=0;
-    char *str;
-
-    if (in_str==NULL) return 0;
-    str=in_str;
-    while (str[i]!='\0') {
-        if (str[i]>32) {
-            if (!in_a_token) {
-                tokens++;
-                in_a_token=1;
-            }
-        } else {
-            if (in_a_token) in_a_token=0;
-        }
-        i++;
-    }
-    return tokens;
-}
-
 
 #if HAVE_GETTIMEOFDAY
 /* Returns: the time difference in milliseconds. */

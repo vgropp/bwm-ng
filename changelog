@@ -36,6 +36,7 @@
                   - added manpage  
                   - added configure --disable-extendedstats to compile w/o
                     avg, sum and max
+                  - fixed compile on MacOSX 10.1
   12-20-2004 0.4: pre1:
                   - get_iface_stats cleanup
                   - plain and csv output added

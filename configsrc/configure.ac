@@ -22,7 +22,7 @@ if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
         CPPFLAGS="$CPPFLAGS -I$withval"
     fi
-    AC_CHECK_LIB([curses],[initscr],,[ CPPFLAGS=$OLD_CPPFLAGS ])
+    AC_CHECK_LIB([curses],[initscr,timeout],,[ CPPFLAGS=$OLD_CPPFLAGS ])
     CURSES_CHECKED="1"
 else
     CURSES_CHECKED="1"
@@ -37,7 +37,7 @@ if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
         CPPFLAGS="$CPPFLAGS -I$withval"
     fi
-    AC_CHECK_LIB([ncurses],[initscr],,[ CPPFLAGS=$OLD_CPPFLAGS ])
+    AC_CHECK_LIB([ncurses],[initscr,timeout],,[ CPPFLAGS=$OLD_CPPFLAGS ])
     CURSES_CHECKED="1"
 else
     CURSES_CHECKED="1"
@@ -48,10 +48,14 @@ fi
 
 
 if [ test $CURSES_CHECKED != "1" ]; then
-AC_CHECK_LIB([curses],[initscr],,[
-	AC_CHECK_LIB([ncurses],[initscr])
+AC_CHECK_LIB([curses],[initscr,timeout],,[
+	AC_CHECK_LIB([ncurses],[initscr,timeout])
 ])
 fi
+
+AC_CHECK_FUNCS([resizeterm])
+AC_CHECK_FUNCS([wattron])
+AC_CHECK_FUNCS([curs_set])
 
 AC_ARG_WITH([varargs],AS_HELP_STRING([--with-varargs],[enable varargs.h use (solaris) (ARG=PATH)]),[
 AC_MSG_CHECKING([for varargs.h])

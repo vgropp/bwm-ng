@@ -113,14 +113,18 @@ void init_curses() {
         cbreak();
         noecho();
         nonl();
+#if HAVE_CURS_SET        
         curs_set(0);
+#endif        
         timeout(delay); /* set the timeout of getch to delay in ms) */
 }
 
 void sigwinch(int sig) {
     struct winsize size;
     if (ioctl(fileno(stdout), TIOCGWINSZ, &size) == 0) {
+#if HAVE_RESIZETERM        
         resizeterm(size.ws_row, size.ws_col);
+#endif        
         if (endwin()==ERR) deinit("failed to deinit curses: %s\n",strerror(errno));
         init_curses();
     }

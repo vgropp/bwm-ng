@@ -34,6 +34,15 @@
 /* define to 1 if you have gettimeofday function */
 #undef HAVE_GETTIMEOFDAY
 
+/* define to 1 if you have resizeterm curses function */
+#undef HAVE_RESIZETERM
+
+/* define to 1 if you have wattron and wattroff curses function */
+#undef HAVE_WATTRON
+
+/* define to 1 if you have curs_set curses function */
+#undef HAVE_CURS_SET
+
 /* Define whether to use __attribute__ gcc flag noreturn or not */
 #undef FUNCATTR_NORETURN
 

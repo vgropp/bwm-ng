@@ -292,17 +292,29 @@ void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float mult
 #ifdef HAVE_CURSES		
         case CURSES_OUT:
             mvwprintw(stdscr,y,x,"%12s:",if_name); /* output the name */
+#if HAVE_WATTRON            
             if (stats.errors.in && output_unit!=ERRORS_OUT) wattron(stdscr, A_REVERSE);
+#endif            
             wprintw(stdscr,"%s",values2str(0,stats,full_stats,multiplier,buffer,49));
+#if HAVE_WATTRON            
             if (stats.errors.in && output_unit!=ERRORS_OUT) wattroff(stdscr, A_REVERSE);
+#endif            
             wprintw(stdscr," ");
+#if HAVE_WATTRON            
             if (stats.errors.out && output_unit!=ERRORS_OUT) wattron(stdscr, A_REVERSE);
+#endif            
             wprintw(stdscr,"%s",values2str(1,stats,full_stats,multiplier,buffer,49));
+#if HAVE_WATTRON            
             if (stats.errors.out && output_unit!=ERRORS_OUT) wattroff(stdscr, A_REVERSE);
+#endif            
             wprintw(stdscr," ");
+#if HAVE_WATTRON            
             if ((stats.errors.out || stats.errors.in) && output_unit!=ERRORS_OUT) wattron(stdscr, A_REVERSE);
+#endif            
             wprintw(stdscr,"%s",values2str(2,stats,full_stats,multiplier,buffer,49));
+#if HAVE_WATTRON            
             if ((stats.errors.out || stats.errors.in) && output_unit!=ERRORS_OUT) wattroff(stdscr, A_REVERSE);
+#endif            
             break;
 #endif
 		case PLAIN_OUT_ONCE:

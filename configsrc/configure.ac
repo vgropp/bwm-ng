@@ -178,13 +178,15 @@ AC_CHECK_FUNCS([sysctl],[
 AC_CHECK_FUNCS([ioctl])
 
 AC_ARG_WITH([procnetdev],AS_HELP_STRING([--with-procnetdev],[enable proc/net/dev like input (ARG=PATH)]),[
-echo "checking for /proc/net/dev-style input: $withval"
+echo "checking for /proc/net/dev style input: $withval"
 if [ test $withval = "yes" ]; then
-    AC_CHECK_FILES([/proc/net/dev])
+    AC_DEFINE_UNQUOTED(HAVE__PROC_NET_DEV)
 else
     if [ test $withval != "no" ]; then
-        AC_CHECK_FILES([$withval],[AC_DEFINE_UNQUOTED(PROC_NET_DEV_PATH,$withval)])
+        AC_CHECK_FILES([$withval],[
+        AC_DEFINE_UNQUOTED(PROC_NET_DEV_PATH,$withval)
         AC_DEFINE_UNQUOTED(HAVE__PROC_NET_DEV)
+        ])
     fi
 fi
 ],[

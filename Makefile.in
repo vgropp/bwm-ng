@@ -27,12 +27,10 @@ clean:
 
 real-clean: clean
 	-rm -f config.h Makefile src/Makefile config.log
-	-rm -fr configsrc/autom4te.cache
-	-rm -f configsrc/configure configure config.status
-
-config:
-	cd configsrc && autoconf
-	cp configsrc/configure ./
+	-rm -fr autom4te.cache
+	-rm -f configure config.status
 
 uninstall:
 	rm $(bindir)/$(BINARY)
+	rm -f $(mandir)/man8/bwm-ng.8
+	mandb $(mandir)

@@ -1,9 +1,21 @@
-bwm-ng v0.5-pre1
+bwm-ng v0.5-pre2
 Copyright (C) 2004 Volker Gropp (bwmng@gropp.org)
 http://www.gropp.org
 
 What is this?
--------------
+=============
+
+Bandwidth Monitor NG is a small and simple console-based live bandwidth 
+monitor for Linux, BSD, Solaris, Mac OS X and others.
+
+Short list of features:
+- supports /proc/net/dev, netstat, getifaddr, sysctl, kstat and libstatgrab
+- unlimited number of interfaces supported
+- interfaces are added or removed dynamically from list
+- white-/blacklist of interfaces
+- output of KB/s, Kb/s, packets, errors, average, max and total sum
+- output in curses, plain console, CSV or HTML
+- configfile
 
 This was influenced by the old bwm util written by ...... (couldnt find any 
 author, debian package: bwm Maintainer: Lenart Janos <ocsi@debian.org>) which 
@@ -11,14 +23,14 @@ had some issues with faster interfaces and was very simple. Since i had almost
 all code done anyway for other projects, i decided to create my own version.
 
 I actually dont know if netstat input is usefull at all. I saw this elsewhere,
-so i added it. Its target is "netstat 1.42 (2001-04-15)" linux or FreeBSD.
-If there are other formats i would be happy to add them.
+so i added it. Its target is "netstat 1.42 (2001-04-15)" linux or 
+Free/Open/netBSD. If there are other formats i would be happy to add them.
 
 For info about libstatgrab please refer to http://www.i-scream.org/libstatgrab/
 
 
-Platforms
----------
+Supported Platforms
+===================
 
 sucessfully tested on:
 Linux 2.4, Linux 2.6
@@ -32,8 +44,9 @@ IRIX64 6.5
 
 please notify me of working or not working platforms.
 
+
 INSTALL
--------
+=======
 
 ./configure
 make
@@ -41,9 +54,13 @@ make
 to install use as root: 
 make install
 
+use ./configure --help for a list of options
+getifaddrs is broken in MacOS X 10.1 and 10.2, therefor please use 
+./configure --without-getifaddrs
+
 
 Specs
------
+=====
 
 csv output format: 
 unix timestamp;iface_name;bytes_out/s;bytes_in/s;bytes_total/s;bytes_in;bytes_out;packets_out/s;packets_in/s;packets_total/s;packets_in;packets_out;errors_out/s;errors_in/s;errors_in;errors_out\n
@@ -55,7 +72,7 @@ modifies the META refresh, you maybe wanna sync --timeout and --htmlrefresh
 
 
 USAGE
------
+=====
 
 USAGE: bwm-ng [OPTION] ... [CONFIGFILE]
 Options:
@@ -105,15 +122,18 @@ Keybindings (curses only):
 	
 
 Configfile
-----------
+==========
+
 either via cmdline or /etc/bwm-ng.conf or ~/.bwm-ng.conf
-it consists of;
+it consists of:
 longoption=value
 with 1 or 0 as values for keys without a value in cmdline options.
 
+For more help take a look at bwm-ng.conf-example
+
 
 Misc
-----
+====
 
 Bugs/Known Problems:
   - configure detects getifaddrs, but doesnt work in MacOS X 10.2 or earlier

@@ -164,7 +164,10 @@ void save_avg(struct t_avg *avg,struct iface_speed_stats calced_stats,float mult
         save_avg_values(&avg->value.errors,&avg->last->data.errors,calced_stats.bytes,multiplier);
         save_avg_values(&avg->value.packets,&avg->last->data.packets,calced_stats.bytes,multiplier);
         avg->items++;
-        while (avg->items>AVG_LENGTH/delay) {
+        /* remove only entries if at least two items added, 
+         * else we might leave an empty list 
+         * avg->first has to be != NULL at this point (if in 2nd line of this function) */
+        while (avg->first->next!=NULL && avg->items>AVG_LENGTH/(1000/multiplier)) {
             /* list is full, remove first entry */
             list_p=avg->first;
             avg->first=avg->first->next;

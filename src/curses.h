@@ -24,24 +24,12 @@
 #include "defines.h"
 #include "types.h"
 
-#if HAVE_SYS_VARARGS_H
-#include <sys/varargs.h> /* solaris */
-#else
-#include <stdarg.h>
-#endif
+#ifdef HAVE_CURSES
+extern void print_online_help();
+extern inline void get_iface_stats(char _n);
+extern void deinit(char *error_msg, ...) FUNCATTR_NORETURN;
 
-extern void get_cmdln_options(int argc, char *argv[]);
-extern int print_header(int option);
-extern void handle_gui_input(char c);
-extern void init_curses();
-extern void sigwinch(int sig);
-
-/* global vars and options */
-extern int if_count;
-#ifdef PROC_NET_DEV
-extern char PROC_FILE[PATH_MAX];
-#endif
-extern unsigned int delay;
+extern WINDOW *myscr;
 extern char dynamic;
 extern char show_all_if;
 extern char sumhidden;
@@ -49,55 +37,13 @@ extern int output_method;
 extern char output_unit;
 extern char output_type;
 extern int input_method;
+extern unsigned int delay;
 extern char *iface_list;
-#ifdef CSV
-extern char csv_char;
-#endif
-#if CSV || HTML
-extern FILE *out_file;
-extern char *out_file_path;
-#endif
-extern int output_count;
-extern char daemonize;
-#ifdef HTML
-extern int html_refresh;
-extern int html_header;
-#endif
-#ifdef HAVE_CURSES
-extern WINDOW *myscr;
-#endif
-
-#ifdef IOCTL
-/* fd for check_if_up and ioctl */
-extern int skfd;
-#endif
+extern int if_count;
 
 /* global buffer to store all data of interfaces in */
 extern t_iface_stats *if_stats;
 /* total struct */
 extern t_iface_stats if_stats_total;
 
-#ifdef PROC_NET_DEV
-extern void get_iface_stats_proc (char verbose);
 #endif
-
-#ifdef LIBSTATGRAB
-extern void get_iface_stats_libstat (char verbose);
-#endif
-
-#ifdef GETIFADDRS
-extern void get_iface_stats_getifaddrs (char verbose);
-#endif
-
-#ifdef SYSCTL
-extern void get_iface_stats_sysctl (char verbose);
-#endif
-
-#ifdef NETSTAT
-extern void get_iface_stats_netstat (char verbose);
-#endif
-
-#ifdef HAVE_LIBKSTAT
-extern void get_iface_stats_kstat (char verbose);
-#endif
-

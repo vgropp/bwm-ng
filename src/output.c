@@ -99,7 +99,7 @@ int print_header(int option) {
 #ifdef HAVE_CURSES
 		case CURSES_OUT:
 	        erase();
-		    mvwprintw(stdscr,1,2,"bwm-ng v%i.%i%s (probing every %2.3fs), press 'q' to end this",MAJOR,MINOR,EXTRA,(float)delay/1000);
+		    mvwprintw(stdscr,1,2,"bwm-ng v%i.%i%s (probing every %2.3fs), press 'h' for help",MAJOR,MINOR,EXTRA,(float)delay/1000);
             mvwprintw(stdscr,2,2,"input: %s type: %s",input2str(),output_type2str());
             wprintw(stdscr,show_all_if2str());
 	        mvwprintw(stdscr,3,2,"%c       iface                  Rx                   Tx                Total",(char)IDLE_CHARS[option]);

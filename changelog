@@ -27,6 +27,8 @@
                   - moved alot functions from retrieve.c into process.c
                   - added average stats
                   - moved help output into help.c
+                  - added onlinehelp for curses output 'h'
+                  - fixed resize term in curses output
   12-20-2004 0.4: pre1:
                   - get_iface_stats cleanup
                   - plain and csv output added

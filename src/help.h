@@ -24,6 +24,9 @@
 #include "defines.h"
 #include "types.h"
 
+extern unsigned int delay;
+
 /* print cmdline help */
 inline void cmdln_printhelp() FUNCATTR_NORETURN;
+
 

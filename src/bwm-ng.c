@@ -119,88 +119,6 @@ void sigint(int sig) {
 }
 
 
-#ifdef HAVE_CURSES
-/* handle key input by user in gui (curses) mode */
-void handle_gui_input(char c) {
-    switch (c) {
-        /* lets check for known keys */
-        case '+': /* increase delay */
-            delay+=100;
-            timeout(delay);
-            break;
-        case '-': /* decrease delay */
-            if (delay>100) {
-                delay+=-100;
-                timeout(delay);
-            }
-            break;
-/*        case 'p':
-        case 'P':
-            show_packets=!show_packets;
-            break;*/
-        case 'a':
-        case 'A':
-            show_all_if++;
-            if (show_all_if>2) show_all_if=0;
-            if (iface_list==NULL && show_all_if==1) show_all_if=2;
-            /* get stats so all values are uptodate */
-            get_iface_stats(0);
-            /* a short sleep, else we get "nan" values due to very short 
-               delay till next get_iface_stats */
-            usleep(100);
-            break;
-        case 's':
-        case 'S':
-            sumhidden=!sumhidden;
-            /* get stats so all values are uptodate */
-            get_iface_stats(0);
-            /* a short sleep, else we get "nan" values due to very short
-               delay till next get_iface_stats */
-            usleep(100);
-            break;
-        case 'n':
-        case 'N':
-			do {
-				input_method=input_method<<1;
-				if (input_method>INPUT_MASK) input_method=1;
-			} while (!(input_method & INPUT_MASK)); 
-            /* switched input, reset iface stats */
-            free(if_stats);
-            if_stats=NULL;
-            if_count=0;
-            memset(&if_stats_total,0,(size_t)sizeof(t_iface_stats));
-            break;
-        case 'q':
-        case 'Q':
-            /* we are asked to exit */
-            deinit(NULL);
-            break;
-        case 'd':
-        case 'D':
-        case 'k':
-        case 'K':
-            /* switch kilobyte/autoassign */
-            dynamic=!dynamic;
-            break;
-        case 'u':
-        case 'U':
-            if (output_unit<4) 
-                output_unit++;
-            else 
-                output_unit=1;
-	        break;
-        case 't':
-        case 'T':
-            if (output_type<4)
-                output_type++;
-            else 
-                output_type=1;
-            break;
-    }
-}	
-#endif
-
-
 int main (int argc, char *argv[]) {
 	unsigned char idle_chars_p=0;
 	char ch;
@@ -218,15 +136,8 @@ int main (int argc, char *argv[]) {
 #ifdef HAVE_CURSES
 	if (output_method==CURSES_OUT) {
 		/* init curses */
-        myscr=initscr();
-        if (myscr == NULL) {
-            deinit("failed to init curses: %s\n",strerror(errno));
-        }
-        cbreak(); 
-		noecho();
-		nonl();
-		curs_set(0);
-		timeout(delay); /* set the timeout of getch to delay in ms) */
+        init_curses();
+        signal(SIGWINCH,sigwinch);
 	}
 #endif	
 	/* end of init curses, now set a sigint handler to deinit the screen on ctrl-break */

@@ -91,10 +91,11 @@ Output:
                           (ie 1 for one single output)
 
 Keybindings (curses only):
+  'h'     show help
   'q'     exit
   '+'     increases timeout by 100ms
   '-'     decreases timeout by 100ms
-  'k','d' switch KB and auto assign Byte/KB/MB
+  'k','d' switch KB and auto assign Byte/KB/MB/GB
   'a'     cycle: show all interfaces, only those which are up, 
                  only up and not hidden
   's'     sum hidden ifaces to total aswell or not
@@ -119,13 +120,14 @@ Bugs/Known Problems:
     (looks like getifaddrs is simply not working in < 10.3)
   - curses output coredumps on netbsd 1.6.1 (maybe others) with unknown TERM
     set and configfile support compiled in
+  - curses-help screen affects average stats
   - no other yet, wow ;) (please report if you found one)
  
 Todo:
   - Docs and manpage
   - try to avoid kmod, like net-tools do, for socket() for ioctl
-  - show the avg of last x seconds (like load avg in uptime)
   - mysql output
+  - setting which stats to output for csv/sql
   - whatever you can think of
 
 

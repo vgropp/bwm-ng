@@ -12,7 +12,7 @@
                   - added output correct error messages
                   - added Solaris support
                   - fixed segfault with getifaddrs on MacOSX < 10.3
-                  - fixed netBSD/openBSD compile 
+                  - fixed NetBSD/OpenBSD compile 
   12-20-2004 0.4: pre1:
                   - get_iface_stats cleanup
                   - plain and csv output added

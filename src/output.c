@@ -21,26 +21,7 @@
  *                                                                            *
  *****************************************************************************/
 
-#include "bwm-ng.h"
-
-/* for csv output and time() */
-#include <time.h>
-
-extern char show_kb;
-extern char show_all_if;
-extern char show_packets;
-extern int output_method;
-extern unsigned int input_method;
-extern char *iface_list;
-#ifdef CSV
-extern char csv_char;
-extern FILE *csv_file;
-#endif
-#ifdef HTML
-extern int html_refresh;
-extern int html_header;
-#endif
-extern unsigned int delay;
+#include "output.h"
 
 
 /* convert doube bytes/s value to some nice string */

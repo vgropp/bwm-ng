@@ -183,7 +183,7 @@
 #endif
 
 #ifdef HTML
-#define HTML_SHORT_OPT "HR:"
+#define HTML_SHORT_OPT "H:R:"
 #else
 #define HTML_SHORT_OPT
 #endif
@@ -200,7 +200,7 @@
 #define CSV_SHORT_OPT
 #endif
 
-#define SHORT_OPTIONS ":ht:d:Va:u:I:i:o:c:D:S:T:" PROC_SHORT_OPT HTML_SHORT_OPT NETSTAT_SHORT_OPT CSV_SHORT_OPT
+#define SHORT_OPTIONS ":ht:d:Va:u:I:i:o:c:D:S:T:A:" PROC_SHORT_OPT HTML_SHORT_OPT NETSTAT_SHORT_OPT CSV_SHORT_OPT
 
 #define BYTES_OUT 1
 #define BITS_OUT 2

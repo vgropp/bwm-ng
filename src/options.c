@@ -198,6 +198,8 @@ char *token, *value;
         if (value) daemonize=value[0]=='0' ? 0 : 1;
     } else if( strcasecmp( token, "SUMHIDDEN" ) == 0 ) {
         if (value) sumhidden=value[0]=='0' ? 0 : 1;
+    } else if( strcasecmp( token, "AVGLENGTH" ) == 0 ) {
+        if (value) avg_length=atoi(value);
 #ifdef HTML
     } else if( strcasecmp( token, "HTMLREFRESH" ) == 0 ) {
         if (value && atol(value)>0) { html_refresh=atol(value); }
@@ -241,6 +243,7 @@ void get_cmdln_options(int argc, char *argv[]) {
         {"interfaces",1,0,'I'},
         {"sumhidden",1,0,'S'},
         {"output",1,0,'o'},
+        {"avglength",1,0,'A'},
 #ifdef CSV
         {"csvchar",1,0,'C'},
         {"csvfile",1,0,'F'},
@@ -249,7 +252,7 @@ void get_cmdln_options(int argc, char *argv[]) {
         {"daemon",1,0,'D'},
 #ifdef HTML
         {"htmlrefresh",1,0,'R'},
-        {"htmlheader",0,0,'H'},
+        {"htmlheader",1,0,'H'},
 #endif
         {0,0,0,0}
     };
@@ -302,6 +305,10 @@ void get_cmdln_options(int argc, char *argv[]) {
                             dynamic=1;
                       else if (!strcmp(argv[optind-1],"-D") || !strcasecmp(argv[optind-1],"--daemon"))
                             daemonize=1;
+#ifdef HTML                      
+                      else if (!strcmp(argv[optind-1],"-H") || !strcasecmp(argv[optind-1],"--htmlheader"))
+                            html_header=1;
+#endif                      
                       else if (!strcmp(argv[optind-1],"-S") || !strcasecmp(argv[optind-1],"--sumhidden"))
                             sumhidden=1;    
                           else {
@@ -317,7 +324,7 @@ void get_cmdln_options(int argc, char *argv[]) {
 				if ((optarg) && atol(optarg)>0) { html_refresh=atol(optarg); }
 				break;
 			case 'H':
-				html_header=1;
+				if (optarg) html_header=atoi(optarg);
 				break;
 #endif
 			case 'c':
@@ -377,6 +384,9 @@ void get_cmdln_options(int argc, char *argv[]) {
             case 'u':
                 output_unit=str2output_unit(optarg);
                 break;
+            case 'A':
+                if (optarg) avg_length=atoi(optarg);
+                break;
 #if NETSTAT && ALLOW_NETSTATPATH
             case 'n':
                 if (optarg && (strlen(optarg)<PATH_MAX)) strcpy(NETSTAT_FILE,optarg);
@@ -389,6 +399,14 @@ void get_cmdln_options(int argc, char *argv[]) {
         }
     }
     if (iface_list==NULL && show_all_if==1) show_all_if=2;
+    /* default init of avg_length */
+    if (avg_length==0) {
+        if (delay<AVG_LENGTH*1000/2) 
+            avg_length=AVG_LENGTH; 
+        else  
+            avg_length=(delay*2)/1000+1;
+    } else /* avg_length was set via cmdline or config file, better check it */
+        if (delay*2/1000>=avg_length) deinit("avglength needs to be a least twice the value of timeout\n");
     return;
 }
 

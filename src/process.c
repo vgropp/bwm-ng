@@ -27,9 +27,9 @@
 /* returns the whether to show the iface or not
  * if is in list return 1, if list is prefaced with ! or 
  * name not found return 0 */
-short show_iface(char *instr, char *searchstr) {
+short show_iface(char *instr, char *searchstr,char iface_is_up) {
 	int pos = 0,k,i=0,success_ret=1;
-    if (instr==NULL) return success_ret;
+    if (instr==NULL) return iface_is_up || (show_all_if==2);
     if (instr[0]=='%') {
         success_ret=!success_ret;
         i++;
@@ -40,7 +40,7 @@ short show_iface(char *instr, char *searchstr) {
 			case 0:
 			case ',':
 				if ( k == pos && ! strncasecmp( &instr[i] - pos, searchstr, pos ) ) {
-					return success_ret;
+					return success_ret || (iface_is_up && show_all_if);
                 }
 				pos = 0;
 				break;
@@ -49,7 +49,7 @@ short show_iface(char *instr, char *searchstr) {
 				break;
 		}
     }
-	return !success_ret;
+	return !success_ret || (iface_is_up && show_all_if) || (show_all_if==2);
 }
 
 
@@ -142,7 +142,7 @@ inline void save_avg_values(struct inouttotal_double *values,struct inouttotal_d
     data->in=calced_stats.in*multiplier;
     data->out=calced_stats.out*multiplier;
     data->total=(calced_stats.in+calced_stats.out)*multiplier;
-    add_avg_values(values,*data,AVG_LENGTH/(1000/multiplier));
+    add_avg_values(values,*data,avg_length/(1000/multiplier));
 }
 
 
@@ -160,7 +160,7 @@ void save_avg(struct t_avg *avg,struct iface_speed_stats calced_stats,float mult
         save_avg_values(&avg->value.bytes,&avg->first->data.bytes,calced_stats.bytes,multiplier);
         save_avg_values(&avg->value.errors,&avg->first->data.errors,calced_stats.errors,multiplier);
         save_avg_values(&avg->value.packets,&avg->first->data.packets,calced_stats.packets,multiplier);
-        avg->first->delay=AVG_LENGTH/(1000/multiplier);
+        avg->first->delay=avg_length/(1000/multiplier);
         avg->items=1;
     } else { /* we already have a list */
         avg->last->next=(struct double_list *)malloc(sizeof(struct double_list));
@@ -170,12 +170,12 @@ void save_avg(struct t_avg *avg,struct iface_speed_stats calced_stats,float mult
         save_avg_values(&avg->value.bytes,&avg->last->data.bytes,calced_stats.bytes,multiplier);
         save_avg_values(&avg->value.errors,&avg->last->data.errors,calced_stats.errors,multiplier);
         save_avg_values(&avg->value.packets,&avg->last->data.packets,calced_stats.packets,multiplier);
-        avg->last->delay=AVG_LENGTH/(1000/multiplier);
+        avg->last->delay=avg_length/(1000/multiplier);
         avg->items++;
         /* remove only entries if at least two items added, 
          * else we might leave an empty list 
          * avg->first has to be != NULL at this point (if in 2nd line of this function) */
-        while (avg->first->next!=NULL && avg->items>AVG_LENGTH/delay) {
+        while (avg->first->next!=NULL && avg->items>avg_length/delay) {
             /* list is full, remove first entry */
             list_p=avg->first;
             avg->first=avg->first->next;
@@ -236,8 +236,7 @@ int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_spe
             if_stats[if_count-1].if_name=(char*)strdup("unknown");
         /* set it to current value, so there is no peak at first announce */
         if_stats[local_if_count].data=tmp_if_stats;
-        if (sumhidden || ((show_all_if>1 || iface_is_up) &&
-            (show_all_if || show_iface(iface_list,name)))) {
+        if (show_iface(iface_list,name,iface_is_up)) {
             /* add the values to total stats now */
             if_stats_total.data.bytes.out+=tmp_if_stats.bytes.out;
             if_stats_total.data.bytes.in+=tmp_if_stats.bytes.in;
@@ -264,8 +263,7 @@ int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_spe
     save_avg(&if_stats[local_if_count].avg,calced_stats,multiplier); 
     if (verbose) { /* any output at all? */
         /* cycle: show all interfaces, only those which are up, only up and not hidden */
-        if ((show_all_if>1 || iface_is_up) && /* is it up or do we show all ifaces? */
-            (show_all_if || show_iface(iface_list,name))) {
+        if (show_iface(iface_list,name,iface_is_up)) {/* is it up or do we show all ifaces? */
             print_values(5+iface_number-hidden_if,2,name,calced_stats,multiplier,if_stats[local_if_count]);
 		} else
             hidden_if++; /* increase the opt cause we dont show this if */
@@ -273,8 +271,7 @@ int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_spe
     /* save current stats for the next run */
     if_stats[local_if_count].data=tmp_if_stats;
     /* add stats to new total */
-    if (sumhidden || ((show_all_if>1 || iface_is_up) &&
-            (show_all_if || show_iface(iface_list,name)))) {
+    if (show_iface(iface_list,name,iface_is_up)) {
         stats->bytes.out+=tmp_if_stats.bytes.out;
         stats->bytes.in+=tmp_if_stats.bytes.in;
         stats->packets.out+=tmp_if_stats.packets.out;

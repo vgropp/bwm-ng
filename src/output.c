@@ -304,24 +304,14 @@ void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float mult
 #ifdef HTML			
 		case HTML_OUT:
             tmp_out_file=out_file==NULL ? stdout : out_file;
-			fprintf(tmp_out_file,"<tr><td class='bwm-ng-name'>%12s:</td>",if_name);
-			fprintf(tmp_out_file,"<td class='bwm-ng-in'>");
-            if (stats.errors.in && output_unit!=ERRORS_OUT) 
-                fprintf(tmp_out_file,"<span class='bwm-ng-error'>"); 
-            else 
-                fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
-            fprintf(tmp_out_file,"%s</span> </td>",values2str(0,stats,full_stats,multiplier,buffer,49));
-            fprintf(tmp_out_file,"<td class='bwm-ng-out'>");
-            if (stats.errors.out && output_unit!=ERRORS_OUT) 
-                fprintf(tmp_out_file,"<span class='bwm-ng-error'>");
-            else
-                fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
-            fprintf(tmp_out_file,"%s</span> </td>",values2str(1,stats,full_stats,multiplier,buffer,49));
-            fprintf(tmp_out_file,"<td class='bwm-ng-total'>");
-            if ((stats.errors.out || stats.errors.in) && output_unit!=ERRORS_OUT)
-                fprintf(tmp_out_file,"<span class='bwm-ng-error'>");
-            else
-                fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
+			fprintf(tmp_out_file,"<tr><td class='bwm-ng-name'>%12s:</td><td class='bwm-ng-in'><span class='bwm-ng-%s'>",if_name,
+                    (stats.errors.in && output_unit!=ERRORS_OUT) ? "error" : "dummy");
+            fprintf(tmp_out_file,"%s</span> </td><td class='bwm-ng-out'><span class='bwm-ng-%s'>",
+                    values2str(0,stats,full_stats,multiplier,buffer,49),
+                    (stats.errors.out && output_unit!=ERRORS_OUT) ? "error" : "dummy");
+            fprintf(tmp_out_file,"%s</span> </td><td class='bwm-ng-total'><span class='bwm-ng-%s'>",
+                    values2str(1,stats,full_stats,multiplier,buffer,49),
+                    ((stats.errors.out || stats.errors.in) && output_unit!=ERRORS_OUT) ? "error" : "dummy" );
             fprintf(tmp_out_file,"%s</span></td><tr>\n",values2str(2,stats,full_stats,multiplier,buffer,49));
             break;
 #endif
@@ -333,10 +323,10 @@ void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float mult
 			if (input_method!=NETSTAT_IN)
 #endif                    
                 /* output Bytes/s */
-                fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu%c",(double)(stats.bytes.out*multiplier),csv_char,(double)(stats.bytes.in*multiplier),csv_char,(double)((stats.bytes.out+stats.bytes.in)*multiplier),csv_char,full_stats.sum.bytes.in,csv_char,full_stats.sum.bytes.out,csv_char);
+                fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu%c",(double)(stats.bytes.out*multiplier),csv_char,(double)(stats.bytes.in*multiplier),csv_char,(double)((stats.bytes.out+stats.bytes.in)*multiplier),csv_char,stats.bytes.in,csv_char,stats.bytes.out,csv_char);
             /* show packets/s and errors/s */
-            fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu",(double)stats.packets.out*multiplier,csv_char,(double)stats.packets.in*multiplier,csv_char,(double)(stats.packets.out+stats.packets.in)*multiplier,csv_char,full_stats.sum.packets.in,csv_char,full_stats.sum.packets.out);
-            fprintf(tmp_out_file,"%c%.2f%c%.2f%c%llu%c%llu\n",csv_char,stats.errors.out*multiplier,csv_char,stats.errors.in*multiplier,csv_char,full_stats.sum.errors.in,csv_char,full_stats.sum.errors.out);
+            fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu",(double)stats.packets.out*multiplier,csv_char,(double)stats.packets.in*multiplier,csv_char,(double)(stats.packets.out+stats.packets.in)*multiplier,csv_char,stats.packets.in,csv_char,stats.packets.out);
+            fprintf(tmp_out_file,"%c%.2f%c%.2f%c%llu%c%llu\n",csv_char,stats.errors.out*multiplier,csv_char,stats.errors.in*multiplier,csv_char,stats.errors.in,csv_char,stats.errors.out);
             break;
 #endif			
     }

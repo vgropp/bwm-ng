@@ -45,6 +45,7 @@ char PROC_FILE[PATH_MAX];
 char NETSTAT_FILE[PATH_MAX];
 #endif
 unsigned int delay=500;
+unsigned int avg_length=0;
 char output_unit=BYTES_OUT;
 char output_type=RATE_OUT;
 char dynamic;
@@ -101,3 +102,4 @@ int html_header=0;
 #endif
 
 extern inline void cmdln_printhelp() FUNCATTR_NORETURN;
+void deinit(char *error_msg, ...) FUNCATTR_NORETURN;

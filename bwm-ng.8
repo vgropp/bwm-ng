@@ -21,7 +21,7 @@
 .SH NAME
 bwm-ng \- Bandwidth Monitor NG (Next Generation), a live bandwidth monitor
 .SH SYNOPSIS
-.BI "bwm-ng ["options "] ... ["configfile "]"
+.BI "bwm-ng "[options] " ... "[configfile] "
 .SH DESCRIPTION
 .B bwm-ng
 can be used to monitor the current Bandwidth of all or some specific 
@@ -50,7 +50,7 @@ procfs file \fB/proc/net/dev\fP. This should be used if in doubt in
 .TP
 .BR "getifaddrs" :
 This is the default on \fIBSD\fP systems like \fIFreeBSD\fP, \fINetBSD\fP, 
-\fIOpenBSD\fP and recent \fIMac OS X (>=10.3)\fP. This should be used if in 
+\fIOpenBSD\fP and recent \fIMac OS X\fP (>=10.3). This should be used if in 
 doubt on those systems. It uses the getifaddrs systemcall.
 .TP
 .BR "kstat" :
@@ -168,10 +168,11 @@ sets the \fIHTML\fP Meta refresh field to seconds in \fIHTML\fP mode.
 This will result in a reload of the page every \fIn\fP seconds by
 the browser. If set this you want to use \fI--htmlheader\fP aswell.
 .TP
-.BI "-H, --htmlheader " ""
+.BI "-H, --htmlheader " "[value]"
 if this option is used, \fBbwm-ng\fP will print the correct \fIHTML\fP
 header (<html></html>) including Meta fields before and after data. 
-This is only useful in \fIHTML\fP mode.
+This is only useful in \fIHTML\fP mode. \fIvalue\fP can be 0 (off) 
+or 1 (on), if the value is not given '1' is used.
 
 .SS OTHER
 These options specify the general behavior of \fBbwm-ng\fP.
@@ -180,11 +181,11 @@ These options specify the general behavior of \fBbwm-ng\fP.
 displays and gathers stats every \fIn\fP msec (1msec = 1/1000sec). The
 default is 500msec.
 .TP
-.BI "-d, --dynamic [" "value"]
+.BI "-d, --dynamic " "[value]"
 shows bytes and bits with dynamic unit like K, M or G (Kilo, Mega, Giga).
 \fIvalue\fP can be 0 (off) or 1 (on), without a value '1' is used.
 .TP
-.BI "-a, --allif [" "mode"]
+.BI "-a, --allif " "[mode]"
 specifies whether only up and selected interfaces (\fImode\fP=0), all which
 are up but maybe not selected (\fImode\fP=1) or all, even down and not 
 selected interfaces (\fImode\fP=2). If no interface list given 
@@ -195,11 +196,15 @@ show only interfaces which are in this comma seperated list (\fBwhitelist\fP).
 If the list is prefixed by a '%' its meaning is negated and interfaces in this
 list are hidden from output (\fBblacklist\fP). (Example: %eth0,tun0)
 .TP
-.BI "-S, --sumhidden [" "value"]
+.BI "-S, --sumhidden " "[value]"
 if given and the optional value is not 0, count also hidden and not shown
 interfaces for total value.
 .TP
-.BI "-D, --daemon [" "value"]
+.BI "-A, --avglength " "seconds"
+sets the span in which the stats for average mode are collected. Default
+is 30 seconds or 2*\fItimeout\fP.
+.TP
+.BI "-D, --daemon " "[value]"
 fork into background and daeonize if given and the optional value is not 0.
 This only affects \fIHTML\fP and \fICSV\fP mode and \fI--outfile\fP is 
 required.

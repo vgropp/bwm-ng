@@ -74,6 +74,9 @@ unsigned int input_method=LIBSTAT_IN;
 #ifdef SYSCTL
 unsigned int input_method=SYSCTL_IN;
 #else
+#if HAVE_LIBKSTAT
+unsigned int input_method=KSTAT_IN;
+#else
 #ifdef NETSTAT
 unsigned int input_method=NETSTAT_IN;
 #else
@@ -81,6 +84,7 @@ unsigned int input_method=NETSTAT_IN;
 unsigned int input_method=0;
 #endif
 #endif 
+#endif
 #endif
 #endif
 #endif

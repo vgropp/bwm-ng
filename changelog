@@ -10,7 +10,7 @@
                   - fixed wrong values on proc/net/dev wrap around.
                   - fixed several configure and compile issues
                   - added output correct error messages
-                  - added Solaris support
+                  - added Solaris support (kstat and netstat)
                   - fixed segfault with getifaddrs on MacOSX < 10.3
                   - fixed NetBSD/OpenBSD compile 
                   - added NetBSD/OpenBSD netstat support

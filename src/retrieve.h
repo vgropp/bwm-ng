@@ -24,6 +24,10 @@
 #include "bwm-ng.h"
 
 
+#ifdef HAVE_LIBKSTAT
+#include <kstat.h>
+#endif
+
 #ifdef GETIFADDRS
 #include <sys/types.h>
 #include <sys/socket.h>

@@ -155,11 +155,20 @@
 
 #ifdef SYSCTL
 #define SYSCTL_IN 16
-#define INPUT_MASK (INPUT_3 | 16)
-#define INPUT_METHODS INPUT_METHODS_3 " sysctl"
+#define INPUT_4 (INPUT_3 | 16)
+#define INPUT_METHODS_4 INPUT_METHODS_3 " sysctl"
 #else
-#define INPUT_METHODS INPUT_METHODS_3
-#define INPUT_MASK INPUT_3
+#define INPUT_METHODS_4 INPUT_METHODS_3
+#define INPUT_4 INPUT_3
+#endif
+
+#if HAVE_LIBKSTAT
+#define KSTAT_IN 32
+#define INPUT_MASK (INPUT_4 | 32)
+#define INPUT_METHODS INPUT_METHODS_4 " kstat"
+#else
+#define INPUT_MASK INPUT_4
+#define INPUT_METHODS INPUT_METHODS_4
 #endif
 
 

@@ -49,18 +49,18 @@ char check_if_up(char *ifname) {
  * if is in list return 1, if list is prefaced with ! or 
  * name not found return 0 */
 short show_iface(char *instr, char *searchstr) {
-	int pos = 0,k,success_ret=1;
+	int pos = 0,k,i=0,success_ret=1;
     if (instr==NULL) return success_ret;
     if (instr[0]=='%') {
         success_ret=!success_ret;
-        *instr=*instr+1; /* dont use *instr++ to avoid netbsd/openbsd warning here */
+        i++;
     }
 	k = strlen( searchstr );
-	do {
-		switch ( *instr ) {
+	for (;i<=strlen(instr);i++) {
+		switch ( instr[i] ) {
 			case 0:
 			case ',':
-				if ( k == pos && ! strncasecmp( instr - pos, searchstr, pos ) ) {
+				if ( k == pos && ! strncasecmp( &instr[i] - pos, searchstr, pos ) ) {
 					return success_ret;
                 }
 				pos = 0;
@@ -68,8 +68,8 @@ short show_iface(char *instr, char *searchstr) {
 			default:
 				pos++;
 				break;
-			}
-		} while ( *instr++ );
+		}
+    }
 	return !success_ret;
 }
 
@@ -77,10 +77,14 @@ short show_iface(char *instr, char *searchstr) {
 /* counts the tokens in a string */
 long count_tokens(char *in_str) {
     long tokens=0;
+    long i=0;
     char in_a_token=0;
-    char *str=strdup(in_str);
-    while (str!=NULL && str[0]!='\0') {
-        if (str[0]>32) {
+    char *str;
+
+    if (in_str==NULL) return 0;
+    str=strdup(in_str);
+    while (str[i]!='\0') {
+        if (str[i]>32) {
             if (!in_a_token) {
                 tokens++;
                 in_a_token=1;
@@ -88,7 +92,7 @@ long count_tokens(char *in_str) {
         } else {
             if (in_a_token) in_a_token=0;
         }
-        *str=*str+1; /* dont use ++ to avoid open/net bsd warning */
+        i++;
     }
     free(str);
     return tokens;
@@ -437,20 +441,19 @@ void get_iface_stats_netstat (char verbose) {
         sscanf(buffer,"%s%llu%llu%llu%llu%llu%llu%llu%llu",name,&buf,&buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&buf,&buf,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
 #endif
 #if NETSTAT_BSD_BYTES 
-        if (count_tokens(buffer)==10) /* including address */
+        if (count_tokens(buffer)>=10) /* including address */
     		sscanf(buffer,"%s%llu%s%s%llu%llu%llu%llu%llu%llu",name,&buf,str_buf,str_buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send,&tmp_if_stats.send);
         else /* w/o address */
             sscanf(buffer,"%s%llu%s%llu%llu%llu%llu%llu%llu",name,&buf,str_buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send,&tmp_if_stats.send);
 #endif
 #if NETSTAT_BSD	|| NETSTAT_SOLARIS	
-        if (count_tokens(buffer)==8) /* including address */
+        if (count_tokens(buffer)>=8) /* including address */
 		    sscanf(buffer,"%s%llu%s%s%llu%llu%llu%llu",name,&buf,str_buf,str_buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
         else /* w/o address */
             sscanf(buffer,"%s%llu%s%llu%llu%llu%llu",name,&buf,str_buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
-         
 #endif
 #if NETSTAT_NETBSD
-        if (count_tokens(buffer)==7) /* including address */
+        if (count_tokens(buffer)>=7) /* including address */
             sscanf(buffer,"%s%llu%s%s%llu%llu%llu",name,&buf,str_buf,str_buf,&tmp_if_stats.rec,&tmp_if_stats.send,&tmp_if_stats.e_send);
         else
             sscanf(buffer,"%s%llu%s%llu%llu%llu",name,&buf,str_buf,&tmp_if_stats.rec,&tmp_if_stats.send,&tmp_if_stats.e_send);
@@ -553,6 +556,85 @@ void get_iface_stats_sysctl (char verbose) {
     free(name);
     /* close input stream */
     free(bsd_if_buf);
+    return;
+}
+#endif
+
+
+/*
+ * #include <kstat.h>
+#include <stdio.h>
+
+int main () {
+     kstat_ctl_t   *kc;
+     kstat_t       *ksp;
+     kstat_io_t     kio;
+     kstat_named_t *knp;
+     kstat_named_t *in_byte;
+//     ce_kstat_t stats;
+     int i;
+
+     kc = kstat_open();
+     for (ksp = kc->kc_chain;
+          ksp != NULL;
+          ksp = ksp->ks_next) {
+  if (strcmp(ksp->ks_class, "net") != 0)
+  continue;
+ printf("interface %s:\n", ksp->ks_name);
+ kstat_read(kc, ksp, NULL);
+ in_byte=(kstat_named_t *)kstat_data_lookup(ksp, "rbytes");
+ if (in_byte==NULL) continue;
+ printf("rbytes: %lu\n",in_byte->value.ui32);
+ knp = KSTAT_NAMED_PTR(ksp);
+ for (i = 0; i < ksp->ks_ndata; i++)
+  printf("0.30s = %s %u\n", knp[i].name, knp[i].value.ul);
+  }
+     kstat_close(kc);
+}
+*/
+#if HAVE_LIBKSTAT
+void get_iface_stats_kstat (char verbose) {
+    kstat_ctl_t   *kc;
+    kstat_t       *ksp;
+    kstat_named_t *i_bytes,*o_bytes,*i_packets,*o_packets,*i_errors,*o_errors;
+    char *name;
+    int hidden_if=0,current_if_num=0,my_errno=0;
+    t_iface_stats stats,tmp_if_stats; /* local struct, used to calc total values */
+    
+    memset(&stats,0,(size_t)sizeof(t_iface_stats)); /* init it */
+    kc = kstat_open();
+    if (kc==NULL) deinit("kstat failed: %s\n",strerror(my_errno));
+    name=(char *)malloc(KSTAT_STRLEN);
+    /* loop for interfaces */
+    for (ksp = kc->kc_chain;ksp != NULL;ksp = ksp->ks_next) {
+        if (strcmp(ksp->ks_class, "net") != 0)
+            continue; /* skip all other stats */
+        strncpy(name,ksp->ks_name,KSTAT_STRLEN);
+        name[KSTAT_STRLEN-1]='\0';
+        kstat_read(kc, ksp, NULL);
+        i_bytes=(kstat_named_t *)kstat_data_lookup(ksp, "rbytes");
+        o_bytes=(kstat_named_t *)kstat_data_lookup(ksp, "obytes");
+        i_packets=(kstat_named_t *)kstat_data_lookup(ksp, "ipackets");
+        o_packets=(kstat_named_t *)kstat_data_lookup(ksp, "opackets");
+        i_errors=(kstat_named_t *)kstat_data_lookup(ksp, "ierrors");
+        o_errors=(kstat_named_t *)kstat_data_lookup(ksp, "oerrors");
+        if (!i_bytes || !o_bytes || !i_packets || !o_packets || !i_errors || !o_errors) 
+            continue;
+        tmp_if_stats.rec=i_bytes->value.ui32;
+        tmp_if_stats.send=o_bytes->value.ui32;
+        tmp_if_stats.p_rec=i_packets->value.ui32;
+        tmp_if_stats.p_send=o_packets->value.ui32;
+        tmp_if_stats.e_rec=i_errors->value.ui32;
+        tmp_if_stats.e_send=o_errors->value.ui32;
+        /* init new interfaces and add fetched data to old or new one */
+        hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose, 1);
+        current_if_num++;
+    }
+    /* add to total stats and output current stats if verbose */
+    finish_iface_stats (verbose, stats, hidden_if,current_if_num);
+    /* clean buffers */
+    free(name);
+    kstat_close(kc);
     return;
 }
 #endif

@@ -87,6 +87,11 @@ extern void get_iface_stats_sysctl (char verbose);
 extern void get_iface_stats_netstat (char verbose);
 #endif
 
+#ifdef HAVE_LIBKSTAT
+extern void get_iface_stats_kstat (char verbose);
+#endif
+
+
 inline void get_iface_stats(char _n) {
 	switch (input_method) { 
 #ifdef NETSTAT		
@@ -112,6 +117,11 @@ inline void get_iface_stats(char _n) {
 #ifdef SYSCTL
         case SYSCTL_IN:
             get_iface_stats_sysctl(_n);
+            break;
+#endif
+#if HAVE_LIBKSTAT
+        case KSTAT_IN:
+            get_iface_stats_kstat(_n);
             break;
 #endif
 			

@@ -189,6 +189,22 @@ AC_CHECK_FUNCS([sysctl],[
 ])
 ])
 
+AC_ARG_WITH([kstat],AS_HELP_STRING([--with-kstat],[enable kstat (Solaris) input (ARG=PATH)]),[
+echo "checking for kstat input: $withval"
+if [ test $withval != "no" ]; then
+    OLD_CPPFLAGS=$CPPFLAGS
+    if [ test $withval != "yes" ]; then
+        CPPFLAGS="$CPPFLAGS -I$withval"
+    fi
+    AC_CHECK_LIB([kstat],[kstat_open],[
+        AC_DEFINE_UNQUOTED(HAVE_KSTAT)
+    ],[ CPPFLAGS=$OLD_CPPFLAGS ])
+fi
+],[
+AC_CHECK_LIB([kstat],[kstat_open])
+])
+
+
 AC_CHECK_FUNCS([ioctl])
 
 AC_ARG_WITH([procnetdev],AS_HELP_STRING([--with-procnetdev],[enable proc/net/dev like input (ARG=PATH)]),[

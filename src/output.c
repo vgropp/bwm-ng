@@ -67,6 +67,11 @@ int print_header(int option) {
 					mvwprintw(stdscr,2,8,"sysctl");
 					break;
 #endif					
+#if HAVE_LIBKSTAT
+                case KSTAT_IN:
+                    mvwprintw(stdscr,2,8,"kstat");
+                    break;
+#endif
 			}
             switch (show_all_if) {
                 case 1:
@@ -119,6 +124,11 @@ int print_header(int option) {
 					printf("/proc/net/dev");
 					break;
 #endif
+#if HAVE_LIBKSTAT
+                case KSTAT_IN:
+                    printf("kstat");
+                    break;
+#endif
 			}
             switch (show_all_if) {
                 case 1:
@@ -161,6 +171,11 @@ int print_header(int option) {
 #ifdef PROC_NET_DEV
                 case PROC_IN:
                     printf("/proc/net/dev");
+                    break;
+#endif
+#if HAVE_LIBKSTAT
+                case KSTAT_IN:
+                    printf("kstat");
                     break;
 #endif
             }

@@ -95,7 +95,7 @@
 
 #define MAJOR 0
 #define MINOR 5
-#define EXTRA "-pre1"
+#define EXTRA "-pre1-cvs"
 
 #define WRAP_AROUND ULONG_MAX
 

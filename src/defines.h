@@ -53,8 +53,11 @@
 #define GETIFADDRS
 #endif
 
-#if HAVE_IOCTL && SIOCGIFFLAGS
+#if HAVE_IOCTL
+#include <sys/ioctl.h>
+#if SIOCGIFFLAGS
 #define IOCTL
+#endif
 #endif
 
 #if HAVE_GETOPT_LONG

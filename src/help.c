@@ -45,7 +45,7 @@ inline void cmdln_printhelp() {
     printf("Options:\n");
     print_help_line("-t <msec>","-t, --timeout <msec>","displays stats every <msec> (1msec = 1/1000sec)");
     print_help_line("","","default: 500");
-    print_help_line("-d","-d, --dynamic","show values dynamicly (Byte KB or MB)");
+    print_help_line("-d","-d, --dynamic [value]","show values dynamicly (Byte KB or MB)");
     print_help_line("-a [mode]","-a, --allif [mode]","where mode is one of:");
     print_help_line("","","0=show only up (and selected) interfaces");
     print_help_line("","","1=show all up interfaces (default)");
@@ -53,8 +53,8 @@ inline void cmdln_printhelp() {
     print_help_line("-I <list>","-I, --interfaces <list>","show only interfaces in <list> (comma seperated), or");
     print_help_line("","","if list is prefaced with %% show all but interfaces");
     print_help_line("","","in list");
-    print_help_line("-S","-S, --sumhidden","count hidden interfaces for total");
-    print_help_line("-D","-D, --daemon","fork into background and daemonize");
+    print_help_line("-S","-S, --sumhidden [value]","count hidden interfaces for total");
+    print_help_line("-D","-D, --daemon [value]","fork into background and daemonize");
     print_help_line("-h","-h, --help","displays this help");
     print_help_line("-V","-V, --version","print version info");
     printf("\nInput:\n");

@@ -196,6 +196,8 @@ char *token, *value;
         if (value) output_count=atol(value);
     } else if( strcasecmp( token, "DAEMON" ) == 0 ) {
         if (value) daemonize=value[0]=='0' ? 0 : 1;
+    } else if( strcasecmp( token, "SUMHIDDEN" ) == 0 ) {
+        if (value) sumhidden=value[0]=='0' ? 0 : 1;
 #ifdef HTML
     } else if( strcasecmp( token, "HTMLREFRESH" ) == 0 ) {
         if (value && atol(value)>0) { html_refresh=atol(value); }
@@ -237,14 +239,14 @@ void get_cmdln_options(int argc, char *argv[]) {
         {"unit",1,0,'u'},
         {"type",1,0,'T'},
         {"interfaces",1,0,'I'},
-        {"sumhidden",0,0,'S'},
+        {"sumhidden",1,0,'S'},
         {"output",1,0,'o'},
 #ifdef CSV
         {"csvchar",1,0,'C'},
         {"csvfile",1,0,'F'},
 #endif
         {"count",1,0,'c'},
-        {"daemon",0,0,'D'},
+        {"daemon",1,0,'D'},
 #ifdef HTML
         {"htmlrefresh",1,0,'R'},
         {"htmlheader",0,0,'H'},
@@ -295,10 +297,13 @@ void get_cmdln_options(int argc, char *argv[]) {
                       break;
             /* ugly workaround to handle optional arguments for all platforms */                      
             case ':': if (!strcmp(argv[optind-1],"-a") || !strcasecmp(argv[optind-1],"--allif")) 
-                          show_all_if=1;
-                      else {
-                          if (!strcmp(argv[optind-1],"-d") || !strcasecmp(argv[optind-1],"--dynamic"))
-                              dynamic=1;
+                            show_all_if=1;
+                      else if (!strcmp(argv[optind-1],"-d") || !strcasecmp(argv[optind-1],"--dynamic"))
+                            dynamic=1;
+                      else if (!strcmp(argv[optind-1],"-D") || !strcasecmp(argv[optind-1],"--daemon"))
+                            daemon=1;
+                      else if (!strcmp(argv[optind-1],"-S") || !strcasecmp(argv[optind-1],"--sumhidden"))
+                            sumhidden=1;    
                           else {
                               printf("%s requires an argument!\n",argv[optind-1]);
                               exit(1);
@@ -306,7 +311,7 @@ void get_cmdln_options(int argc, char *argv[]) {
                       }
                       break;
 			case 'D':
-				daemonize=1;
+				if (optarg) daemonize=atoi(optarg);
 				break;
 #ifdef HTML
 			case 'R':
@@ -351,7 +356,7 @@ void get_cmdln_options(int argc, char *argv[]) {
                 if (optarg) iface_list=strdup(optarg);
                 break;
             case 'S':
-                sumhidden=1;
+                if (optarg) sumhidden=atoi(optarg);
                 break;
             case 'o':
                 if (optarg) {

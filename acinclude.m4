@@ -12,10 +12,10 @@
 # PARTICULAR PURPOSE.
 
 
-AC_DEFUN([PR_CHECK_WORKING_GETIFADDRS],
+AC_DEFUN([AC_CHECK_WORKING_GETIFADDRS],
 [
   AC_MSG_CHECKING([whether getifaddrs returns correct values])
-  AC_TRY_RUN([
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
     #include <stdio.h>
     #if STDC_HEADERS
     # include <stdlib.h>
@@ -34,8 +34,8 @@ AC_DEFUN([PR_CHECK_WORKING_GETIFADDRS],
 
     int main() {
         struct ifaddrs *net;
-        if (getifaddrs(&net) != 0) return 1; 
-        if (net!=NULL) 
+        if (getifaddrs(&net) != 0) return 1;
+        if (net!=NULL)
             if (net->ifa_data==NULL) {
                 freeifaddrs(net);
                 return 1;
@@ -43,25 +43,22 @@ AC_DEFUN([PR_CHECK_WORKING_GETIFADDRS],
         freeifaddrs(net);
         return 0;
     }
-  ],
-  [
+  ]])],[
     AC_MSG_RESULT(yes)
-    AC_DEFINE_UNQUOTED(HAVE_WORKING_GETIFADDRS)
-  ],
-  [
+    AC_DEFINE_UNQUOTED([HAVE_WORKING_GETIFADDRS],[1],[getifaddrs works as espected])
+  ],[
     AC_MSG_RESULT(no)
-  ],
-  [ 
+  ],[
     AC_MSG_RESULT(cross-compiling, assume yes)
-    AC_DEFINE_UNQUOTED(HAVE_WORKING_GETIFADDRS)
+    AC_DEFINE_UNQUOTED([HAVE_WORKING_GETIFADDRS],[1],[getifaddrs works as espected])
   ])
 ])
 
 
-# PR_CHECK_CC_OPT
+# AC_CHECK_CC_OPT
 # ---------------------
 # Check whether the C compiler accepts the given option
-AC_DEFUN(PR_CHECK_CC_OPT,
+AC_DEFUN([AC_CHECK_CC_OPT],
   [AC_MSG_CHECKING([whether ${CC-cc} accepts -[$1]])
    echo 'void f(){}' > conftest.c
    if test -z "`${CC-cc} -c -$1 conftest.c 2>&1`"; then
@@ -75,12 +72,12 @@ AC_DEFUN(PR_CHECK_CC_OPT,
 
 
 # Usage:
-#  DC_ASK_OPTLIB(library, function, header, description, packagename, libdefine, headerdefine)
+#  AC_ASK_OPTLIB(library, function, header, description, packagename, libdefine, headerdefine)
 #  Only the last argument is optional, because they will only be defined if both the lib
 #  and header are found
 #  Example:
-#    DC_ASK_OPTLIB(z, compress2, zlib.h, [            Support zlib], zlib, HAVE_LIBZ, HAVE_ZLIB_H)
-AC_DEFUN(DC_ASK_OPTLIB, [
+#    AC_ASK_OPTLIB(z, compress2, zlib.h, [            Support zlib], zlib, HAVE_LIBZ, HAVE_ZLIB_H)
+AC_DEFUN([AC_ASK_OPTLIB], [
   AC_ARG_WITH($5, [  --with-$5 $4], [
 # Specified
     LIBSPEC=$withval
@@ -142,26 +139,23 @@ dnl  		AC_MSG_WARN(Support for $5 disabled)
   esac
 ])
 
-AC_DEFUN([QEF_C_NORETURN],
+AC_DEFUN([AC_QEF_C_NORETURN],
 [AC_REQUIRE([AC_PROG_CC])
 AC_MSG_CHECKING(whether the C compiler (${CC-cc}) accepts noreturn attribute)
 AC_CACHE_VAL(qef_cv_c_noreturn,
 [qef_cv_c_noreturn=no
-AC_TRY_COMPILE(
-[#include <stdio.h>
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>
 void f (void) __attribute__ ((noreturn));
 void f (void)
 {
    exit (1);
-}
-], [
-   f ();
-],
-[qef_cv_c_noreturn="yes";  FUNCATTR_NORETURN_VAL="__attribute__ ((noreturn))"],
-[qef_cv_c_noreturn="no";   FUNCATTR_NORETURN_VAL="/* will not return */"])
+   }
+   ]], [[
+      f ();
+      ]])],[qef_cv_c_noreturn="yes";  FUNCATTR_NORETURN_VAL="__attribute__ ((noreturn))"],[qef_cv_c_noreturn="no";   FUNCATTR_NORETURN_VAL="/* will not return */"])
 ])
 
 AC_MSG_RESULT($qef_cv_c_noreturn)
-AC_DEFINE_UNQUOTED(FUNCATTR_NORETURN, $FUNCATTR_NORETURN_VAL)
+AC_DEFINE_UNQUOTED([FUNCATTR_NORETURN], [$FUNCATTR_NORETURN_VAL],[cc knows about noreturn])
 ])dnl
 

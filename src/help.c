@@ -97,7 +97,7 @@ void print_online_help() {
     WINDOW *helpwin;
     helpwin=newwin(15,76,0,1);
     box(helpwin,ACS_VLINE, ACS_HLINE);
-    mvwprintw(helpwin,0,2,"bwm-ng v%i.%i%s - Keybindings:",MAJOR,MINOR,EXTRA);
+    mvwprintw(helpwin,0,2,"bwm-ng v" VERSION " - Keybindings:");
     mvwprintw(helpwin,2,2,"'h'  show this help");
     mvwprintw(helpwin,3,2,"'q'  exit");
     mvwprintw(helpwin,4,2,"'+'  increases timeout by 100ms");

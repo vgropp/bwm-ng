@@ -21,7 +21,7 @@
  *                                                                            *
  *****************************************************************************/
 
-#include "curses.h"
+#include "curses_tools.h"
 
 
 #ifdef HAVE_CURSES

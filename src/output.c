@@ -105,7 +105,7 @@ int print_header(int option) {
 #ifdef HAVE_CURSES
 		case CURSES_OUT:
 	        erase();
-		    mvwprintw(stdscr,1,2,"bwm-ng v%i.%i%s (probing every %2.3fs), press 'h' for help",MAJOR,MINOR,EXTRA,(float)delay/1000);
+		    mvwprintw(stdscr,1,2,"bwm-ng v" VERSION" (probing every %2.3fs), press 'h' for help",(float)delay/1000);
             mvwprintw(stdscr,2,2,"input: %s type: %s",input2str(),output_type2str());
             wprintw(stdscr,show_all_if2str());
 	        mvwprintw(stdscr,3,2,"%c       iface                  Rx                   Tx                Total",(char)IDLE_CHARS[option]);
@@ -125,7 +125,7 @@ int print_header(int option) {
 		        fprintf(tmp_out_file,"<link rel=\"stylesheet\" href=\"bwm-ng.css\" type=\"text/css\" media=\"screen,projection,print\">\n");
 		        fprintf(tmp_out_file,"<title>bwm-ng stats</title>\n</head>\n<body>\n");
 			}
-	        fprintf(tmp_out_file,"<div class='bwm-ng-header'>bwm-ng bwm-ng v%i.%i%s (refresh %is); input: ",MAJOR,MINOR,EXTRA,html_refresh);
+	        fprintf(tmp_out_file,"<div class='bwm-ng-header'>bwm-ng bwm-ng v" VERSION " (refresh %is); input: ",html_refresh);
             fprintf(tmp_out_file,input2str());
             fprintf(tmp_out_file,show_all_if2str());
 	        fprintf(tmp_out_file,"</div><table class='bwm-ng-output'>");
@@ -135,7 +135,7 @@ int print_header(int option) {
 		case PLAIN_OUT_ONCE:
 		case PLAIN_OUT:
 			if (output_method==PLAIN_OUT) printf("\033[1;2H");
-	        printf("bwm-ng v%i.%i%s (delay %2.3fs); ",MAJOR,MINOR,EXTRA,(float)delay/1000);
+	        printf("bwm-ng v" VERSION " (delay %2.3fs); ",(float)delay/1000);
 			if (output_method==PLAIN_OUT) printf("press 'ctrl-c' to end this\033[2;2H"); else printf("input: ");
             printf(input2str());
             printf("%s\n",show_all_if2str());

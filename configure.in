@@ -1,7 +1,10 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT
+AC_INIT([bwm-ng],[0.6-pre1],[bwmng@gropp.org],[bwm-ng])
+AM_INIT_AUTOMAKE([bwm-ng],[0.6-pre1])
+AC_CONFIG_SRCDIR(src/bwm-ng.c)
+AC_CONFIG_HEADERS(config.h)
 AC_CONFIG_MACRO_DIR(./)
 AC_LANG([C])
 
@@ -20,10 +23,6 @@ if test -z "${CFLAGS}"; then
     CFLAGS="-O2 -Wall"
 fi
 ])
-
-AC_CONFIG_SRCDIR([src/bwm-ng.c])
-AC_CONFIG_HEADER([config.h:config.h.in])
-
 
 # Checks for libraries.
 CURSES_CHECKED="0"
@@ -112,7 +111,7 @@ AC_CHECK_HEADERS([getopt.h],[
 ])
 
 #check for getifaddrs
-net_if_h_includes="\
+net_if_h_includes="
             #include <stdio.h>
             #if STDC_HEADERS
             # include <stdlib.h>
@@ -140,7 +139,7 @@ if [ test $withval != "no" ]; then
             AC_CHECK_HEADERS([sys/socket.h])
             AC_CHECK_HEADERS([net/if.h], [
                 AC_CHECK_MEMBERS([struct if_data.ifi_ibytes],[
-                    PR_CHECK_WORKING_GETIFADDRS()
+                    AC_DEFINE_UNQUOTED([HAVE_WORKING_GETIFADDRS],[1],[getifaddrs works as espected])
                 ],[ CPPFLAGS=$OLD_CPPFLAGS ],[
                     $net_if_h_includes
                     #include <net/if.h>
@@ -156,7 +155,7 @@ AC_CHECK_HEADER([ifaddrs.h],[
 		AC_CHECK_HEADERS([sys/socket.h])
 		AC_CHECK_HEADERS([net/if.h], [
 	        AC_CHECK_MEMBERS([struct if_data.ifi_ibytes],[
-                PR_CHECK_WORKING_GETIFADDRS()
+                AC_CHECK_WORKING_GETIFADDRS()
             ],,[
 				$net_if_h_includes
 				#include <net/if.h>
@@ -206,9 +205,7 @@ if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
         CPPFLAGS="$CPPFLAGS -I$withval"
     fi
-    AC_CHECK_LIB([kstat],[kstat_open],[
-        AC_DEFINE_UNQUOTED(HAVE_KSTAT)
-    ],[ CPPFLAGS=$OLD_CPPFLAGS ])
+    AC_CHECK_LIB([kstat],[kstat_open],[],[ CPPFLAGS=$OLD_CPPFLAGS ])
 fi
 ],[
 AC_CHECK_LIB([kstat],[kstat_open])
@@ -221,12 +218,12 @@ AC_ARG_WITH([procnetdev],AS_HELP_STRING([--with-procnetdev],[enable proc/net/dev
 AC_MSG_CHECKING([for /proc/net/dev style input])
 AC_MSG_RESULT($withval)
 if [ test $withval = "yes" ]; then
-    AC_DEFINE_UNQUOTED(HAVE__PROC_NET_DEV)
+    AC_DEFINE_UNQUOTED([HAVE__PROC_NET_DEV],[1],[enable proc/net/dev support])
 else
     if [ test $withval != "no" ]; then
         AC_CHECK_FILES([$withval],[
-        AC_DEFINE_UNQUOTED(PROC_NET_DEV_PATH,$withval)
-        AC_DEFINE_UNQUOTED(HAVE__PROC_NET_DEV)
+        AC_DEFINE_UNQUOTED([PROC_NET_DEV_PATH],[$withval],[set path to proc/net/dev raw-file])
+        AC_DEFINE_UNQUOTED([HAVE__PROC_NET_DEV],[1],[enable proc/net/dev support])
         ])
     fi
 fi
@@ -234,65 +231,65 @@ fi
 AC_CHECK_FILES([/proc/net/dev])
 ])
 
-DC_ASK_OPTLIB(statgrab, sg_get_network_io_stats, statgrab.h, [     Use libstatgrab to gather statistics.], libstatgrab, HAVE_LIBSTATGRAB, HAVE_STATGRAB_H)
+AC_ASK_OPTLIB(statgrab, sg_get_network_io_stats, statgrab.h, [     Use libstatgrab to gather statistics.], libstatgrab, HAVE_LIBSTATGRAB, HAVE_STATGRAB_H)
 
 AC_ARG_ENABLE([html],AS_HELP_STRING([--enable-html],[enable html output (default: yes)]),[
 echo "enable html output: $enableval"
 if [ test $enableval = "yes" ]; then
-    AC_DEFINE_UNQUOTED(HTML)
+    AC_DEFINE_UNQUOTED([HTML],[1],[enable html output])
 fi
 ],[
 echo "enable html output: yes"
-AC_DEFINE_UNQUOTED(HTML)
+AC_DEFINE_UNQUOTED([HTML],[1],[enable html output])
 ])
 
 AC_ARG_ENABLE([csv],AS_HELP_STRING([--enable-csv],[enable csv output (default: yes)]),[
 echo "enable csv output: $enableval"
 if [ test $enableval = "yes" ]; then
-    AC_DEFINE_UNQUOTED(CSV)
+    AC_DEFINE_UNQUOTED([CSV],[1],[enable CSV output])
 fi
 ],[
 echo "enable csv output: yes"
-AC_DEFINE_UNQUOTED(CSV)
+AC_DEFINE_UNQUOTED([CSV],[1],[enable CSV output])
 ])
 
 AC_ARG_ENABLE([extendedstats],AS_HELP_STRING([--enable-extendedstats],[enable max, sum and avg stats (default: yes)]),[
 echo "enable extended stats: $enableval"
 if [ test $enableval = "yes" ]; then
-    AC_DEFINE_UNQUOTED(EXTENDED_STATS)
+    AC_DEFINE_UNQUOTED([EXTENDED_STATS],[1],[enable max, sum and avg stats])
 fi
 ],[
 echo "enable extended stats: yes"
-AC_DEFINE_UNQUOTED(EXTENDED_STATS)
+AC_DEFINE_UNQUOTED([EXTENDED_STATS],[1],[enable max, sum and avg stats])
 ])
 
 AC_ARG_ENABLE([configfile],AS_HELP_STRING([--enable-configfile],[enable configfile support (default: yes)]),[
 echo "enable config-file support: $enableval"
 if [ test $enableval = "yes" ]; then
-    AC_DEFINE_UNQUOTED(CONFIG_FILE)
+    AC_DEFINE_UNQUOTED([CONFIG_FILE],[1],[enable use of configfile])
 fi
 ],[
 echo "enable config-file support: yes"
-AC_DEFINE_UNQUOTED(CONFIG_FILE)
+AC_DEFINE_UNQUOTED([CONFIG_FILE],[1],[enable use of configfile])
 ])
 
 AC_ARG_ENABLE([64bit],AS_HELP_STRING([--enable-64bit],[enable 64bit support (default: no)]),[
 echo "enable 64bit support: $enableval"
 if [ test $enableval = "yes" ]; then
-    AC_DEFINE_UNQUOTED(SYS_64BIT)
+    AC_DEFINE_UNQUOTED([SYS_64BIT],[1],[enable 64bit support])
 fi
 ])
 
 AC_CHECK_HEADERS([pwd.h],[
     AC_CHECK_FUNCS([getpwuid],[
-        AC_DEFINE_UNQUOTED(HAVE_GETPWUID)
+        AC_DEFINE_UNQUOTED([HAVE_GETPWUID],[1],[enable use of getbwuid])
     ])
 ])
 
 AC_ARG_ENABLE([netstatpath],AS_HELP_STRING([--enable-netstatpath],[enable path to netstat as runtime option (default: no), WARNING THIS IS A SECURITY FLAW!]),[
 echo "enable path to netstat as option: $enableval"
 if [ test $enableval = "yes" ]; then
-    AC_DEFINE_UNQUOTED(ALLOW_NETSTATPATH)
+    AC_DEFINE_UNQUOTED([ALLOW_NETSTATPATH],[1],[allow set path to netstat at runtime])
 fi
 ],[
 echo "enable path to netstat as option: no"
@@ -320,17 +317,17 @@ AC_ARG_WITH([netstatbsd],AS_HELP_STRING([--with-netstatbsd],[enable bsd like net
 if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
         echo "bsd like version with byte info forced: $withval"
-        AC_DEFINE_UNQUOTED(HAVE_NETSTAT_PATH,$withval)
+        AC_DEFINE_UNQUOTED([HAVE_NETSTAT_PATH],[$withval],[set path to netstat])
     else
         echo "bsd like version with byte info forced"
     fi
     if [ test $NETSTAT_BYTE != "1" ]; then
-        AC_DEFINE_UNQUOTED(NETSTAT_BSD)
+        AC_DEFINE_UNQUOTED([NETSTAT_BSD],[1],[use bsd like netstat])
     else
-        AC_DEFINE_UNQUOTED(NETSTAT_BSD_BYTES)
+        AC_DEFINE_UNQUOTED([NETSTAT_BSD_BYTES],[1],[use bsd like netstat including bytes info])
     fi
     if [ test $NETSTAT_LINK != "0" ]; then
-        AC_DEFINE_UNQUOTED(NETSTAT_BSD_LINK)
+        AC_DEFINE_UNQUOTED([NETSTAT_BSD_LINK],[1],[use bsd like netstat with link switch])
     fi
 else 
     NETSTAT_DEFINED="1"
@@ -342,11 +339,11 @@ AC_ARG_WITH([netstatlinux],AS_HELP_STRING([--with-netstatlinux],[enable linux li
 if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
         echo "GNU net-tools like version forced: $withval"
-        AC_DEFINE_UNQUOTED(HAVE_NETSTAT_PATH,$withval)
+        AC_DEFINE_UNQUOTED([HAVE_NETSTAT_PATH],[$withval],[set path to netstat])
     else
         echo "GNU net-tools like version forced"
     fi
-    AC_DEFINE_UNQUOTED(NETSTAT_LINUX)
+    AC_DEFINE_UNQUOTED([NETSTAT_LINUX],[1],[use GNU net-tools netstat])
     NETSTAT_DEFINED="1"
 else
     NETSTAT_DEFINED="1"
@@ -359,11 +356,11 @@ AC_ARG_WITH([netstatsolaris],AS_HELP_STRING([--with-netstatsolaris],[enable sola
 if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
         echo "solaris like version forced: $withval"
-        AC_DEFINE_UNQUOTED(HAVE_NETSTAT_PATH,$withval)
+        AC_DEFINE_UNQUOTED([HAVE_NETSTAT_PATH],[$withval],[set oath to netstat])
     else
         echo "solaris like version forced"
     fi
-    AC_DEFINE_UNQUOTED(NETSTAT_SOLARIS)
+    AC_DEFINE_UNQUOTED([NETSTAT_SOLARIS],[1],[use Solaris netstat theme])
     NETSTAT_DEFINED="1"
 else
     NETSTAT_DEFINED="1"
@@ -375,11 +372,11 @@ AC_ARG_WITH([netstatnetbsd],AS_HELP_STRING([--with-netstatnetbsd],[enable NetBSD
 if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
         echo "NetBSD/OpenBSD like version forced: $withval"
-        AC_DEFINE_UNQUOTED(HAVE_NETSTAT_PATH,$withval)
+        AC_DEFINE_UNQUOTED([HAVE_NETSTAT_PATH],[$withval],[set path to netstat])
     else
         echo "NetBSD/OpenBSD like version forced"
     fi
-    AC_DEFINE_UNQUOTED(NETSTAT_NETBSD)
+    AC_DEFINE_UNQUOTED([NETSTAT_NETBSD],[1],[use NetBSD/OpenBSD like netstat])
     NETSTAT_DEFINED="1"
 else
     NETSTAT_DEFINED="1"
@@ -398,23 +395,23 @@ if [ test "${EGREP}" ]; then
         net_test=`${NETSTAT_CMD} -ia 2>/dev/null | ${EGREP} "Iface +MTU +Met +RX-OK +RX-ERR +RX-DRP +RX-OVR +TX-OK +TX-ERR +TX-DRP +TX-OVR +Flg"`
         if [ test "${net_test}" ]; then
             AC_MSG_RESULT([GNU net-tools like version found])
-			AC_DEFINE_UNQUOTED(NETSTAT_LINUX)
+			AC_DEFINE_UNQUOTED([NETSTAT_LINUX],[1],[use GNU net-tools netstat])
         else
             net_test=`${NETSTAT_CMD} -iW 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Opkts +Oerrs +Coll"`
             if [ test "${net_test}" ]; then
 				net_test2=`${NETSTAT_CMD} -iW -b 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Ibytes +Opkts +Oerrs +Obytes +Coll"`
 				if [ test "${net_test2}" ]; then
-					AC_MSG_RESULT([bsd like version with byte info found])
-					AC_DEFINE_UNQUOTED(NETSTAT_BSD_BYTES)
+					AC_MSG_RESULT([BSD like version with byte info found])
+					AC_DEFINE_UNQUOTED([NETSTAT_BSD_BYTES],[1],[bsd like version with byte info])
 				else
-	                AC_MSG_RESULT([bsd like version found])
-					AC_DEFINE_UNQUOTED(NETSTAT_BSD)
+	                AC_MSG_RESULT([BSD like version found])
+					AC_DEFINE_UNQUOTED([NETSTAT_BSD],[1],[BSD like netstat])
 				fi
 				AC_MSG_CHECKING([for netstat -f link])
 				net_test3=`${NETSTAT_CMD} -iW -f link 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Opkts +Oerrs +Coll"`
 				if [ test "${net_test3}" ]; then
 					AC_MSG_RESULT([yes])
-					AC_DEFINE_UNQUOTED(NETSTAT_BSD_LINK)
+					AC_DEFINE_UNQUOTED([NETSTAT_BSD_LINK],[1],[enable link info for netstat])
 				else
 					AC_MSG_RESULT([no])
 				fi
@@ -422,12 +419,12 @@ if [ test "${EGREP}" ]; then
                 net_test=`${NETSTAT_CMD} -i -f inet -f inet6 2>/dev/null | ${EGREP} "Name +Mtu +Net/Dest +Address +Ipkts +Ierrs +Opkts +Oerrs +Collis +Queue"`
                 if [ test "${net_test}" ]; then
                     AC_MSG_RESULT([solaris version found])
-                    AC_DEFINE_UNQUOTED(NETSTAT_SOLARIS)
+                    AC_DEFINE_UNQUOTED([NETSTAT_SOLARIS],[1],[use Solaris netstat])
                 else 
                     net_test=`${NETSTAT_CMD} -ibd 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ibytes +Obytes +Drop"`
                     if [ test "${net_test}" ]; then
                         AC_MSG_RESULT([Net/OpenBSD version found])
-                        AC_DEFINE_UNQUOTED(NETSTAT_NETBSD)
+                        AC_DEFINE_UNQUOTED([NETSTAT_NETBSD],[1],[Use Net/OpenBSD netstat])
                     else
         				AC_MSG_RESULT([unknown netstat version - disabled])
 echo "*********************************************
@@ -441,7 +438,7 @@ echo "*********************************************
 fi
 fi
 
-QEF_C_NORETURN
+AC_QEF_C_NORETURN
 AC_C_INLINE
 
 if [ test -z ${DEBUG} ]; then
@@ -482,8 +479,11 @@ else
     STRIP="@echo DEBUG mode enabled."
 fi
 
-PR_CHECK_CC_OPT(Wno-long-double)
+AC_CHECK_CC_OPT(Wno-long-double)
 
-AC_CONFIG_FILES([Makefile])
-AC_CONFIG_FILES([src/Makefile])
+AC_CONFIG_FILES([
+    Makefile
+    src/Makefile
+])
+
 AC_OUTPUT

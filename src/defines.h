@@ -244,8 +244,4 @@
 #define WRAP_AROUND 18446744073709551615ull
 #endif
 
-#define MAJOR 0
-#define MINOR 5
-#define EXTRA ""
-
-#define print_version printf("Bandwidth Monitor NG (bmw-ng) v%i.%i%s\nCopyright (C) 2004,2005 Volker Gropp <bwmng@gropp.org>\n",MAJOR,MINOR,EXTRA); 
+#define print_version printf("Bandwidth Monitor NG (" PACKAGE_NAME ") v" VERSION "\nCopyright (C) 2004,2005 Volker Gropp <" PACKAGE_BUGREPORT ">\n"); 

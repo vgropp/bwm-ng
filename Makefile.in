@@ -17,9 +17,11 @@ bwm-ng:
 	${STRIP}
 
 install: all
-	install -D ${TARGET} $(bindir)/$(BINARY)
-	install -D bwm-ng.8 $(mandir)/man8/bwm-ng.8
-	mandb $(mandir)
+	@(if [ ! -d $(bindir) ]; then mkdir -p $(bindir); fi )
+	cp -p ${TARGET} $(bindir)/$(BINARY)
+	@(if [ ! -d $(mandir)/man1 ]; then mkdir -p $(mandir)/man1; fi)
+	cp -p bwm-ng.1 $(mandir)/man1/bwm-ng.1
+	@(if [ `uname` = "Linux" ]; then mandb $(mandir); fi)
 
 clean:
 	@( cd src ; $(MAKE) clean )
@@ -31,6 +33,6 @@ real-clean: clean
 	-rm -f configure config.status
 
 uninstall:
-	rm $(bindir)/$(BINARY)
-	rm -f $(mandir)/man8/bwm-ng.8
-	mandb $(mandir)
+	-rm -f $(bindir)/$(BINARY)
+	-rm -f $(mandir)/man1/bwm-ng.1
+	@(if [ `uname` = "Linux" ]; then mandb $(mandir); fi)

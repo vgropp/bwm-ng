@@ -1,4 +1,4 @@
-bwm-ng v0.5-pre2
+bwm-ng v0.5
 Copyright (C) 2004,2005 Volker Gropp (bwmng@gropp.org)
 http://www.gropp.org
 
@@ -113,7 +113,9 @@ Bugs/Known Problems:
 Todo:
   - Docs
   - try to avoid kmod, like net-tools do, for socket() for ioctl
-  - mysql output
+  - maybe change sscanf() use in retrieve.c to gettoken()
+  - checking options to be valid
+  - mysql output (ipac-ng compatible)
   - setting which stats to output for csv/sql
   - whatever you can think of
 

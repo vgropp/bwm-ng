@@ -246,6 +246,6 @@
 
 #define MAJOR 0
 #define MINOR 5
-#define EXTRA "-pre2-cvs"
+#define EXTRA ""
 
 #define print_version printf("Bandwidth Monitor NG (bmw-ng) v%i.%i%s\nCopyright (C) 2004,2005 Volker Gropp <bwmng@gropp.org>\n",MAJOR,MINOR,EXTRA); 

@@ -54,7 +54,8 @@ AC_CHECK_LIB([curses],[initscr],,[
 fi
 
 AC_ARG_WITH([varargs],AS_HELP_STRING([--with-varargs],[enable varargs.h use (solaris) (ARG=PATH)]),[
-echo "checking for varargs.h: $withval"
+AC_MSG_CHECKING([for varargs.h])
+AC_MSG_RESULT($withval)
 if [ test $withval != "no" ]; then  
     OLD_CPPFLAGS=$CPPFLAGS
     if [ test $withval != "yes" ]; then
@@ -64,13 +65,13 @@ if [ test $withval != "no" ]; then
     
 fi
 ],[
-    echo "checking for varargs.h: yes"
     AC_CHECK_HEADER([sys/varargs.h],[AC_DEFINE_UNQUOTED(HAVE_SYS_VARARGS_H)])
 ])
 
 
 AC_ARG_WITH([time],AS_HELP_STRING([--with-time],[enable accurate time calculating (ARG=PATH)]),[
-echo "checking accurate time calc: $withval"
+AC_MSG_CHECKING([for accurate time calc])
+AC_MSG_RESULT($withval)
 if [ test $withval != "no" ]; then
     OLD_CPPFLAGS=$CPPFLAGS
     if [ test $withval != "yes" ]; then
@@ -83,7 +84,8 @@ if [ test $withval != "no" ]; then
     ],[ CPPFLAGS=$OLD_CPPFLAGS ])
 fi
 ],[
-    echo "checking accurate time calc: yes"
+    AC_MSG_CHECKING([for accurate time calc])
+    echo "yes"
     AC_CHECK_HEADER([time.h],[
         AC_CHECK_HEADER([sys/time.h],[
             AC_CHECK_FUNCS([gettimeofday])
@@ -92,7 +94,8 @@ fi
 ])
 
 AC_ARG_WITH([getopt_long],AS_HELP_STRING([--with-getopt_long],[enable getopt_long for long options (ARG=PATH)]),[
-echo "checking for getopt_long: $withval"
+AC_MSG_CHECKING([for getopt_long])
+AC_MSG_RESULT($withval)
 if [ test $withval != "no" ]; then
     OLD_CPPFLAGS=$CPPFLAGS
     if [ test $withval != "yes" ]; then
@@ -125,7 +128,8 @@ net_if_h_includes="\
             "
 
 AC_ARG_WITH([getifaddrs],AS_HELP_STRING([--with-getifaddrs],[enable getifaddrs input (ARG=PATH)]),[
-echo "checking for getifaddrs input: $withval"
+AC_MSG_CHECKING([for getifaddrs input])
+AC_MSG_RESULT($withval)
 if [ test $withval != "no" ]; then
     OLD_CPPFLAGS=$CPPFLAGS
     if [ test $withval != "yes" ]; then
@@ -160,7 +164,8 @@ AC_CHECK_HEADER([ifaddrs.h],[
 ])
 
 AC_ARG_WITH([sysctl],AS_HELP_STRING([--with-sysctl],[enable sysctl input (ARG=PATH)]),[
-echo "checking for sysctl input: $withval"
+AC_MSG_CHECKING([for sysctl input])
+AC_MSG_RESULT($withval)
 if [ test $withval != "no" ]; then
     OLD_CPPFLAGS=$CPPFLAGS
     if [ test $withval != "yes" ]; then
@@ -190,7 +195,8 @@ AC_CHECK_FUNCS([sysctl],[
 ])
 
 AC_ARG_WITH([kstat],AS_HELP_STRING([--with-kstat],[enable kstat (Solaris) input (ARG=PATH)]),[
-echo "checking for kstat input: $withval"
+AC_MSG_CHECKING([for kstat input])
+AC_MSG_RESULT($withval)
 if [ test $withval != "no" ]; then
     OLD_CPPFLAGS=$CPPFLAGS
     if [ test $withval != "yes" ]; then
@@ -208,7 +214,8 @@ AC_CHECK_LIB([kstat],[kstat_open])
 AC_CHECK_FUNCS([ioctl])
 
 AC_ARG_WITH([procnetdev],AS_HELP_STRING([--with-procnetdev],[enable proc/net/dev like input (ARG=PATH)]),[
-echo "checking for /proc/net/dev style input: $withval"
+AC_MSG_CHECKING([for /proc/net/dev style input])
+AC_MSG_RESULT($withval)
 if [ test $withval = "yes" ]; then
     AC_DEFINE_UNQUOTED(HAVE__PROC_NET_DEV)
 else
@@ -372,43 +379,43 @@ AC_PROG_EGREP
 if [ test "${EGREP}" ]; then
     AC_CHECK_PROGS([NETSTAT_CMD],[netstat])
     if [ test "${NETSTAT_CMD}" ]; then
-		echo -n "checking netstat version... "
+        AC_MSG_CHECKING([for netstat version])
         net_test=`${NETSTAT_CMD} -ia 2>/dev/null | ${EGREP} "Iface +MTU +Met +RX-OK +RX-ERR +RX-DRP +RX-OVR +TX-OK +TX-ERR +TX-DRP +TX-OVR +Flg"`
         if [ test "${net_test}" ]; then
-            echo "GNU net-tools like version found"
+            AC_MSG_RESULT([GNU net-tools like version found])
 			AC_DEFINE_UNQUOTED(NETSTAT_LINUX)
         else
             net_test=`${NETSTAT_CMD} -iW 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Opkts +Oerrs +Coll"`
             if [ test "${net_test}" ]; then
 				net_test2=`${NETSTAT_CMD} -iW -b 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Ibytes +Opkts +Oerrs +Obytes +Coll"`
 				if [ test "${net_test2}" ]; then
-					echo "bsd like version with byte info found"
+					AC_MSG_RESULT([bsd like version with byte info found])
 					AC_DEFINE_UNQUOTED(NETSTAT_BSD_BYTES)
 				else
-	                echo "bsd like version found"
+	                AC_MSG_RESULT([bsd like version found])
 					AC_DEFINE_UNQUOTED(NETSTAT_BSD)
 				fi
-				echo -n "checking for netstat -f link: "
+				AC_MSG_CHECKING([for netstat -f link])
 				net_test3=`${NETSTAT_CMD} -iW -f link 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Opkts +Oerrs +Coll"`
 				if [ test "${net_test3}" ]; then
-					echo "OK"
+					AC_MSG_RESULT([yes])
 					AC_DEFINE_UNQUOTED(NETSTAT_BSD_LINK)
 				else
-					echo "not working"
+					AC_MSG_RESULT([no])
 				fi
 			else
                 net_test=`${NETSTAT_CMD} -i -f inet -f inet6 2>/dev/null | ${EGREP} "Name +Mtu +Net/Dest +Address +Ipkts +Ierrs +Opkts +Oerrs +Collis +Queue"`
                 if [ test "${net_test}" ]; then
-                    echo "solaris version found"
+                    AC_MSG_RESULT([solaris version found])
                     AC_DEFINE_UNQUOTED(NETSTAT_SOLARIS)
                 else 
                     net_test=`${NETSTAT_CMD} -ibd 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ibytes +Obytes +Drop"`
                     if [ test "${net_test}" ]; then
-                        echo "Net/OpenBSD version found"
+                        AC_MSG_RESULT([Net/OpenBSD version found])
                         AC_DEFINE_UNQUOTED(NETSTAT_NETBSD)
                     else
-        				echo "unknown netstat version - disabled
-*********************************************
+        				AC_MSG_RESULT([unknown netstat version - disabled])
+echo "*********************************************
   please mail 'netstat -i' output to author
 *********************************************"
                     fi
@@ -423,7 +430,8 @@ QEF_C_NORETURN
 AC_C_INLINE
 
 AC_ARG_WITH([strip],AS_HELP_STRING([--with-strip],[use strip after make (ARG=PATH)]),[
-echo "enable strip: $enableval"
+echo "enable strip... "
+AC_MSG_RESULT($enableval)
 if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
         STRIP="${withval} \${TARGET}"
@@ -442,7 +450,6 @@ if [ test $withval != "no" ]; then
     fi
 fi
 ],[
-echo "enable strip: yes"
 AC_CHECK_FILES([/usr/ccs/bin/strip],[
     AC_CHECK_PROGS([STRIP],[strip],,,[/usr/ccs/bin])
 ])

@@ -39,10 +39,6 @@ void handle_gui_input(char c) {
                 timeout(delay);
             }
             break;
-/*        case 'p':
-        case 'P':
-            show_packets=!show_packets;
-            break;*/
         case 'a':
         case 'A':
             show_all_if++;

@@ -90,21 +90,21 @@ inline void cmdln_printhelp() {
 #ifdef HAVE_CURSES
 void print_online_help() {
     WINDOW *helpwin;
-    helpwin=newwin(16,76,0,1);
+    helpwin=newwin(15,76,0,1);
     box(helpwin,ACS_VLINE, ACS_HLINE);
-    mvwprintw(helpwin,1,2,"bwm-ng v%i.%i%s - Keybindings:",MAJOR,MINOR,EXTRA);
-    mvwprintw(helpwin,3,2,"'h'  show this help");
-    mvwprintw(helpwin,4,2,"'q'  exit");
-    mvwprintw(helpwin,5,2,"'+'  increases timeout by 100ms");
-    mvwprintw(helpwin,6,2,"'-'  decreases timeout by 100ms");
-    mvwprintw(helpwin,7,2,"'d'  switch KB and auto assign Byte/KB/MB/GB");
-    mvwprintw(helpwin,8,2,"'a'  cycle: show all interfaces, only those which are up,");
-    mvwprintw(helpwin,9,2,"            only up and not hidden");
-    mvwprintw(helpwin,10,2,"'s'  sum hidden ifaces to total aswell or not");
-    mvwprintw(helpwin,11,2,"'n'  cycle: input methods");
-    mvwprintw(helpwin,12,2,"'u'  cycle: bytes,bits,packets,errors");
-    mvwprintw(helpwin,13,2,"'t'  cycle: current rate, max, sum since start, average for last 30s");
-    mvwprintw(helpwin,15,2," press any key to continue... ");
+    mvwprintw(helpwin,0,2,"bwm-ng v%i.%i%s - Keybindings:",MAJOR,MINOR,EXTRA);
+    mvwprintw(helpwin,2,2,"'h'  show this help");
+    mvwprintw(helpwin,3,2,"'q'  exit");
+    mvwprintw(helpwin,4,2,"'+'  increases timeout by 100ms");
+    mvwprintw(helpwin,5,2,"'-'  decreases timeout by 100ms");
+    mvwprintw(helpwin,6,2,"'d'  switch KB and auto assign Byte/KB/MB/GB");
+    mvwprintw(helpwin,7,2,"'a'  cycle: show all interfaces, only those which are up,");
+    mvwprintw(helpwin,8,2,"            only up and not hidden");
+    mvwprintw(helpwin,9,2,"'s'  sum hidden ifaces to total aswell or not");
+    mvwprintw(helpwin,10,2,"'n'  cycle: input methods");
+    mvwprintw(helpwin,11,2,"'u'  cycle: bytes,bits,packets,errors");
+    mvwprintw(helpwin,12,2,"'t'  cycle: current rate, max, sum since start, average for last 30s");
+    mvwprintw(helpwin,14,2," press any key to continue... ");
     wrefresh(helpwin);
     timeout(-1);
     getch();

@@ -123,11 +123,18 @@ t_iface_speed_stats convert2calced_values(t_iface_speed_stats new, t_iface_speed
 
 
 /* sub old values from cached for avg stats */
-inline void sub_avg_values(struct inouttotal_double *values,struct inouttotal_double data) {
-    values->in-=data.in/(AVG_LENGTH/delay);
-    values->out-=data.out/(AVG_LENGTH/delay);
-    values->total-=data.total/(AVG_LENGTH/delay);
+inline void sub_avg_values(struct inouttotal_double *values,struct inouttotal_double data,float local_delay) {
+    values->in-=data.in/local_delay;
+    values->out-=data.out/local_delay;
+    values->total-=data.total/local_delay;
 }
+
+inline void add_avg_values(struct inouttotal_double *values,struct inouttotal_double data,float local_delay) {
+    values->in+=data.in/local_delay;
+    values->out+=data.out/local_delay;
+    values->total+=data.total/local_delay;
+}
+
 
 /* put new-old bytes in inout_long struct into a inouttotal_double struct 
  * and add values to cached .value struct */
@@ -135,10 +142,9 @@ inline void save_avg_values(struct inouttotal_double *values,struct inouttotal_d
     data->in=calced_stats.in*multiplier;
     data->out=calced_stats.out*multiplier;
     data->total=(calced_stats.in+calced_stats.out)*multiplier;
-    values->in+=data->in/(AVG_LENGTH/delay);
-    values->out+=data->out/(AVG_LENGTH/delay);
-    values->total+=data->total/(AVG_LENGTH/delay);
+    add_avg_values(values,*data,AVG_LENGTH/(1000/multiplier));
 }
+
 
 /* manages the list of values for avg
  * saves data in list
@@ -152,8 +158,9 @@ void save_avg(struct t_avg *avg,struct iface_speed_stats calced_stats,float mult
         memset(avg->first,0,sizeof(struct double_list)); 
         /* save data and add to cache */
         save_avg_values(&avg->value.bytes,&avg->first->data.bytes,calced_stats.bytes,multiplier);
-        save_avg_values(&avg->value.errors,&avg->first->data.errors,calced_stats.bytes,multiplier);
-        save_avg_values(&avg->value.packets,&avg->first->data.packets,calced_stats.bytes,multiplier);
+        save_avg_values(&avg->value.errors,&avg->first->data.errors,calced_stats.errors,multiplier);
+        save_avg_values(&avg->value.packets,&avg->first->data.packets,calced_stats.packets,multiplier);
+        avg->first->delay=AVG_LENGTH/(1000/multiplier);
         avg->items=1;
     } else { /* we already have a list */
         avg->last->next=(struct double_list *)malloc(sizeof(struct double_list));
@@ -161,20 +168,21 @@ void save_avg(struct t_avg *avg,struct iface_speed_stats calced_stats,float mult
         avg->last=avg->last->next;
         /* save data and add to cache */
         save_avg_values(&avg->value.bytes,&avg->last->data.bytes,calced_stats.bytes,multiplier);
-        save_avg_values(&avg->value.errors,&avg->last->data.errors,calced_stats.bytes,multiplier);
-        save_avg_values(&avg->value.packets,&avg->last->data.packets,calced_stats.bytes,multiplier);
+        save_avg_values(&avg->value.errors,&avg->last->data.errors,calced_stats.errors,multiplier);
+        save_avg_values(&avg->value.packets,&avg->last->data.packets,calced_stats.packets,multiplier);
+        avg->last->delay=AVG_LENGTH/(1000/multiplier);
         avg->items++;
         /* remove only entries if at least two items added, 
          * else we might leave an empty list 
          * avg->first has to be != NULL at this point (if in 2nd line of this function) */
-        while (avg->first->next!=NULL && avg->items>AVG_LENGTH/(1000/multiplier)) {
+        while (avg->first->next!=NULL && avg->items>AVG_LENGTH/delay) {
             /* list is full, remove first entry */
             list_p=avg->first;
             avg->first=avg->first->next;
             /* sub values from cache */
-            sub_avg_values(&avg->value.bytes,list_p->data.bytes);
-            sub_avg_values(&avg->value.errors,list_p->data.errors);
-            sub_avg_values(&avg->value.packets,list_p->data.packets);
+            sub_avg_values(&avg->value.bytes,list_p->data.bytes,list_p->delay);
+            sub_avg_values(&avg->value.errors,list_p->data.errors,list_p->delay);
+            sub_avg_values(&avg->value.packets,list_p->data.packets,list_p->delay);
             free(list_p);
             avg->items--;
         }
@@ -252,7 +260,7 @@ int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_spe
     save_sum(&if_stats[local_if_count].sum.bytes,tmp_if_stats.bytes,if_stats[local_if_count].data.bytes);
     save_sum(&if_stats[local_if_count].sum.packets,tmp_if_stats.packets,if_stats[local_if_count].data.packets);
     save_sum(&if_stats[local_if_count].sum.errors,tmp_if_stats.errors,if_stats[local_if_count].data.errors);
-    /* fill avg struct */
+    /* fill avg struct if there is old data */
     save_avg(&if_stats[local_if_count].avg,calced_stats,multiplier); 
     if (verbose) { /* any output at all? */
         /* cycle: show all interfaces, only those which are up, only up and not hidden */

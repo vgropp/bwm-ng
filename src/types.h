@@ -49,6 +49,7 @@ typedef struct iface_speed_stats t_iface_speed_stats;
 
 struct double_list {
     struct double_types data;
+    float delay;
     struct double_list *next;
 };
 

@@ -39,7 +39,7 @@
 #endif
 
 #if HAVE__PROC_NET_DEV
-#if PROC_NET_DEV_PATH
+#ifdef PROC_NET_DEV_PATH
 #define PROC_NET_DEV PROC_NET_DEV_PATH
 #else
 #define PROC_NET_DEV "/proc/net/dev"

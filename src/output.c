@@ -25,7 +25,7 @@
 
 
 /* convert doube bytes/s value to some nice string */
-char *convert_bytes(double bytes,char * buffer, int buf_size) {
+inline char *convert_bytes(double bytes,char * buffer, int buf_size) {
     if (bytes<0) bytes=0;
     if (bytes<1024 && !show_kb)
         snprintf(buffer,buf_size,"%12.2f  B/s",bytes);
@@ -205,19 +205,30 @@ int print_header(int option) {
 	return option;
 }
 
+
+inline unsigned long long calc_new_values(unsigned long long new, unsigned long long old) {
+    /* FIXME: WRAP_AROUND _might_ be wrong for libstatgrab, where the type is always long long */
+    return ((unsigned long long)(new-old) >= 0) ? (unsigned long long)(new-old) : (unsigned long long)((
+#ifdef HAVE_LIBKSTAT
+            (input_method==KSTAT_IN) ?
+            WRAP_32BIT :
+#endif            
+            WRAP_AROUND)
+            -old)+new;
+}
+
 /* do the actual output */
 void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stats stats,float multiplier) {
 	unsigned long long packets_out,packets_in,bytess,bytesr,errors_in,errors_out;
 #ifdef CSV	
 	FILE *out_file;
 #endif
-    /* FIXME: WRAP_AROUND _might_ be wrong for libstatgrab, where the type is always long long */
-	errors_in=((long long)(new_stats.e_rec-stats.e_rec) >= 0) ? new_stats.e_rec-stats.e_rec : (WRAP_AROUND-stats.e_rec)+new_stats.e_rec;
-	errors_out=((long long)(new_stats.e_send-stats.e_send) >= 0) ? new_stats.e_send-stats.e_send : (WRAP_AROUND-stats.e_send)+new_stats.e_send;
-    packets_out=((long long)(new_stats.p_send-stats.p_send) >= 0) ? new_stats.p_send-stats.p_send : (WRAP_AROUND-stats.p_send)+new_stats.p_send;
-    packets_in=((long long)(new_stats.p_rec-stats.p_rec) >= 0) ? new_stats.p_rec-stats.p_rec : (WRAP_AROUND-stats.p_rec)+new_stats.p_rec;
-    bytess=((long long)(new_stats.send-stats.send) >= 0) ? new_stats.send-stats.send : (WRAP_AROUND-stats.send)+new_stats.send;
-    bytesr=((long long)(new_stats.rec-stats.rec) >= 0) ? new_stats.rec-stats.rec : (WRAP_AROUND-stats.rec)+new_stats.rec;
+	errors_in=calc_new_values(new_stats.e_rec,stats.e_rec);
+	errors_out=calc_new_values(new_stats.e_send,stats.e_send);
+    packets_out=calc_new_values(new_stats.p_send,stats.p_send);
+    packets_in=calc_new_values(new_stats.p_rec,stats.p_rec);
+    bytess=calc_new_values(new_stats.send,stats.send);
+    bytesr=calc_new_values(new_stats.rec,stats.rec);
     switch (output_method) {
 #ifdef HAVE_CURSES		
         case CURSES_OUT:

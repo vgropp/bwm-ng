@@ -620,6 +620,7 @@ void get_iface_stats_kstat (char verbose) {
         o_errors=(kstat_named_t *)kstat_data_lookup(ksp, "oerrors");
         if (!i_bytes || !o_bytes || !i_packets || !o_packets || !i_errors || !o_errors) 
             continue;
+        /* use ui32 values, the 64 bit values return strange (very big) differences */
         tmp_if_stats.rec=i_bytes->value.ui32;
         tmp_if_stats.send=o_bytes->value.ui32;
         tmp_if_stats.p_rec=i_packets->value.ui32;

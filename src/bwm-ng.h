@@ -98,6 +98,7 @@
 #define EXTRA "-pre1-cvs"
 
 #define WRAP_AROUND ULONG_MAX
+#define WRAP_32BIT 4294967296ul
 
 #ifdef SYS_64BIT 
 #undef WRAP_AROUND

@@ -46,7 +46,7 @@ Specs
 -----
 
 csv output format: 
-unix timestamp;iface_name;bytes_out/s;bytes_in/s;bytes_total/s;packets_out/s;packets_in/s;packets_total/s;errors_out;errors_in\n
+unix timestamp;iface_name;bytes_out/s;bytes_in/s;bytes_total/s;bytes_in;bytes_out;packets_out/s;packets_in/s;packets_total/s;packets_in;packets_out;errors_out/s;errors_in/s;errors_in;errors_out\n
 Use --count 0 to skip the all zero output after start.
 
 html output format:

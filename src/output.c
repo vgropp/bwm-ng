@@ -322,9 +322,10 @@ void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float mult
 			if (input_method!=NETSTAT_IN)
 #endif                    
                 /* output Bytes/s */
-                fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c",(double)(stats.bytes.out*multiplier),csv_char,(double)(stats.bytes.in*multiplier),csv_char,(double)((stats.bytes.out+stats.bytes.in)*multiplier),csv_char);
+                fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu%c",(double)(stats.bytes.out*multiplier),csv_char,(double)(stats.bytes.in*multiplier),csv_char,(double)((stats.bytes.out+stats.bytes.in)*multiplier),csv_char,full_stats.sum.bytes.in,csv_char,full_stats.sum.bytes.out,csv_char);
             /* show packets/s and errors/s */
-            fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu\n",(double)stats.packets.out*multiplier,csv_char,(double)stats.packets.in*multiplier,csv_char,(double)(stats.packets.out+stats.packets.in)*multiplier,csv_char,stats.errors.out,csv_char,stats.errors.in);
+            fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu",(double)stats.packets.out*multiplier,csv_char,(double)stats.packets.in*multiplier,csv_char,(double)(stats.packets.out+stats.packets.in)*multiplier,csv_char,full_stats.sum.packets.in,csv_char,full_stats.sum.packets.out);
+            fprintf(tmp_out_file,"%c%.2f%c%.2f%c%llu%c%llu\n",csv_char,stats.errors.out*multiplier,csv_char,stats.errors.in*multiplier,csv_char,full_stats.sum.errors.in,csv_char,full_stats.sum.errors.out);
             break;
 #endif			
     }

@@ -342,7 +342,6 @@ void get_cmdln_options(int argc, char *argv[]) {
         read_config(str);
         free(str);
     }
-    
 #endif    
     if (optind < argc) {
         read_config(argv[optind]);
@@ -443,5 +442,6 @@ void get_cmdln_options(int argc, char *argv[]) {
         }
     }
     if (iface_list==NULL && show_all_if==1) show_all_if=2;
+    return;
 }
 

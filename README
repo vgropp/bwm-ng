@@ -111,8 +111,11 @@ with 1 or 0 as values for keys without a value in cmdline options.
 Misc
 ----
 
-Bugs:
+Bugs/Known Problems:
   - configure detects getifaddrs, but doesnt work in MacOS X 10.2 or earlier
+    (looks like getifaddrs is simply not working in < 10.3)
+  - curses output coredumps on netbsd 1.6.1 (maybe others) with unknown TERM
+    set (and configfile support compiled in)
   - no other yet, wow ;) (please report if you found one)
  
 Todo:

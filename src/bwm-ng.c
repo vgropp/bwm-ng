@@ -245,8 +245,13 @@ int main (int argc, char *argv[]) {
 #ifdef HAVE_CURSES
 	if (output_method==CURSES_OUT) {
 		/* init curses */
-		initscr(); 
-		cbreak(); 
+        if (initscr() == NULL) {
+            printf("failed to init curses: %s\n",strerror(errno));
+            /* free the opt iface_list */
+            if (iface_list!=NULL) free(iface_list);
+            exit(0);
+        }
+        cbreak(); 
 		noecho();
 		nonl();
 		curs_set(0);

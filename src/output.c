@@ -165,11 +165,14 @@ int print_header(int option) {
 #endif
             }
             switch (show_all_if) {
+                case 0:
+                    printf("\n");
+                    break;
                 case 1:
-                     printf(" %s\n","(all)");
+                    printf(" %s\n","(all)");
                     break;
                 case 2:
-                     printf(" %s\n","(all and down)");
+                    printf(" %s\n","(all and down)");
                     break;
             }
 			if (output_method==PLAIN_OUT) {

@@ -386,7 +386,7 @@ if [ test "${EGREP}" ]; then
                     echo "solaris version found"
                     AC_DEFINE_UNQUOTED(NETSTAT_SOLARIS)
                 else 
-                    net_test=`${NETSTAT_CMD} -ibd 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ibytes +Obytes +Drops"`
+                    net_test=`${NETSTAT_CMD} -ibd 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ibytes +Obytes +Drop"`
                     if [ test "${net_test}" ]; then
                         echo "Net/OpenBSD version found"
                         AC_DEFINE_UNQUOTED(NETSTAT_NETBSD)

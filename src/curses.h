@@ -27,9 +27,14 @@
 #ifdef HAVE_CURSES
 extern void print_online_help();
 extern inline void get_iface_stats(char _n);
+#ifdef __STDC__
 extern void deinit(char *error_msg, ...) FUNCATTR_NORETURN;
+#else
+extern void deinit(...) FUNCATTR_NORETURN;
+#endif
 
-extern WINDOW *myscr;
+extern WINDOW *mywin;
+extern SCREEN *myscr;
 extern char dynamic;
 extern char show_all_if;
 extern char sumhidden;

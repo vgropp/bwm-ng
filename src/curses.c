@@ -105,11 +105,9 @@ void handle_gui_input(char c) {
     }
 }	
 
-void init_curses() {
-        myscr=initscr();
-        if (myscr == NULL) {
-            deinit("failed to init curses: %s\n",strerror(errno));
-        }
+int init_curses() {
+    myscr=newterm(NULL,stdout,stdin);
+    if (myscr!=NULL) {
         cbreak();
         noecho();
         nonl();
@@ -117,15 +115,20 @@ void init_curses() {
         curs_set(0);
 #endif        
         timeout(delay); /* set the timeout of getch to delay in ms) */
+        return 1;
+    } else {
+        printf("curses newterm() failed: %s\n",strerror(errno));
+        sleep(1);
+        output_method=PLAIN_OUT;
+        return 0;
+    }
 }
 
 void sigwinch(int sig) {
     struct winsize size;
     if (ioctl(fileno(stdout), TIOCGWINSZ, &size) == 0) {
-#if HAVE_RESIZETERM        
-        resizeterm(size.ws_row, size.ws_col);
-#endif        
         if (endwin()==ERR) deinit("failed to deinit curses: %s\n",strerror(errno));
+        if (myscr) delscreen(myscr);
         init_curses();
     }
 }

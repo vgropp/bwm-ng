@@ -45,7 +45,9 @@ char PROC_FILE[PATH_MAX];
 char NETSTAT_FILE[PATH_MAX];
 #endif
 unsigned int delay=500;
+#if EXTENDED_STATS
 unsigned int avg_length=0;
+#endif
 char output_unit=BYTES_OUT;
 char output_type=RATE_OUT;
 char dynamic;
@@ -53,7 +55,8 @@ char dynamic;
 char show_all_if=0;
 #ifdef HAVE_CURSES
 int output_method=CURSES_OUT;
-WINDOW *myscr=NULL;
+WINDOW *mywin=NULL;
+SCREEN *myscr=NULL;
 #else
 int output_method=PLAIN_OUT;
 #endif

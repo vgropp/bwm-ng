@@ -5,9 +5,22 @@ AC_INIT
 AC_CONFIG_MACRO_DIR(./)
 AC_LANG([C])
 
-if test -z ${CFLAGS}; then
-	CFLAGS="-O3 -Wall"
+AC_ARG_ENABLE([debug],AS_HELP_STRING([--enable-debug],[enable debug (default: no)]),[
+echo "enable debugging info: $enableval"
+if [ test $enableval = "yes" ]; then
+    if test -z ${CFLAGS}; then
+        CFLAGS="-g3 -Wall"
+    else
+        CFLAGS="-g3 ${CFLAGS}"
+    fi
+    DEBUG=1
 fi
+],[
+if test -z ${CFLAGS}; then
+    CFLAGS="-O3 -Wall"
+fi
+])
+
 
 AC_CONFIG_SRCDIR([src/bwm-ng.c])
 AC_CONFIG_HEADER([config.h:config.h.in])
@@ -22,7 +35,7 @@ if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
         CPPFLAGS="$CPPFLAGS -I$withval"
     fi
-    AC_CHECK_LIB([curses],[initscr,timeout],,[ CPPFLAGS=$OLD_CPPFLAGS ])
+    AC_CHECK_LIB([curses],[newterm,timeout],,[ CPPFLAGS=$OLD_CPPFLAGS ])
     CURSES_CHECKED="1"
 else
     CURSES_CHECKED="1"
@@ -37,7 +50,7 @@ if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
         CPPFLAGS="$CPPFLAGS -I$withval"
     fi
-    AC_CHECK_LIB([ncurses],[initscr,timeout],,[ CPPFLAGS=$OLD_CPPFLAGS ])
+    AC_CHECK_LIB([ncurses],[newterm,timeout],,[ CPPFLAGS=$OLD_CPPFLAGS ])
     CURSES_CHECKED="1"
 else
     CURSES_CHECKED="1"
@@ -49,28 +62,12 @@ fi
 
 if [ test $CURSES_CHECKED != "1" ]; then
 AC_CHECK_LIB([curses],[initscr,timeout],,[
-	AC_CHECK_LIB([ncurses],[initscr,timeout])
+	AC_CHECK_LIB([ncurses],[newterm,timeout])
 ])
 fi
 
-AC_CHECK_FUNCS([resizeterm])
 AC_CHECK_FUNCS([wattron])
 AC_CHECK_FUNCS([curs_set])
-
-AC_ARG_WITH([varargs],AS_HELP_STRING([--with-varargs],[enable varargs.h use (solaris) (ARG=PATH)]),[
-AC_MSG_CHECKING([for varargs.h])
-AC_MSG_RESULT($withval)
-if [ test $withval != "no" ]; then  
-    OLD_CPPFLAGS=$CPPFLAGS
-    if [ test $withval != "yes" ]; then
-        CPPFLAGS="$CPPFLAGS -I$withval"
-    fi
-    AC_CHECK_HEADER([sys/varargs.h],[AC_DEFINE_UNQUOTED(HAVE_SYS_VARARGS_H)],[ CPPFLAGS=$OLD_CPPFLAGS ])
-    
-fi
-],[
-    AC_CHECK_HEADER([sys/varargs.h],[AC_DEFINE_UNQUOTED(HAVE_SYS_VARARGS_H)])
-])
 
 
 AC_ARG_WITH([time],AS_HELP_STRING([--with-time],[enable accurate time calculating (ARG=PATH)]),[
@@ -143,7 +140,9 @@ if [ test $withval != "no" ]; then
         AC_CHECK_FUNCS([getifaddrs],[
             AC_CHECK_HEADERS([sys/socket.h])
             AC_CHECK_HEADERS([net/if.h], [
-                AC_CHECK_MEMBERS([struct if_data.ifi_ibytes],,[ CPPFLAGS=$OLD_CPPFLAGS ],[
+                AC_CHECK_MEMBERS([struct if_data.ifi_ibytes],[
+                    PR_CHECK_WORKING_GETIFADDRS()
+                ],[ CPPFLAGS=$OLD_CPPFLAGS ],[
                     $net_if_h_includes
                     #include <net/if.h>
                ])
@@ -157,7 +156,9 @@ AC_CHECK_HEADER([ifaddrs.h],[
 	AC_CHECK_FUNCS([getifaddrs],[
 		AC_CHECK_HEADERS([sys/socket.h])
 		AC_CHECK_HEADERS([net/if.h], [
-	        AC_CHECK_MEMBERS([struct if_data.ifi_ibytes],,,[
+	        AC_CHECK_MEMBERS([struct if_data.ifi_ibytes],[
+                PR_CHECK_WORKING_GETIFADDRS()
+            ],,[
 				$net_if_h_includes
 				#include <net/if.h>
 			])
@@ -444,6 +445,7 @@ fi
 QEF_C_NORETURN
 AC_C_INLINE
 
+if [ test ${DEBUG} != 1 ]; then
 AC_ARG_WITH([strip],AS_HELP_STRING([--with-strip],[use strip after make (ARG=PATH)]),[
 echo "enable strip... "
 AC_MSG_RESULT($enableval)
@@ -477,6 +479,11 @@ if [ test "${STRIP}" ]; then
 fi
 fi
 ])
+else
+    STRIP="@echo DEBUG enabled"
+fi
+
+PR_CHECK_CC_OPT(Wno-long-double)
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([src/Makefile])

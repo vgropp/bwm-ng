@@ -46,4 +46,6 @@ extern int html_refresh;
 extern int html_header;
 #endif
 extern unsigned int delay;
-
+#if EXTENDED_STATS
+extern unsigned int avg_length;
+#endif

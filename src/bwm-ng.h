@@ -24,16 +24,16 @@
 #include "defines.h"
 #include "types.h"
 
-#if HAVE_SYS_VARARGS_H
-#include <sys/varargs.h> /* solaris */
-#else
+#ifdef __STDC__
 #include <stdarg.h>
+#else
+#include <varargs.h>
 #endif
 
 extern void get_cmdln_options(int argc, char *argv[]);
 extern int print_header(int option);
 extern void handle_gui_input(char c);
-extern void init_curses();
+extern int init_curses();
 extern void sigwinch(int sig);
 
 /* global vars and options */
@@ -64,7 +64,8 @@ extern int html_refresh;
 extern int html_header;
 #endif
 #ifdef HAVE_CURSES
-extern WINDOW *myscr;
+extern WINDOW *mywin;
+extern SCREEN *myscr;
 #endif
 
 #ifdef IOCTL

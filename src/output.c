@@ -25,6 +25,9 @@
 
 
 inline char *output_type2str() {
+#if EXTENDED_STATS
+    static char str[25];
+#endif
     switch (output_type) {
         case RATE_OUT:
             return "rate";
@@ -37,7 +40,8 @@ inline char *output_type2str() {
             return "sum";
             break;
         case AVG_OUT:
-            return "avg";
+            snprintf(str,24,"avg (%is)",(int)avg_length/1000);
+            return str;
             break;
 #endif            
     }

@@ -34,15 +34,14 @@ Supported Platforms
 
 sucessfully tested on:
 Linux 2.4, Linux 2.6
-freeBSD 4.8, freeBSD 5.3
-MacOS X 10.3 
-MacOS X 10.1, 10.2 (--without-getifaddrs)
+FreeBSD 4.8, 5.3
+MacOS X 10.1, 10.2, 10.3 
 SunOS 5.9 sparc Solaris 9
 OpenBSD 3.4
 NetBSD 1.6.1, 2.0
 IRIX64 6.5
 
-please notify me of working or not working platforms.
+please email me of working or not working platforms.
 
 
 INSTALL
@@ -55,16 +54,6 @@ to install use as root:
 make install
 
 use ./configure --help for a list of options
-
-
-MacOS X hints:
-
-getifaddrs is broken in MacOS X 10.1 and 10.2, therefor please use 
-./configure --without-getifaddrs
-
-To avoid warnings about long-double, use the flag
-CFLAGS="-Wno-long-double ....(other options here)"
-in addition to the normal compilation options.
 
 
 Specs
@@ -115,10 +104,10 @@ Misc
 ====
 
 Bugs/Known Problems:
-  - configure detects getifaddrs, but doesnt work in MacOS X 10.2 or earlier
-    (looks like getifaddrs is simply not working in < 10.3)
   - curses output coredumps on netbsd 1.6.1 (maybe others) with unknown TERM
     set and configfile support compiled in
+  - average value is not correct for avg_length when timeout/delay was changed
+    during runtime.
   - no other yet, wow ;) (please report if you found one)
  
 Todo:

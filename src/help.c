@@ -51,10 +51,12 @@ inline void cmdln_printhelp() {
     print_help_line("","","1=show all up interfaces (default)");
     print_help_line("","","2=show all and down interfaces");
     print_help_line("-I <list>","-I, --interfaces <list>","show only interfaces in <list> (comma seperated), or");
-    print_help_line("","","if list is prefaced with %% show all but interfaces");
+    print_help_line("","","if list is prefaced with % show all but interfaces");
     print_help_line("","","in list");
     print_help_line("-S","-S, --sumhidden [value]","count hidden interfaces for total");
+#if EXTENDED_STATS    
     print_help_line("-A","-A, --avglength <sec>","sets the span of average stats (Default 30s)");
+#endif    
     print_help_line("-D","-D, --daemon [value]","fork into background and daemonize");
     print_help_line("-h","-h, --help","displays this help");
     print_help_line("-V","-V, --version","print version info");

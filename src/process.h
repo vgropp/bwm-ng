@@ -38,7 +38,9 @@ extern char output_type;
 extern int output_method;
 extern int input_method;
 extern char *iface_list;
+#if EXTENDED_STATS
 extern unsigned int avg_length;
+#endif
 
 /* global buffer to store all data of interfaces in */
 t_iface_stats *if_stats=NULL;

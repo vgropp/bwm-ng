@@ -37,6 +37,8 @@
                   - added configure --disable-extendedstats to compile w/o
                     avg, sum and max
                   - fixed compile on MacOSX 10.1
+                  - fallback to plain output if curses init fails
+                  - added --enable-debug for -g3 and future use #define DEBUG
   12-20-2004 0.4: pre1:
                   - get_iface_stats cleanup
                   - plain and csv output added

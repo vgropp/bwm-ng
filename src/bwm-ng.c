@@ -62,11 +62,15 @@ inline void get_iface_stats(char _n) {
 
 
 /* clear stuff */
-void deinit(char *error_msg, ...) FUNCATTR_NORETURN;
 void sigint(int sig) FUNCATTR_NORETURN;
 
-
+#ifdef __STDC__
+void deinit(char *error_msg, ...) FUNCATTR_NORETURN;
 void deinit(char *error_msg, ...) {
+#else
+void deinit(...) FUNCATTR_NORETURN;
+void deinit(...) {
+#endif
     va_list    ap;
 #if EXTENDED_STATS
     int local_if_count;
@@ -75,10 +79,10 @@ void deinit(char *error_msg, ...) {
 #ifdef HAVE_CURSES	
 	if (output_method==CURSES_OUT && myscr!=NULL) {
 		/* first close curses, so we dont leave mess behind */
+#if HAVE_CURS_SET
+        curs_set(1);
+#endif
 		endwin();
-#if HAVE_CURS_SET        
-		curs_set(1);
-#endif        
 	}
 #endif	
 #ifdef IOCTL
@@ -108,11 +112,16 @@ void deinit(char *error_msg, ...) {
 	if (out_file!=NULL) fclose(out_file);
     if (out_file_path!=NULL) free(out_file_path);
 #endif	
-	/* output errormsg if given */
-	if (error_msg!=NULL) {
+#ifdef __STDC__        
+    /* output errormsg if given */
+    if (error_msg!=NULL) {
         va_start(ap, error_msg);
 		vprintf(error_msg,ap);
-	}
+    }
+#else
+    va_start(ap);
+    vprintf(ap);
+#endif
 	/* we are done, say goodbye */
     exit(0);
 }
@@ -142,8 +151,8 @@ int main (int argc, char *argv[]) {
 #ifdef HAVE_CURSES
 	if (output_method==CURSES_OUT) {
 		/* init curses */
-        init_curses();
-        signal(SIGWINCH,sigwinch);
+        if (init_curses())
+            signal(SIGWINCH,sigwinch);
 	}
 #endif	
 	/* end of init curses, now set a sigint handler to deinit the screen on ctrl-break */

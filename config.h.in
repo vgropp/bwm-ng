@@ -22,8 +22,8 @@
 #undef HAVE_IOCTL
 
 /* Define to 1 if you have 'getifaddrs' function 
- * and 'struct if_data.ifi_ibytes' */
-#undef HAVE_STRUCT_IF_DATA_IFI_IBYTES
+ * with correct values reported */
+#undef HAVE_WORKING_GETIFADDRS
 
 /* Define to 1 if you have 'sysctl' and 'struct if_msghdr.ifm_data' */
 #undef HAVE_STRUCT_IF_MSGHDR_IFM_DATA
@@ -33,9 +33,6 @@
 
 /* define to 1 if you have gettimeofday function */
 #undef HAVE_GETTIMEOFDAY
-
-/* define to 1 if you have resizeterm curses function */
-#undef HAVE_RESIZETERM
 
 /* define to 1 if you have wattron and wattroff curses function */
 #undef HAVE_WATTRON
@@ -91,5 +88,3 @@
 /* define to 1 if you have 64bit system */
 #undef SYS_64BIT
 
-/* define to 1 if you have sys/varargs.h for va_start function (solaris) */
-#undef HAVE_SYS_VARARGS_H

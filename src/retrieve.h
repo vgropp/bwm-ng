@@ -67,7 +67,11 @@
 
 extern int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_speed_stats *stats, char *name, int iface_number,char verbose, char iface_is_up);
 extern void finish_iface_stats (char verbose, t_iface_speed_stats stats, int hidden_if, int iface_number);
-extern int deinit(char *error_msg, ...);
+#ifdef __STDC__
+extern void deinit(char *error_msg, ...) FUNCATTR_NORETURN;
+#else
+extern void deinit(...) FUNCATTR_NORETURN;
+#endif
 
 extern int if_count;
 #ifdef PROC_NET_DEV

@@ -1,4 +1,4 @@
-  ..-..-.... 0.5: pre1:
+  02-20-2005 0.5: pre1:
                   - fixed invalid option msg showed up twice
                   - added --sumhidden, by default hidden ifaces dont count for
                     total anymore
@@ -16,7 +16,7 @@
                   - added NetBSD/OpenBSD netstat support
                   - fixed netstat parsing if address field missing
                   - fixed showing same iface twice on netstat input
-                  pre2:
+                  final:
                   - added outfile and daemonize for html output
                   - fixes for IRIX
                   - added bit/second output (Michael Eckhoff)

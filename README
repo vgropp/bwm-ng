@@ -17,10 +17,10 @@ Short list of features:
 - output in curses, plain console, CSV or HTML
 - configfile
 
-This was influenced by the old bwm util written by ...... (couldnt find any 
-author, debian package: bwm Maintainer: Lenart Janos <ocsi@debian.org>) which 
-had some issues with faster interfaces and was very simple. Since i had almost
-all code done anyway for other projects, i decided to create my own version.
+This was influenced by the old bwm util written by Barney 
+<barney@freewill.tzo.com> which had some issues with faster interfaces and was 
+very simple. Since i had almost all code done anyway for other projects, i 
+decided to create my own version.
 
 I actually dont know if netstat input is usefull at all. I saw this elsewhere,
 so i added it. Its target is "netstat 1.42 (2001-04-15)" linux or 

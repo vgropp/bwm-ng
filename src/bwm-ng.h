@@ -30,8 +30,8 @@
 #define SYSCTL
 #endif
 
-#if NETSTAT_LINUX || NETSTAT_BSD || NETSTAT_BSD_BYTES
-#define NETSTAT
+#if NETSTAT_LINUX || NETSTAT_BSD || NETSTAT_BSD_BYTES || NETSTAT_SOLARIS
+#define NETSTAT 1
 #endif
 
 #if HAVE_LIBSTATGRAB
@@ -54,7 +54,7 @@
 #define GETIFADDRS
 #endif
 
-#if HAVE_IOCTL
+#if HAVE_IOCTL && SIOCGIFFLAGS
 #define IOCTL
 #endif
 

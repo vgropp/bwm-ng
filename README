@@ -24,6 +24,7 @@ Tested and running on:
 Linux 2.4, Linux 2.6
 freeBSD 4.8, freeBSD 5.3
 MacOS X 10.3 (10.2 getifaddrs fails)
+SunOS 5.9 sparc Solaris 9
 
 please notify me of working or not working platforms.
 

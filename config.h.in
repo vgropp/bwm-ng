@@ -61,6 +61,9 @@
 /* define for linux like netstat input */
 #undef NETSTAT_LINUX
 
+/* define for solaris like netstat input */
+#undef NETSTAT_SOLARIS
+
 /* define for beeing able to pass the netstat path */
 #undef ALLOW_NETSTATPATH
 
@@ -69,3 +72,6 @@
 
 /* define to 1 if you have 64bit system */
 #undef SYS_64BIT
+
+/* define to 1 if you have sys/varargs.h for va_start function (solaris) */
+#undef HAVE_SYS_VARARGS_H

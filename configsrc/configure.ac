@@ -13,7 +13,6 @@ AC_CONFIG_SRCDIR([src/bwm-ng.c])
 AC_CONFIG_HEADER([config.h:config.h.in])
 
 
-
 # Checks for libraries.
 CURSES_CHECKED="0"
 
@@ -23,7 +22,7 @@ if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
         CPPFLAGS="$CPPFLAGS -I$withval"
     fi
-    AC_CHECK_LIB([curses],[cbreak],,[ CPPFLAGS=$OLD_CPPFLAGS ])
+    AC_CHECK_LIB([curses],[initscr],,[ CPPFLAGS=$OLD_CPPFLAGS ])
     CURSES_CHECKED="1"
 else
     CURSES_CHECKED="1"
@@ -38,7 +37,7 @@ if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
         CPPFLAGS="$CPPFLAGS -I$withval"
     fi
-    AC_CHECK_LIB([ncurses],[cbreak],,[ CPPFLAGS=$OLD_CPPFLAGS ])
+    AC_CHECK_LIB([ncurses],[initscr],,[ CPPFLAGS=$OLD_CPPFLAGS ])
     CURSES_CHECKED="1"
 else
     CURSES_CHECKED="1"
@@ -49,10 +48,25 @@ fi
 
 
 if [ test $CURSES_CHECKED != "1" ]; then
-AC_CHECK_LIB([ncurses],[cbreak],,[
-	AC_CHECK_LIB([curses],[cbreak])
+AC_CHECK_LIB([curses],[initscr],,[
+	AC_CHECK_LIB([ncurses],[initscr])
 ])
 fi
+
+AC_ARG_WITH([varargs],AS_HELP_STRING([--with-varargs],[enable varargs.h use (solaris) (ARG=PATH)]),[
+echo "checking for varargs.h: $withval"
+if [ test $withval != "no" ]; then  
+    OLD_CPPFLAGS=$CPPFLAGS
+    if [ test $withval != "yes" ]; then
+        CPPFLAGS="$CPPFLAGS -I$withval"
+    fi
+    AC_CHECK_HEADER([sys/varargs.h],[AC_DEFINE_UNQUOTED(HAVE_SYS_VARARGS_H)],[ CPPFLAGS=$OLD_CPPFLAGS ])
+    
+fi
+],[
+    echo "checking for varargs.h: yes"
+    AC_CHECK_HEADER([sys/varargs.h],[AC_DEFINE_UNQUOTED(HAVE_SYS_VARARGS_H)])
+])
 
 
 AC_ARG_WITH([time],AS_HELP_STRING([--with-time],[enable accurate time calculating (ARG=PATH)]),[
@@ -246,39 +260,39 @@ fi
 echo "enable path to netstat as option: no"
 ])
 
+NETSTAT_BYTE="0"
+AC_ARG_ENABLE([netstatbyte],AS_HELP_STRING([--enable-netstatbyte],[enable netstat with byte info (default: no)]),[
+echo "enable netstat with byte info: $enableval"
+if [ test $enableval = "yes" ]; then
+    NETSTAT_BYTE="1"
+fi
+])
+
+NETSTAT_LINK="0"
+AC_ARG_ENABLE([netstatlink],AS_HELP_STRING([--enable-netstatlink],[enable netstat with link limit (default: no)]),[
+echo "enable netstat with link limit: $enableval"
+if [ test $enableval = "yes" ]; then
+    NETSTAT_LINK="1"
+fi
+])
+
 
 NETSTAT_DEFINED="0"
 AC_ARG_WITH([netstatbsd],AS_HELP_STRING([--with-netstatbsd],[enable bsd like netstat -i (ARG=PATH)]),[
 if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
-        AC_PROG_EGREP
-        if [ test "${EGREP}" ]; then
-            AC_CHECK_PROGS([NETSTAT_CMD],[$withval])
-            if [ test "${NETSTAT_CMD}" ]; then
-                echo -n "checking netstat version... "
-                net_test=`${NETSTAT_CMD} -iW | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Opkts +Oerrs +Coll"`
-                if [ test "${net_test}" ]; then
-                    net_test2=`${NETSTAT_CMD} -iW -b | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Ibytes +Opkts +Oerrs +Obytes +Coll"`
-                    if [ test "${net_test2}" ]; then
-                        echo "bsd like version with byte info found"
-                        AC_DEFINE_UNQUOTED(NETSTAT_BSD_BYTES)
-                    else
-                        echo "bsd like version found"
-                        AC_DEFINE_UNQUOTED(NETSTAT_BSD)
-                    fi
-                    echo -n "checking for netstat -f link: "
-                    net_test3=`${NETSTAT_CMD} -iW -f link | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Opkts +Oerrs +Coll"`
-                    if [ test "${net_test3}" ]; then
-                        echo "OK"
-                        AC_DEFINE_UNQUOTED(NETSTAT_BSD_LINK)
-                    else
-                        echo "not working"
-                    fi
-                    AC_DEFINE_UNQUOTED(HAVE_NETSTAT_PATH,$withval)
-                    NETSTAT_DEFINED="1"
-                fi
-            fi
-        fi
+        echo "bsd like version with byte info forced: $withval"
+        AC_DEFINE_UNQUOTED(HAVE_NETSTAT_PATH,$withval)
+    else
+        echo "bsd like version with byte info forced"
+    fi
+    if [ test $NETSTAT_BYTE != "1" ]; then
+        AC_DEFINE_UNQUOTED(NETSTAT_BSD)
+    else
+        AC_DEFINE_UNQUOTED(NETSTAT_BSD_BYTES)
+    fi
+    if [ test $NETSTAT_LINK != "0" ]; then
+        AC_DEFINE_UNQUOTED(NETSTAT_BSD_LINK)
     fi
 else 
     NETSTAT_DEFINED="1"
@@ -289,26 +303,36 @@ fi
 AC_ARG_WITH([netstatlinux],AS_HELP_STRING([--with-netstatlinux],[enable linux like netstat -i (ARG=PATH)]),[
 if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
-        AC_PROG_EGREP
-        if [ test "${EGREP}" ]; then
-            AC_CHECK_PROGS([NETSTAT_CMD],[$withval])
-            if [ test "${NETSTAT_CMD}" ]; then
-                echo -n "checking netstat version... "
-                net_test=`${NETSTAT_CMD} -ia | ${EGREP} "Iface +MTU +Met +RX-OK +RX-ERR +RX-DRP +RX-OVR +TX-OK +TX-ERR +TX-DRP +TX-OVR +Flg"`
-                if [ test "${net_test}" ]; then
-                    echo "GNU net-tools like version found"
-                    AC_DEFINE_UNQUOTED(NETSTAT_LINUX)
-                    AC_DEFINE_UNQUOTED(HAVE_NETSTAT_PATH,$withval)
-                    NETSTAT_DEFINED="1"
-                fi
-            fi
-        fi
+        echo "GNU net-tools like version forced: $withval"
+        AC_DEFINE_UNQUOTED(HAVE_NETSTAT_PATH,$withval)
+    else
+        echo "GNU net-tools like version forced"
     fi
+    AC_DEFINE_UNQUOTED(NETSTAT_LINUX)
+    NETSTAT_DEFINED="1"
 else
     NETSTAT_DEFINED="1"
     echo "disable netstat: GNU net-tools like version"
 fi
 ])
+
+
+AC_ARG_WITH([netstatsolaris],AS_HELP_STRING([--with-netstatsolaris],[enable solaris like netstat -i (ARG=PATH)]),[
+if [ test $withval != "no" ]; then
+    if [ test $withval != "yes" ]; then
+        echo "solrais like version forced: $withval"
+        AC_DEFINE_UNQUOTED(HAVE_NETSTAT_PATH,$withval)
+    else
+        echo "solaris like version forced"
+    fi
+    AC_DEFINE_UNQUOTED(NETSTAT_SOLARIS)
+    NETSTAT_DEFINED="1"
+else
+    NETSTAT_DEFINED="1"
+    echo "disable netstat: solaris like version"
+fi
+])
+
 
 if [ test $NETSTAT_DEFINED != "1" ]; then
 AC_PROG_EGREP
@@ -316,14 +340,14 @@ if [ test "${EGREP}" ]; then
     AC_CHECK_PROGS([NETSTAT_CMD],[netstat])
     if [ test "${NETSTAT_CMD}" ]; then
 		echo -n "checking netstat version... "
-        net_test=`${NETSTAT_CMD} -ia | ${EGREP} "Iface +MTU +Met +RX-OK +RX-ERR +RX-DRP +RX-OVR +TX-OK +TX-ERR +TX-DRP +TX-OVR +Flg"`
+        net_test=`${NETSTAT_CMD} -ia 2>/dev/null | ${EGREP} "Iface +MTU +Met +RX-OK +RX-ERR +RX-DRP +RX-OVR +TX-OK +TX-ERR +TX-DRP +TX-OVR +Flg"`
         if [ test "${net_test}" ]; then
             echo "GNU net-tools like version found"
 			AC_DEFINE_UNQUOTED(NETSTAT_LINUX)
         else
-            net_test=`${NETSTAT_CMD} -iW | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Opkts +Oerrs +Coll"`
+            net_test=`${NETSTAT_CMD} -iW 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Opkts +Oerrs +Coll"`
             if [ test "${net_test}" ]; then
-				net_test2=`${NETSTAT_CMD} -iW -b | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Ibytes +Opkts +Oerrs +Obytes +Coll"`
+				net_test2=`${NETSTAT_CMD} -iW -b 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Ibytes +Opkts +Oerrs +Obytes +Coll"`
 				if [ test "${net_test2}" ]; then
 					echo "bsd like version with byte info found"
 					AC_DEFINE_UNQUOTED(NETSTAT_BSD_BYTES)
@@ -332,7 +356,7 @@ if [ test "${EGREP}" ]; then
 					AC_DEFINE_UNQUOTED(NETSTAT_BSD)
 				fi
 				echo -n "checking for netstat -f link: "
-				net_test3=`${NETSTAT_CMD} -iW -f link | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Opkts +Oerrs +Coll"`
+				net_test3=`${NETSTAT_CMD} -iW -f link 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Opkts +Oerrs +Coll"`
 				if [ test "${net_test3}" ]; then
 					echo "OK"
 					AC_DEFINE_UNQUOTED(NETSTAT_BSD_LINK)
@@ -340,7 +364,16 @@ if [ test "${EGREP}" ]; then
 					echo "not working"
 				fi
 			else
-				echo "unknown netstat version, mail `netstat -i` output to author to get it working - disabled!"
+                net_test=`${NETSTAT_CMD} -i -f inet -f inet6 2>/dev/null | ${EGREP} "Name +Mtu +Net/Dest +Address +Ipkts +Ierrs +Opkts +Oerrs +Collis +Queue"`
+                if [ test "${net_test}" ]; then
+                    echo "solaris version found"
+                    AC_DEFINE_UNQUOTED(NETSTAT_SOLARIS)
+                else 
+    				echo "unknown netstat version - disabled
+*********************************************
+  please mail 'netstat -i' output to author
+*********************************************"
+                fi
             fi
         fi
     fi
@@ -350,10 +383,39 @@ fi
 QEF_C_NORETURN
 AC_C_INLINE
 
+AC_ARG_WITH([strip],AS_HELP_STRING([--with-strip],[use strip after make (ARG=PATH)]),[
+echo "enable strip: $enableval"
+if [ test $withval != "no" ]; then
+    if [ test $withval != "yes" ]; then
+        STRIP="${withval} \${TARGET}"
+    else
+        AC_CHECK_FILES([/usr/ccs/bin/strip],[
+            AC_CHECK_PROGS([STRIP],[strip],,,[/usr/ccs/bin])
+        ])
+        if [ test "${STRIP}" ]; then
+            STRIP="${STRIP} \${TARGET}"
+        else
+        AC_CHECK_PROGS([STRIP],[strip])
+        if [ test "${STRIP}" ]; then
+            STRIP="${STRIP} \${TARGET}"
+        fi
+        fi
+    fi
+fi
+],[
+echo "enable strip: yes"
+AC_CHECK_FILES([/usr/ccs/bin/strip],[
+    AC_CHECK_PROGS([STRIP],[strip],,,[/usr/ccs/bin])
+])
+if [ test "${STRIP}" ]; then
+    STRIP="/usr/ccs/bin/${STRIP} \${TARGET}"
+else
 AC_CHECK_PROGS([STRIP],[strip])
 if [ test "${STRIP}" ]; then
     STRIP="${STRIP} \${TARGET}"
 fi
+fi
+])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

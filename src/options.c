@@ -78,6 +78,7 @@ unsigned int input_method=SYSCTL_IN;
 unsigned int input_method=NETSTAT_IN;
 #else
 #error "NO INPUT DEFINED!"
+unsigned int input_method=0;
 #endif
 #endif 
 #endif
@@ -88,6 +89,36 @@ unsigned int input_method=NETSTAT_IN;
 int html_refresh=5;
 int html_header=0;
 #endif
+
+
+ /******************************************************************************
+ * This is a replacement for strsep which is not portable (missing on Solaris).
+ */
+static char* getToken(char** str, const char* delims)
+{
+    char* token;
+
+    if (*str==NULL) {
+        /* No more tokens */
+        return NULL;
+    }
+
+    token=*str;
+    while (**str!='\0') {
+        if (strchr(delims,**str)!=NULL) {
+            **str='\0';
+            (*str)++;
+            return token;
+        }
+        (*str)++;
+    }
+    /* There is no other token */
+    *str=NULL;
+    return token;
+}
+
+/******************************************************************************/
+
 
 /* prints a helpscreen and exists */
 int printhelp() {
@@ -230,11 +261,11 @@ char *dud = str;
 int i;
 
    // beginning whitespace first
-   while( isspace(*dud) )
+   while( isspace((int)*dud) )
       ++dud;
    // now trailing whitespace
    i = strlen(dud) - 1;
-   while( isspace(dud[i]) )
+   while( isspace((int)dud[i]) )
       --i;
    dud[i+1] = 0;
    return dud;
@@ -256,7 +287,7 @@ char *token, *value;
 
   while( fgets( buffer, 4096, fp ) ) {
     value = trim_whitespace( buffer );
-    token = strsep( &value, "=" );
+    token = getToken( &value, "=" );
     if( token == NULL )  /* ignore this line if there isn't a token/value pair */
         continue;
     token = trim_whitespace( token );

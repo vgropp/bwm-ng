@@ -23,6 +23,10 @@
 
 #include "bwm-ng.h"
 
+#if HAVE_SYS_VARARGS_H
+#include <sys/varargs.h>
+#endif
+
 extern void get_cmdln_options(int argc, char *argv[]);
 extern int print_header(int option);
 

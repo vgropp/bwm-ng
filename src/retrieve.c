@@ -420,7 +420,7 @@ void get_iface_stats_libstat (char verbose) {
 void get_iface_stats_netstat (char verbose) {
     int current_if_num=0,hidden_if=0;
 	char *buffer=NULL,*name=NULL;
-#if NETSTAT_BSD	|| NETSTAT_BSD_BYTES
+#if NETSTAT_BSD	|| NETSTAT_BSD_BYTES || NETSTAT_SOLARIS
 	char *str_buf=NULL;
 #endif	
 	FILE *f=NULL;
@@ -438,10 +438,12 @@ void get_iface_stats_netstat (char verbose) {
 #if NETSTAT_BSD_BYTES
 			" -b"
 #endif
-#else
+#endif
 #if NETSTAT_LINUX
                   show_all_if ? NETSTAT_PATH " -ia" : NETSTAT_PATH " -i"
 #endif
+#if NETSTAT_SOLARIS
+            NETSTAT_PATH " -i -f inet -f inet6"
 #endif
                     ,"r")))
         deinit("no input stream found: %s\n",strerror(errno));
@@ -450,14 +452,13 @@ void get_iface_stats_netstat (char verbose) {
     /* we skip first 2 lines if not bsd at any mode */
     if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL ) || (fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) 
 		deinit("read of netstat failed: %s\n",strerror(errno));
-#else
-#if NETSTAT_BSD || NETSTAT_BSD_BYTES
+#endif
+#if NETSTAT_BSD || NETSTAT_BSD_BYTES || NETSTAT_SOLARIS
 	str_buf=(char *)malloc(MAX_LINE_BUFFER);
 	if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) deinit("read of netstat failed: %s\n",strerror(errno));
 #endif
-#endif
     name=(char *)malloc(MAX_LINE_BUFFER);
-    while ( (fgets(buffer,MAX_LINE_BUFFER,f) != NULL) ) {
+    while ( (fgets(buffer,MAX_LINE_BUFFER,f) != NULL && buffer[0]!='\n') ) {
         memset(&tmp_if_stats,0,(size_t)sizeof(t_iface_stats)); /* reinit it to zero */
 #ifdef NETSTAT_LINUX		
         sscanf(buffer,"%s%llu%llu%llu%llu%llu%llu%llu%llu",name,&buf,&buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&buf,&buf,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
@@ -465,9 +466,9 @@ void get_iface_stats_netstat (char verbose) {
 #if NETSTAT_BSD_BYTES
 		sscanf(buffer,"%s%llu%s%s%llu%llu%llu%llu%llu%llu",name,&buf,str_buf,str_buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send,&tmp_if_stats.send);
 #endif
-#if NETSTAT_BSD		
+#if NETSTAT_BSD	|| NETSTAT_SOLARIS	
 		 sscanf(buffer,"%s%llu%s%s%llu%llu%llu%llu",name,&buf,str_buf,str_buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
-#endif		 
+#endif
         /* init new interfaces and add fetched data to old or new one */
         hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose,
 #if NETSTAT_BSD || NETSTAT_BSD_BYTES

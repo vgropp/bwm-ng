@@ -224,7 +224,7 @@ void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stat
         case CURSES_OUT:
             mvwprintw(stdscr,y,x,"%12s:",if_name); /* output the name */
             if (
-#if !NETSTAT_BSD_BYTES					
+#if !NETSTAT_BSD_BYTES && NETSTAT
 					(input_method==NETSTAT_IN) || 
 #endif					
 					show_packets) {
@@ -263,7 +263,7 @@ void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stat
 			if (output_method==PLAIN_OUT) printf("\033[%d;2H",y);
             printf("%12s:",if_name); /* output the name */
             if (
-#if !NETSTAT_BSD_BYTES					
+#if !NETSTAT_BSD_BYTES && NETSTAT
 					(input_method==NETSTAT_IN) || 
 #endif					
 					show_packets) {
@@ -284,7 +284,7 @@ void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stat
 		case HTML_OUT:
 			printf("<tr><td class='bwm-ng-name'>%12s:</td>",if_name);
 			if (
-#if !NETSTAT_BSD_BYTES					
+#if !NETSTAT_BSD_BYTES && NETSTAT
 					(input_method==NETSTAT_IN) || 
 #endif					
 					show_packets) {
@@ -325,7 +325,7 @@ void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stat
 			out_file=csv_file==NULL ? stdout : csv_file;
             fprintf(out_file,"%i%c%s%c",(int)time(NULL),csv_char,if_name,csv_char);
             if (
-#if !NETSTAT_BSD_BYTES					
+#if !NETSTAT_BSD_BYTES && NETSTAT
 					!(input_method==NETSTAT_IN) && 
 #endif					
 					!show_packets) {

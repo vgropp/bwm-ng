@@ -21,23 +21,36 @@
  *                                                                            *
  *****************************************************************************/
 
+
+struct inout_long {
+    unsigned long long in;
+    unsigned long long out;
+};
+
+struct inouttotal_double {
+    long double in;
+    long double out;
+    long double total;
+};
+
+struct double_types {
+    struct inouttotal_double bytes;
+    struct inouttotal_double packets;
+    struct inouttotal_double errors;
+};
+
+struct iface_speed_stats {
+    struct inout_long bytes;
+    struct inout_long packets;
+    struct inout_long errors;
+};
+
+typedef struct iface_speed_stats t_iface_speed_stats;
+
 struct iface_stats {
     char    *if_name;
-    long double max_rec;
-    long double max_send;
-    long double max_total;
-    long double max_prec;
-    long double max_psend;
-    long double max_ptotal;
-    long double max_erec;
-    long double max_esend;
-    long double max_etotal;
-    unsigned long long rec;
-    unsigned long long send;
-    unsigned long long p_rec;
-    unsigned long long p_send;
-    unsigned long long e_rec;
-    unsigned long long e_send;
+    t_iface_speed_stats data;
+    struct double_types max;
 #if HAVE_GETTIMEOFDAY
     struct timeval time;
 #endif
@@ -45,22 +58,3 @@ struct iface_stats {
 
 typedef struct iface_stats t_iface_stats;
 
-struct iface_speed_stats {
-    unsigned long long errors_in;
-    unsigned long long errors_out;
-    unsigned long long packets_out;
-    unsigned long long packets_in;
-    unsigned long long bytess;
-    unsigned long long bytesr;
-    long double max_rec;
-    long double max_send;
-    long double max_total;
-    long double max_prec;
-    long double max_psend;
-    long double max_ptotal;
-    long double max_erec;
-    long double max_esend;
-    long double max_etotal;
-};
-
-typedef struct iface_speed_stats t_iface_speed_stats;

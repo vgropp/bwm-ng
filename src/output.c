@@ -143,32 +143,32 @@ int print_header(int option) {
 }
 
 
-inline unsigned long long direction2value(char mode,unsigned long long in, unsigned long long out) {
+inline unsigned long long direction2value(char mode,struct inout_long stats) {
     switch (mode) {
         case 0:
-            return in;
+            return stats.in;
         case 1:
-            return out;
+            return stats.out;
         case 2: 
-            return in+out;
+            return stats.in+stats.out;
     }
     return 0;
 }
 
-inline double direction_max2value(char mode,double in, double out, double total) {
+inline double direction_max2value(char mode,struct inouttotal_double stats) {
     switch (mode) {
         case 0:
-            return in;
+            return stats.in;
         case 1:
-            return out;
+            return stats.out;
         case 2:
-            return total;
+            return stats.total;
     }
     return 0;
 }
 
 
-char *values2str(char mode,t_iface_speed_stats stats,float multiplier,char *str,int buf_size) {
+char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,float multiplier,char *str,int buf_size) {
     char byte_char=' ';
     double value=0;
     if (
@@ -178,10 +178,10 @@ char *values2str(char mode,t_iface_speed_stats stats,float multiplier,char *str,
         output_unit==PACKETS_OUT) {
         switch (output_type) {
             case RATE_OUT:
-                value=(double)direction2value(mode,stats.packets_in,stats.packets_out)*multiplier;
+                value=(double)direction2value(mode,stats.packets)*multiplier;
                 break;
             case MAX_OUT:
-                value=(double)direction_max2value(mode,stats.max_prec,stats.max_psend,stats.max_ptotal);
+                value=(double)direction_max2value(mode,full_stats.max.packets);
                 break;
         }
         snprintf(str,buf_size,"%13.2f P/s",(double)value);
@@ -190,10 +190,10 @@ char *values2str(char mode,t_iface_speed_stats stats,float multiplier,char *str,
             if (output_unit==BYTES_OUT) byte_char='B';
             switch (output_type) {
                 case RATE_OUT:
-                    value=(double)direction2value(mode,stats.bytesr,stats.bytess)*multiplier;
+                    value=(double)direction2value(mode,stats.bytes)*multiplier;
                     break;
                 case MAX_OUT:
-                    value=(double)direction_max2value(mode,stats.max_rec,stats.max_send,stats.max_total);
+                    value=(double)direction_max2value(mode,full_stats.max.bytes);
                     break;
             }
             if (output_unit==BITS_OUT) {
@@ -218,10 +218,10 @@ char *values2str(char mode,t_iface_speed_stats stats,float multiplier,char *str,
         if (output_unit==ERRORS_OUT) {
             switch (output_type) {
                 case RATE_OUT:
-                    value=(double)direction2value(mode,stats.errors_in,stats.errors_out)*multiplier;
+                    value=(double)direction2value(mode,stats.errors)*multiplier;
                     break;
                 case MAX_OUT:
-                    value=(double)direction_max2value(mode,stats.max_erec,stats.max_esend,stats.max_etotal);
+                    value=(double)direction_max2value(mode,full_stats.max.errors);
                     break;
             }
             snprintf(str,buf_size,"%13.2f E/s",(double)value);
@@ -231,7 +231,7 @@ char *values2str(char mode,t_iface_speed_stats stats,float multiplier,char *str,
 }
 
 /* do the actual output */
-void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float multiplier) {
+void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float multiplier,t_iface_stats full_stats) {
     char buffer[50];
 #if CSV || HTML
 	FILE *tmp_out_file;
@@ -240,17 +240,17 @@ void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float mult
 #ifdef HAVE_CURSES		
         case CURSES_OUT:
             mvwprintw(stdscr,y,x,"%12s:",if_name); /* output the name */
-            if (stats.errors_in && output_unit!=ERRORS_OUT) wattron(stdscr, A_REVERSE);
-            wprintw(stdscr,"%s",values2str(0,stats,multiplier,buffer,49));
-            if (stats.errors_in && output_unit!=ERRORS_OUT) wattroff(stdscr, A_REVERSE);
+            if (stats.errors.in && output_unit!=ERRORS_OUT) wattron(stdscr, A_REVERSE);
+            wprintw(stdscr,"%s",values2str(0,stats,full_stats,multiplier,buffer,49));
+            if (stats.errors.in && output_unit!=ERRORS_OUT) wattroff(stdscr, A_REVERSE);
             wprintw(stdscr," ");
-            if (stats.errors_out && output_unit!=ERRORS_OUT) wattron(stdscr, A_REVERSE);
-            wprintw(stdscr,"%s",values2str(1,stats,multiplier,buffer,49));
-            if (stats.errors_out && output_unit!=ERRORS_OUT) wattroff(stdscr, A_REVERSE);
+            if (stats.errors.out && output_unit!=ERRORS_OUT) wattron(stdscr, A_REVERSE);
+            wprintw(stdscr,"%s",values2str(1,stats,full_stats,multiplier,buffer,49));
+            if (stats.errors.out && output_unit!=ERRORS_OUT) wattroff(stdscr, A_REVERSE);
             wprintw(stdscr," ");
-            if ((stats.errors_out || stats.errors_in) && output_unit!=ERRORS_OUT) wattron(stdscr, A_REVERSE);
-            wprintw(stdscr,"%s",values2str(2,stats,multiplier,buffer,49));
-            if ((stats.errors_out || stats.errors_in) && output_unit!=ERRORS_OUT) wattroff(stdscr, A_REVERSE);
+            if ((stats.errors.out || stats.errors.in) && output_unit!=ERRORS_OUT) wattron(stdscr, A_REVERSE);
+            wprintw(stdscr,"%s",values2str(2,stats,full_stats,multiplier,buffer,49));
+            if ((stats.errors.out || stats.errors.in) && output_unit!=ERRORS_OUT) wattroff(stdscr, A_REVERSE);
             break;
 #endif
 		case PLAIN_OUT_ONCE:
@@ -258,32 +258,32 @@ void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float mult
 			if (output_method==PLAIN_OUT) printf("\033[%d;2H",y);
             printf("%12s:",if_name); /* output the name */
             printf("%s %s %s\n",
-                values2str(0,stats,multiplier,buffer,49),
-                values2str(1,stats,multiplier,buffer,49),
-                values2str(2,stats,multiplier,buffer,49));
+                values2str(0,stats,full_stats,multiplier,buffer,49),
+                values2str(1,stats,full_stats,multiplier,buffer,49),
+                values2str(2,stats,full_stats,multiplier,buffer,49));
             break;
 #ifdef HTML			
 		case HTML_OUT:
             tmp_out_file=out_file==NULL ? stdout : out_file;
 			fprintf(tmp_out_file,"<tr><td class='bwm-ng-name'>%12s:</td>",if_name);
 			fprintf(tmp_out_file,"<td class='bwm-ng-in'>");
-            if (stats.errors_in && output_unit!=ERRORS_OUT) 
+            if (stats.errors.in && output_unit!=ERRORS_OUT) 
                 fprintf(tmp_out_file,"<span class='bwm-ng-error'>"); 
             else 
                 fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
-            fprintf(tmp_out_file,"%s</span> </td>",values2str(0,stats,multiplier,buffer,49));
+            fprintf(tmp_out_file,"%s</span> </td>",values2str(0,stats,full_stats,multiplier,buffer,49));
             fprintf(tmp_out_file,"<td class='bwm-ng-out'>");
-            if (stats.errors_out && output_unit!=ERRORS_OUT) 
+            if (stats.errors.out && output_unit!=ERRORS_OUT) 
                 fprintf(tmp_out_file,"<span class='bwm-ng-error'>");
             else
                 fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
-            fprintf(tmp_out_file,"%s</span> </td>",values2str(1,stats,multiplier,buffer,49));
+            fprintf(tmp_out_file,"%s</span> </td>",values2str(1,stats,full_stats,multiplier,buffer,49));
             fprintf(tmp_out_file,"<td class='bwm-ng-total'>");
-            if ((stats.errors_out || stats.errors_in) && output_unit!=ERRORS_OUT)
+            if ((stats.errors.out || stats.errors.in) && output_unit!=ERRORS_OUT)
                 fprintf(tmp_out_file,"<span class='bwm-ng-error'>");
             else
                 fprintf(tmp_out_file,"<span class='bwm-ng-dummy'>");
-            fprintf(tmp_out_file,"%s</span></td><tr>\n",values2str(2,stats,multiplier,buffer,49));
+            fprintf(tmp_out_file,"%s</span></td><tr>\n",values2str(2,stats,full_stats,multiplier,buffer,49));
             break;
 #endif
 #ifdef CSV
@@ -294,9 +294,9 @@ void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float mult
 			if (input_method!=NETSTAT_IN)
 #endif                    
                 /* output Bytes/s */
-                fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c",(double)(stats.bytess*multiplier),csv_char,(double)(stats.bytesr*multiplier),csv_char,(double)((stats.bytess+stats.bytesr)*multiplier),csv_char);
+                fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c",(double)(stats.bytes.out*multiplier),csv_char,(double)(stats.bytes.in*multiplier),csv_char,(double)((stats.bytes.out+stats.bytes.in)*multiplier),csv_char);
             /* show packets/s and errors/s */
-            fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu\n",(double)stats.packets_out*multiplier,csv_char,(double)stats.packets_in*multiplier,csv_char,(double)(stats.packets_out+stats.packets_in)*multiplier,csv_char,stats.errors_out,csv_char,stats.errors_in);
+            fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu\n",(double)stats.packets.out*multiplier,csv_char,(double)stats.packets.in*multiplier,csv_char,(double)(stats.packets.out+stats.packets.in)*multiplier,csv_char,stats.errors.out,csv_char,stats.errors.in);
             break;
 #endif			
     }

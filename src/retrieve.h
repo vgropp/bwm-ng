@@ -65,7 +65,7 @@
 
 #define MAX_LINE_BUFFER 1024
 
-extern void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float multiplier);
+extern void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float multiplier,t_iface_stats full_stats);
 extern int deinit(char *error_msg, ...);
 
 extern int if_count;
@@ -79,7 +79,7 @@ extern char sumhidden;
 extern char output_unit;
 extern char output_type;
 extern int output_method;
-extern unsigned int intput_method;
+extern int input_method;
 extern char *iface_list;
 
 

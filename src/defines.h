@@ -55,7 +55,7 @@
 
 #if HAVE_IOCTL
 #include <sys/ioctl.h>
-#if SIOCGIFFLAGS
+#ifdef SIOCGIFFLAGS
 #define IOCTL
 #endif
 #endif
@@ -100,11 +100,11 @@
 #define EXTRA "-pre2-cvs"
 
 #define WRAP_AROUND ULONG_MAX
-#define WRAP_32BIT 4294967296ul
+#define WRAP_32BIT 4294967295ul
 
 #ifdef SYS_64BIT 
 #undef WRAP_AROUND
-#define WRAP_AROUND 18446744073709551616ull
+#define WRAP_AROUND 18446744073709551615ull
 #endif
 
 #ifdef HAVE_CURSES

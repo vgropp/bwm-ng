@@ -98,15 +98,6 @@ long count_tokens(char *in_str) {
     return tokens;
 }
 
-inline void copy_iface_stats(t_iface_stats *dest,t_iface_stats src) {
-    dest->send=src.send;
-    dest->rec=src.rec;
-    dest->p_send=src.p_send;
-    dest->p_rec=src.p_rec;
-    dest->e_send=src.e_send;
-    dest->e_rec=src.e_rec;
-}
-
 
 #if HAVE_GETTIMEOFDAY
 /* Returns: the time difference in milliseconds. */
@@ -138,50 +129,34 @@ inline unsigned long long calc_new_values(unsigned long long new, unsigned long 
             -old)+new;
 }
 
-t_iface_speed_stats convert2calced_values(t_iface_stats new, t_iface_stats old) {
+
+/* calc actual new-old values */
+t_iface_speed_stats convert2calced_values(t_iface_speed_stats new, t_iface_speed_stats old) {
     t_iface_speed_stats calced_stats;
-    calced_stats.errors_in=calc_new_values(new.e_rec,old.e_rec);
-    calced_stats.errors_out=calc_new_values(new.e_send,old.e_send);
-    calced_stats.packets_out=calc_new_values(new.p_send,old.p_send);
-    calced_stats.packets_in=calc_new_values(new.p_rec,old.p_rec);
-    calced_stats.bytess=calc_new_values(new.send,old.send);
-    calced_stats.bytesr=calc_new_values(new.rec,old.rec);
+    calced_stats.errors.in=calc_new_values(new.errors.in,old.errors.in);
+    calced_stats.errors.out=calc_new_values(new.errors.out,old.errors.out);
+    calced_stats.packets.out=calc_new_values(new.packets.out,old.packets.out);
+    calced_stats.packets.in=calc_new_values(new.packets.in,old.packets.in);
+    calced_stats.bytes.out=calc_new_values(new.bytes.out,old.bytes.out);
+    calced_stats.bytes.in=calc_new_values(new.bytes.in,old.bytes.in);
     return calced_stats;
 }
 
-inline void save_max(t_iface_stats *stats,t_iface_speed_stats *calced_stats,float multiplier) {
-    if (multiplier*calced_stats->errors_in > stats->max_erec)
-        calced_stats->max_erec=stats->max_erec=multiplier*calced_stats->errors_in;
-    else calced_stats->max_erec=stats->max_erec;
-    if (multiplier*calced_stats->errors_out>stats->max_esend)
-        calced_stats->max_esend=stats->max_esend=multiplier*calced_stats->errors_out;
-    else calced_stats->max_esend=stats->max_esend;
-    if (multiplier*(calced_stats->errors_out+calced_stats->errors_in)>stats->max_etotal)
-        calced_stats->max_etotal=stats->max_etotal=multiplier*(calced_stats->errors_in+calced_stats->errors_out);
-    else calced_stats->max_etotal=stats->max_etotal;
 
-    if (multiplier*calced_stats->packets_in>stats->max_prec)
-        calced_stats->max_prec=stats->max_prec=multiplier*calced_stats->packets_in;
-    else calced_stats->max_prec=stats->max_prec;
-    if (multiplier*calced_stats->packets_out>stats->max_psend)
-        calced_stats->max_psend=stats->max_psend=multiplier*calced_stats->packets_out;
-    else calced_stats->max_psend=stats->max_psend;
-    if (multiplier*(calced_stats->packets_out+calced_stats->packets_in)>stats->max_ptotal)
-        calced_stats->max_ptotal=stats->max_ptotal=multiplier*(calced_stats->packets_in+calced_stats->packets_out);
-    else calced_stats->max_ptotal=stats->max_ptotal;
-
-    if (multiplier*calced_stats->bytesr>stats->max_rec)
-        calced_stats->max_rec=stats->max_rec=multiplier*calced_stats->bytesr;
-    else calced_stats->max_rec=stats->max_rec;
-    if (multiplier*calced_stats->bytess>stats->max_send)
-        calced_stats->max_send=stats->max_send=multiplier*calced_stats->bytess;
-    else calced_stats->max_send=stats->max_send;
-    if (multiplier*(calced_stats->bytess+calced_stats->bytesr)>stats->max_total)
-        calced_stats->max_total=stats->max_total=multiplier*(calced_stats->bytess+calced_stats->bytesr);
-    else calced_stats->max_total=stats->max_total;
+inline void save_max(struct inouttotal_double *stats,struct inout_long calced_stats,float multiplier) {
+    if (multiplier*calced_stats.in > stats->in)
+        stats->in=multiplier*calced_stats.in;
+    if (multiplier*calced_stats.out>stats->out)
+        stats->out=multiplier*calced_stats.out;
+    if (multiplier*(calced_stats.out+calced_stats.in)>stats->total)
+        stats->total=multiplier*(calced_stats.in+calced_stats.out);
 }
 
-int process_if_data (int hidden_if, t_iface_stats tmp_if_stats,t_iface_stats *stats, char *name, int iface_number, char verbose, char iface_is_up) {
+inline void init_double_types(struct inouttotal_double *in) {
+    in->out=in->in=in->total=0;    
+}
+
+int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_speed_stats *stats, char *name, int iface_number, char verbose, char iface_is_up) {
 #if HAVE_GETTIMEOFDAY
     float multiplier;
 #else
@@ -204,56 +179,58 @@ int process_if_data (int hidden_if, t_iface_stats tmp_if_stats,t_iface_stats *st
             if_stats[if_count-1].if_name=(char*)strdup(name);
         else
             if_stats[if_count-1].if_name=(char*)strdup("unknown");
-        /* set it to current value, so there is no peak at first announce,
-         * we cannot copy the struct cause we wanna safe the name */
+        /* set it to current value, so there is no peak at first announce */
+        if_stats[local_if_count].data=tmp_if_stats;
         if (sumhidden || ((show_all_if>1 || iface_is_up) &&
             (show_all_if || show_iface(iface_list,name)))) {
-            copy_iface_stats(&if_stats[local_if_count],tmp_if_stats);
-            if_stats[local_if_count].max_rec=if_stats[local_if_count].max_send=if_stats[local_if_count].max_total=0;
-            if_stats[local_if_count].max_prec=if_stats[local_if_count].max_psend=if_stats[local_if_count].max_ptotal=0;
-            if_stats[local_if_count].max_erec=if_stats[local_if_count].max_esend=if_stats[local_if_count].max_etotal=0;
-            if_stats_total.send+=if_stats[local_if_count].send;
-            if_stats_total.rec+=if_stats[local_if_count].rec;
-            if_stats_total.p_send+=if_stats[local_if_count].p_send;
-            if_stats_total.p_rec+=if_stats[local_if_count].p_rec;
-            if_stats_total.e_send+=if_stats[local_if_count].e_send;
-            if_stats_total.e_rec+=if_stats[local_if_count].e_rec;
-        } else {
-            copy_iface_stats(&if_stats[local_if_count],tmp_if_stats);
+            /* add the values to total stats now */
+            if_stats_total.data.bytes.out+=tmp_if_stats.bytes.out;
+            if_stats_total.data.bytes.in+=tmp_if_stats.bytes.in;
+            if_stats_total.data.packets.out+=tmp_if_stats.packets.out;
+            if_stats_total.data.packets.in+=tmp_if_stats.packets.in;
+            if_stats_total.data.errors.out+=tmp_if_stats.errors.out;
+            if_stats_total.data.errors.in+=tmp_if_stats.errors.in;
         }
+        /* init max values with 0 */
+        init_double_types(&if_stats[local_if_count].max.bytes);
+        init_double_types(&if_stats[local_if_count].max.packets);
+        init_double_types(&if_stats[local_if_count].max.errors);
     }
 #if HAVE_GETTIMEOFDAY
     multiplier=(float)get_time_delay(local_if_count);
-#endif   
-    calced_stats=convert2calced_values(tmp_if_stats,if_stats[local_if_count]);
+#endif
+    /* calc new-old, so we have the new bytes,errors,packets */
+    calced_stats=convert2calced_values(tmp_if_stats,if_stats[local_if_count].data);
     /* save new max values in both, calced (for output) and ifstats */
-    save_max(&if_stats[local_if_count],&calced_stats,multiplier);
+    save_max(&if_stats[local_if_count].max.bytes,calced_stats.bytes,multiplier);
+    save_max(&if_stats[local_if_count].max.errors,calced_stats.errors,multiplier);
+    save_max(&if_stats[local_if_count].max.packets,calced_stats.packets,multiplier);
     if (verbose) { /* any output at all? */
         /* cycle: show all interfaces, only those which are up, only up and not hidden */
         if ((show_all_if>1 || iface_is_up) && /* is it up or do we show all ifaces? */
             (show_all_if || show_iface(iface_list,name))) {
-            print_values(5+iface_number-hidden_if,8,name,calced_stats,multiplier);
+            print_values(5+iface_number-hidden_if,8,name,calced_stats,multiplier,if_stats[local_if_count]);
 		} else
             hidden_if++; /* increase the opt cause we dont show this if */
     }
-    /* save current stats for the next run add current iface stats to total */
+    /* save current stats for the next run */
+    if_stats[local_if_count].data=tmp_if_stats;
+    /* add stats to new total */
     if (sumhidden || ((show_all_if>1 || iface_is_up) &&
             (show_all_if || show_iface(iface_list,name)))) {
-        copy_iface_stats(&if_stats[local_if_count],tmp_if_stats);
-        stats->send+=if_stats[local_if_count].send;
-        stats->rec+=if_stats[local_if_count].rec;
-        stats->p_send+=if_stats[local_if_count].p_send;
-        stats->p_rec+=if_stats[local_if_count].p_rec;
-        stats->e_send+=if_stats[local_if_count].e_send;
-        stats->e_rec+=if_stats[local_if_count].e_rec;
-    } else {
-        copy_iface_stats(&if_stats[local_if_count],tmp_if_stats);
-    }
+        stats->bytes.out+=tmp_if_stats.bytes.out;
+        stats->bytes.in+=tmp_if_stats.bytes.in;
+        stats->packets.out+=tmp_if_stats.packets.out;
+        stats->packets.in+=tmp_if_stats.packets.in;
+        stats->errors.out+=tmp_if_stats.errors.out;
+        stats->errors.in+=tmp_if_stats.errors.in;
+    } 
 	return hidden_if;
 }	
 
-void finish_iface_stats (char verbose, t_iface_stats stats, int hidden_if, int iface_number) {
+void finish_iface_stats (char verbose, t_iface_speed_stats stats, int hidden_if, int iface_number) {
     int i;
+    t_iface_speed_stats calced_stats;
 #if HAVE_GETTIMEOFDAY
     struct timeval now;
     float multiplier;
@@ -264,10 +241,11 @@ void finish_iface_stats (char verbose, t_iface_stats stats, int hidden_if, int i
 #else
 	float multiplier=(float)1000/delay;
 #endif    
-    t_iface_speed_stats calced_stats;
-    calced_stats=convert2calced_values(stats,if_stats_total);
+    calced_stats=convert2calced_values(stats,if_stats_total.data);
     /* save new max values in both, calced (for output) and final stats */
-    save_max(&if_stats_total,&calced_stats,multiplier);
+    save_max(&if_stats_total.max.bytes,calced_stats.bytes,multiplier);
+    save_max(&if_stats_total.max.errors,calced_stats.errors,multiplier);
+    save_max(&if_stats_total.max.packets,calced_stats.packets,multiplier);
 
     if (verbose) {
         /* output total ifaces stats */
@@ -278,10 +256,10 @@ void finish_iface_stats (char verbose, t_iface_stats stats, int hidden_if, int i
 #endif			
 			if (output_method==PLAIN_OUT || output_method==PLAIN_OUT_ONCE)
 				printf("%s------------------------------------------------------------------\n",output_method==PLAIN_OUT ? " " : "");
-        print_values(6+iface_number-hidden_if,8,"total",calced_stats,multiplier);
+        print_values(6+iface_number-hidden_if,8,"total",calced_stats,multiplier,if_stats_total);
     }
     /* save the data in total-struct */
-    copy_iface_stats(&if_stats_total,stats);
+    if_stats_total.data=stats;
 	if (output_method==PLAIN_OUT)
 		for (i=0;i<if_count-iface_number;i++) printf("%70s\n"," "); /* clear unused lines */
 	return;
@@ -291,17 +269,16 @@ void finish_iface_stats (char verbose, t_iface_stats stats, int hidden_if, int i
 #ifdef GETIFADDRS
 /* do the actual work, get and print stats if verbose */
 void get_iface_stats_getifaddrs (char verbose) {
-    char iface_is_up=0;
-	
     char *name=NULL;
 
     struct ifaddrs *net, *net_ptr=NULL;
     struct if_data *net_data;
 	
 	int hidden_if=0,current_if_num=0;
-    t_iface_stats stats,tmp_if_stats; /* local struct, used to calc total values */
+    t_iface_speed_stats stats; /* local struct, used to calc total values */
+    t_iface_speed_stats tmp_if_stats;
 
-    memset(&stats,0,(size_t)sizeof(t_iface_stats)); /* init it */
+    memset(&stats,0,(size_t)sizeof(t_iface_speed_stats)); /* init it */
 
     /* dont open proc_net_dev if netstat_i is requested, else try to open and if it fails fallback */
 	if (getifaddrs(&net) != 0) {
@@ -311,7 +288,6 @@ void get_iface_stats_getifaddrs (char verbose) {
     /* loop either while netstat enabled and still lines to read
      * or still buffer (buf) left */
     while (net_ptr!=NULL) {
-        memset(&tmp_if_stats,0,(size_t)sizeof(t_iface_stats)); /* reinit it to zero */
         /* move getifaddr data to my struct */
 		if (net_ptr->ifa_addr==NULL || net_ptr->ifa_addr->sa_family != AF_LINK) {
 			net_ptr=net_ptr->ifa_next;
@@ -323,20 +299,19 @@ void get_iface_stats_getifaddrs (char verbose) {
 			name=strdup("");
         if (net_ptr->ifa_data!=NULL) {
 		    net_data=(struct if_data *)net_ptr->ifa_data;
-            tmp_if_stats.rec=net_data->ifi_ibytes;
-            tmp_if_stats.send=net_data->ifi_obytes;
-            tmp_if_stats.p_rec=net_data->ifi_ipackets;
-            tmp_if_stats.p_send=net_data->ifi_opackets;
-            tmp_if_stats.e_rec=net_data->ifi_ierrors;
-            tmp_if_stats.e_send=net_data->ifi_oerrors;
+            tmp_if_stats.bytes.in=net_data->ifi_ibytes;
+            tmp_if_stats.bytes.out=net_data->ifi_obytes;
+            tmp_if_stats.packets.in=net_data->ifi_ipackets;
+            tmp_if_stats.packets.out=net_data->ifi_opackets;
+            tmp_if_stats.errors.in=net_data->ifi_ierrors;
+            tmp_if_stats.errors.out=net_data->ifi_oerrors;
         } else {
             net_ptr=net_ptr->ifa_next;
             continue;
         }
-		iface_is_up= (show_all_if || (net_ptr->ifa_flags & IFF_UP));
-		net_ptr=net_ptr->ifa_next;
         /* init new interfaces and add fetched data to old or new one */
-        hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose, iface_is_up);
+        hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose, (show_all_if || (net_ptr->ifa_flags & IFF_UP)));
+        net_ptr=net_ptr->ifa_next;
 		free(name);
 		current_if_num++;
     } /* fgets done (while) */
@@ -357,9 +332,10 @@ void get_iface_stats_proc (char verbose) {
     char *buffer=NULL,*name=NULL;
     
 	int hidden_if=0,current_if_num=0;
-	t_iface_stats stats,tmp_if_stats; /* local struct, used to calc total values */
+	t_iface_speed_stats stats; /* local struct, used to calc total values */
+    t_iface_speed_stats tmp_if_stats;
 
-	memset(&stats,0,(size_t)sizeof(t_iface_stats)); /* init it */
+	memset(&stats,0,(size_t)sizeof(t_iface_speed_stats)); /* init it */
     /* dont open proc_net_dev if netstat_i is requested, else try to open and if it fails fallback */
     if (!(f=fopen(PROC_FILE,"r"))) {
 		deinit("open of procfile failed: %s\n",strerror(errno));
@@ -369,14 +345,13 @@ void get_iface_stats_proc (char verbose) {
 	if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL ) || (fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) deinit("read of proc failed: %s\n",strerror(errno));
 	name=(char *)malloc(MAX_LINE_BUFFER);
 	while ( (fgets(buffer,MAX_LINE_BUFFER,f) != NULL) ) {
-		memset(&tmp_if_stats,0,(size_t)sizeof(t_iface_stats)); /* reinit it to zero */
         /* get the name */
         ptr=strchr(buffer,':');
         /* wrong format */
         if (ptr==NULL) { deinit("wrong format of input stream\n"); }
 		/* set : to end_of_string and move to first char of "next" string (to first data) */
         *ptr++ = 0;
-        sscanf(ptr,"%llu%llu%llu%*i%*i%*i%*i%*i%llu%llu%llu",&tmp_if_stats.rec,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.send,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
+        sscanf(ptr,"%llu%llu%llu%*i%*i%*i%*i%*i%llu%llu%llu",&tmp_if_stats.bytes.in,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.bytes.out,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out);
         sscanf(buffer,"%s",name);
 		/* init new interfaces and add fetched data to old or new one */
 		hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose
@@ -405,8 +380,9 @@ void get_iface_stats_libstat (char verbose) {
     sg_network_io_stats *network_stats=NULL;
     int num_network_stats,current_if_num=0,hidden_if=0;
 	
-	t_iface_stats stats,tmp_if_stats; /* local struct, used to calc total values */
-	memset(&stats,0,(size_t)sizeof(t_iface_stats)); /* init it */
+	t_iface_speed_stats stats; /* local struct, used to calc total values */
+    t_iface_speed_stats tmp_if_stats;
+	memset(&stats,0,(size_t)sizeof(t_iface_speed_stats)); /* init it */
     
 	network_stats = sg_get_network_io_stats(&num_network_stats);
     if (network_stats == NULL){
@@ -414,12 +390,12 @@ void get_iface_stats_libstat (char verbose) {
     }
 	
 	while (num_network_stats>current_if_num) {
-	    tmp_if_stats.rec=network_stats->rx;
-		tmp_if_stats.send=network_stats->tx;
-	    tmp_if_stats.p_rec=network_stats->ipackets;
-		tmp_if_stats.p_send=network_stats->opackets;
-	    tmp_if_stats.e_rec=network_stats->ierrors;
-		tmp_if_stats.e_send=network_stats->oerrors;
+	    tmp_if_stats.bytes.in=network_stats->rx;
+		tmp_if_stats.bytes.out=network_stats->tx;
+	    tmp_if_stats.packets.in=network_stats->ipackets;
+		tmp_if_stats.packets.out=network_stats->opackets;
+	    tmp_if_stats.errors.in=network_stats->ierrors;
+		tmp_if_stats.errors.out=network_stats->oerrors;
 		network_stats++;
 
 		hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, network_stats->interface_name, current_if_num, verbose
@@ -443,13 +419,20 @@ void get_iface_stats_libstat (char verbose) {
 void get_iface_stats_netstat (char verbose) {
     int current_if_num=0,hidden_if=0;
 	char *buffer=NULL,*name=NULL;
+#if NETSTAT_NETBSD
+    char *str_buf=NULL;
+    char *test_buf;
+    char *buffer2=NULL;
+    FILE *f2=NULL;
+#endif
 #if NETSTAT_BSD	|| NETSTAT_BSD_BYTES || NETSTAT_SOLARIS || NETSTAT_NETBSD
     char *last_name=NULL;
 #endif	
 	FILE *f=NULL;
 
-	t_iface_stats stats,tmp_if_stats; /* local struct, used to calc total values */
-    memset(&stats,0,(size_t)sizeof(t_iface_stats)); /* init it */
+	t_iface_speed_stats stats; /* local struct, used to calc total values */
+    t_iface_speed_stats tmp_if_stats;
+    memset(&stats,0,(size_t)sizeof(t_iface_speed_stats)); /* init it */
 	if (!(f=popen(
 #if NETSTAT_BSD || NETSTAT_BSD_BYTES
 #if NETSTAT_BSD_LINK
@@ -468,10 +451,17 @@ void get_iface_stats_netstat (char verbose) {
             NETSTAT_PATH " -i -f inet -f inet6"
 #endif
 #if NETSTAT_NETBSD
-            NETSTAT_PATH " -ibd"
+            NETSTAT_PATH " -ib"
 #endif
                     ,"r")))
         deinit("no input stream found: %s\n",strerror(errno));
+#if NETSTAT_NETBSD
+    if (!(f2=popen( NETSTAT_PATH " -i","r")))
+        deinit("no input stream found: %s\n",strerror(errno));
+    buffer2=(char *)malloc(MAX_LINE_BUFFER);
+    if ((fgets(buffer2,MAX_LINE_BUFFER,f2) == NULL )) deinit("read of netstat failed: %s\n",strerror(errno));
+    str_buf=(char *)malloc(MAX_LINE_BUFFER);
+#endif
     buffer=(char *)malloc(MAX_LINE_BUFFER);
 #ifdef NETSTAT_LINUX
     /* we skip first 2 lines if not bsd at any mode */
@@ -486,28 +476,31 @@ void get_iface_stats_netstat (char verbose) {
     name=(char *)malloc(MAX_LINE_BUFFER);
     /* loop and read each line */
     while ( (fgets(buffer,MAX_LINE_BUFFER,f) != NULL && buffer[0]!='\n') ) {
-        memset(&tmp_if_stats,0,(size_t)sizeof(t_iface_stats)); /* reinit it to zero */
+        memset(&tmp_if_stats,0,(size_t)sizeof(t_iface_speed_stats)); /* reinit it to zero */
 #ifdef NETSTAT_LINUX		
-        sscanf(buffer,"%s%*i%*i%llu%llu%*i%*i%llu%llu",name,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
+        sscanf(buffer,"%s%*i%*i%llu%llu%*i%*i%llu%llu",name,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out);
 #endif
 #if NETSTAT_BSD_BYTES 
         if (count_tokens(buffer)>=10) /* including address */
-    		sscanf(buffer,"%s%*i%*s%*s%llu%llu%llu%llu%llu%llu",name,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send,&tmp_if_stats.send);
+    		sscanf(buffer,"%s%*i%*s%*s%llu%llu%llu%llu%llu%llu",name,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.bytes.in,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out,&tmp_if_stats.bytes.out);
         else /* w/o address */
-            sscanf(buffer,"%s%*i%*s%llu%llu%llu%llu%llu%llu",name,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send,&tmp_if_stats.send);
+            sscanf(buffer,"%s%*i%*s%llu%llu%llu%llu%llu%llu",name,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.bytes.in,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out,&tmp_if_stats.bytes.out);
 #endif
 #if NETSTAT_BSD	|| NETSTAT_SOLARIS	
         if (count_tokens(buffer)>=8) /* including address */
-		    sscanf(buffer,"%s%*i%*s%*s%llu%llu%llu%llu",name,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
+		    sscanf(buffer,"%s%*i%*s%*s%llu%llu%llu%llu",name,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out);
         else /* w/o address */
-            sscanf(buffer,"%s%*i%*s%llu%llu%llu%llu",name,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
+            sscanf(buffer,"%s%*i%*s%llu%llu%llu%llu",name,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out);
 #endif
 #if NETSTAT_NETBSD
-        if (count_tokens(buffer)>=7) /* including address */
-            sscanf(buffer,"%s%*i%*s%*s%llu%llu%llu",name,&tmp_if_stats.rec,&tmp_if_stats.send,&tmp_if_stats.e_send);
-        else
-            sscanf(buffer,"%s%*i%*s%llu%llu%llu",name,&tmp_if_stats.rec,&tmp_if_stats.send,&tmp_if_stats.e_send);
-        tmp_if_stats.e_rec=tmp_if_stats.e_send;
+        test_buf=fgets(buffer2,MAX_LINE_BUFFER,f2); 
+        if (count_tokens(buffer)>=6) { /* including address */
+            if (test_buf) sscanf(buffer2,"%s%s%s%s%llu%llu%llu%llu",str_buf,str_buf,str_buf,str_buf,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out);
+            sscanf(buffer,"%s%s%s%s%llu%llu",name,str_buf,str_buf,str_buf,&tmp_if_stats.bytes.in,&tmp_if_stats.bytes.out);
+        } else {
+            if (test_buf) sscanf(buffer2,"%s%s%s%llu%llu%llu%llu",str_buf,str_buf,str_buf,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out);
+            sscanf(buffer,"%s%s%s%llu%llu",name,str_buf,str_buf,&tmp_if_stats.bytes.in,&tmp_if_stats.bytes.out);
+        }
 #endif
 #if NETSTAT_BSD || NETSTAT_BSD_BYTES || NETSTAT_SOLARIS || NETSTAT_NETBSD
         /* check if we have a new iface or if its only a second line of the same one */
@@ -529,6 +522,11 @@ void get_iface_stats_netstat (char verbose) {
     finish_iface_stats (verbose, stats, hidden_if,current_if_num);
     /* clean buffers */
     free(buffer);
+#if NETSTAT_NETBSD
+    free(buffer2);
+    free(str_buf);
+    pclose(f2);
+#endif
 #if NETSTAT_BSD || NETSTAT_NETBSD || NETSTAT_BSD_BYTES || NETSTAT_SOLARIS
     free(last_name);
 #endif	
@@ -552,9 +550,10 @@ void get_iface_stats_sysctl (char verbose) {
     char *name=NULL;
 
     int hidden_if=0,current_if_num=0,my_errno=0;
-    t_iface_stats stats,tmp_if_stats; /* local struct, used to calc total values */
+    t_iface_speed_stats tmp_if_stats;
+    t_iface_speed_stats stats; /* local struct, used to calc total values */
 
-    memset(&stats,0,(size_t)sizeof(t_iface_stats)); /* init it */
+    memset(&stats,0,(size_t)sizeof(t_iface_speed_stats)); /* init it */
 
     /* dont open proc_net_dev if netstat_i is requested, else try to open and if it fails fallback */
     if (sysctl(mib, 6, NULL, &size, NULL, 0) < 0) deinit("sysctl failed: %s\n",strerror(errno));
@@ -572,7 +571,6 @@ void get_iface_stats_sysctl (char verbose) {
     /* loop either while netstat enabled and still lines to read
      * or still buffer (buf) left */
     while (next < (bsd_if_buf + size)) {
-        memset(&tmp_if_stats,0,(size_t)sizeof(t_iface_stats)); /* reinit it to zero */
         /* BSD sysctl code */
         ifmhdr = (struct if_msghdr *) next;
         if (ifmhdr->ifm_type != RTM_IFINFO) break;
@@ -589,12 +587,12 @@ void get_iface_stats_sysctl (char verbose) {
         name=(char *)malloc(saddr->sdl_nlen+1);
 		strncpy(name,saddr->sdl_data,saddr->sdl_nlen);
         name[saddr->sdl_nlen]='\0';
-        tmp_if_stats.rec=ifmhdr->ifm_data.ifi_ibytes;
-        tmp_if_stats.send=ifmhdr->ifm_data.ifi_obytes;
-        tmp_if_stats.p_rec=ifmhdr->ifm_data.ifi_ipackets;
-        tmp_if_stats.p_send=ifmhdr->ifm_data.ifi_opackets; 
-		tmp_if_stats.e_rec=ifmhdr->ifm_data.ifi_ierrors;
-        tmp_if_stats.e_send=ifmhdr->ifm_data.ifi_oerrors;
+        tmp_if_stats.bytes.in=ifmhdr->ifm_data.ifi_ibytes;
+        tmp_if_stats.bytes.out=ifmhdr->ifm_data.ifi_obytes;
+        tmp_if_stats.packets.in=ifmhdr->ifm_data.ifi_ipackets;
+        tmp_if_stats.packets.out=ifmhdr->ifm_data.ifi_opackets; 
+		tmp_if_stats.errors.in=ifmhdr->ifm_data.ifi_ierrors;
+        tmp_if_stats.errors.out=ifmhdr->ifm_data.ifi_oerrors;
         /* init new interfaces and add fetched data to old or new one */
         hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose, iface_is_up);
         free(name);
@@ -616,9 +614,10 @@ void get_iface_stats_kstat (char verbose) {
     kstat_named_t *i_bytes,*o_bytes,*i_packets,*o_packets,*i_errors,*o_errors;
     char *name;
     int hidden_if=0,current_if_num=0,my_errno=0;
-    t_iface_stats stats,tmp_if_stats; /* local struct, used to calc total values */
+    t_iface_speed_stats tmp_if_stats;
+    t_iface_speed_stats stats; /* local struct, used to calc total values */
     
-    memset(&stats,0,(size_t)sizeof(t_iface_stats)); /* init it */
+    memset(&stats,0,(size_t)sizeof(t_iface_speed_stats)); /* init it */
     kc = kstat_open();
     if (kc==NULL) deinit("kstat failed: %s\n",strerror(my_errno));
     name=(char *)malloc(KSTAT_STRLEN);
@@ -638,12 +637,12 @@ void get_iface_stats_kstat (char verbose) {
         if (!i_bytes || !o_bytes || !i_packets || !o_packets || !i_errors || !o_errors) 
             continue;
         /* use ui32 values, the 64 bit values return strange (very big) differences */
-        tmp_if_stats.rec=i_bytes->value.ui32;
-        tmp_if_stats.send=o_bytes->value.ui32;
-        tmp_if_stats.p_rec=i_packets->value.ui32;
-        tmp_if_stats.p_send=o_packets->value.ui32;
-        tmp_if_stats.e_rec=i_errors->value.ui32;
-        tmp_if_stats.e_send=o_errors->value.ui32;
+        tmp_if_stats.bytes.in=i_bytes->value.ui32;
+        tmp_if_stats.bytes.out=o_bytes->value.ui32;
+        tmp_if_stats.packets.in=i_packets->value.ui32;
+        tmp_if_stats.packets.out=o_packets->value.ui32;
+        tmp_if_stats.errors.in=i_errors->value.ui32;
+        tmp_if_stats.errors.out=o_errors->value.ui32;
         /* init new interfaces and add fetched data to old or new one */
         hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose, 1);
         current_if_num++;

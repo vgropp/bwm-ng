@@ -75,7 +75,7 @@ void deinit(char *error_msg, ...) {
 		curs_set(1);
 	}
 #endif	
-#ifdef IOCTL	
+#ifdef IOCTL
 	/* close socket if we opened it for ioctl */
 	if (skfd >= 0) { 
 		close(skfd);
@@ -239,9 +239,12 @@ int main (int argc, char *argv[]) {
 	if (output_count==0) output_count=-1;
 	if (output_method==PLAIN_OUT && output_count==1) output_method=PLAIN_OUT_ONCE;
 	if (output_method==PLAIN_OUT) printf("\033[2J"); /* clear screen for plain out */
-    if_stats_total.max_rec=if_stats_total.max_send=if_stats_total.max_total=0;
-    if_stats_total.max_prec=if_stats_total.max_psend=if_stats_total.max_ptotal=0;
-    if_stats_total.max_esend=if_stats_total.max_erec=if_stats_total.max_etotal=0;
+    init_double_types(&if_stats_total.max.bytes);
+    init_double_types(&if_stats_total.max.packets);
+    init_double_types(&if_stats_total.max.errors);
+    if_stats_total.data.bytes.out=if_stats_total.data.bytes.in=0;
+    if_stats_total.data.packets.out=if_stats_total.data.packets.in=0;
+    if_stats_total.data.errors.out=if_stats_total.data.errors.out=0;
     while (1) { /* do the main loop */
 #ifdef HTML
         if (output_method==HTML_OUT && out_file_path) {

@@ -26,10 +26,6 @@
 
 /* ugly defines to handle different compile time options */
 
-#if TIME
-#define HAVE_GETTIMEOFDAY 1
-#endif
-
 #if HAVE_STRUCT_IF_MSGHDR_IFM_DATA
 #define SYSCTL
 #endif
@@ -99,6 +95,20 @@
 #define MAJOR 0
 #define MINOR 5
 #define EXTRA "-pre1"
+
+#define WRAP_AROUND 4294967296ull
+
+#ifdef SYS_64BIT 
+#undef WRAP_AROUND
+#define WRAP_AROUND 18446744073709551616ull
+#else
+#ifdef __WORDSIZE
+#if __WORDSIZE == 64
+#undef WRAP_AROUND
+#define WRAP_AROUND 18446744073709551616ull
+#endif
+#endif
+#endif
 
 #ifdef CURSES
 #define CURSES_OUT 0

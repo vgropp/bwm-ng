@@ -7,6 +7,7 @@
                   - if ifacelist (-I) is prefaced with % it behaves like a
                     blacklist
                   - get_options (long_options) cleanup
+                  - fixed wrong values on proc/net/dev wrap around.
   12-20-2004 0.4: pre1:
                   - get_iface_stats cleanup
                   - plain and csv output added

@@ -222,6 +222,13 @@ echo "enable config-file support: yes"
 AC_DEFINE_UNQUOTED(CONFIG_FILE)
 ])
 
+AC_ARG_ENABLE([64bit],AS_HELP_STRING([--enable-64bit],[enable 64bit support (default: no)]),[
+echo "enable 64bit support: $enableval"
+if [ test $enableval = "yes" ]; then
+    AC_DEFINE_UNQUOTED(SYS_64BIT)
+fi
+])
+
 AC_CHECK_HEADERS([pwd.h],[
     AC_CHECK_FUNCS([getpwuid],[
         AC_DEFINE_UNQUOTED(HAVE_GETPWUID)

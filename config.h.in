@@ -67,6 +67,5 @@
 /* define the path to netstat binary */
 #undef HAVE_NETSTAT_PATH
 
-/* define to 1 if you have gettimeofday function */
-#undef TIME
-
+/* define to 1 if you have 64bit system */
+#undef SYS_64BIT

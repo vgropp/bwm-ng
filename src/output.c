@@ -211,9 +211,13 @@ void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stat
 	unsigned long long packets_out,packets_in,bytess,bytesr,errors_in,errors_out;
 #ifdef CSV	
 	FILE *out_file;
-#endif	
-	errors_in=new_stats.e_rec-stats.e_rec > 0 ? new_stats.e_rec-stats.e_rec : 0;
-	errors_out=new_stats.e_send-stats.e_send > 0 ? new_stats.e_send-stats.e_send : 0;
+#endif
+	errors_in=((long long)(new_stats.e_rec-stats.e_rec) >= 0) ? new_stats.e_rec-stats.e_rec : (WRAP_AROUND-stats.e_rec)+new_stats.e_rec;
+	errors_out=((long long)(new_stats.e_send-stats.e_send) >= 0) ? new_stats.e_send-stats.e_send : (WRAP_AROUND-stats.e_send)+new_stats.e_send;
+    packets_out=((long long)(new_stats.p_send-stats.p_send) >= 0) ? new_stats.p_send-stats.p_send : (WRAP_AROUND-stats.p_send)+new_stats.p_send;
+    packets_in=((long long)(new_stats.p_rec-stats.p_rec) >= 0) ? new_stats.p_rec-stats.p_rec : (WRAP_AROUND-stats.p_rec)+new_stats.p_rec;
+    bytess=((long long)(new_stats.send-stats.send) >= 0) ? new_stats.send-stats.send : (WRAP_AROUND-stats.send)+new_stats.send;
+    bytesr=((long long)(new_stats.rec-stats.rec) >= 0) ? new_stats.rec-stats.rec : (WRAP_AROUND-stats.rec)+new_stats.rec;
     switch (output_method) {
 #ifdef CURSES		
         case CURSES_OUT:
@@ -224,8 +228,6 @@ void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stat
 #endif					
 					show_packets) {
                 /* show packets/s if asked for or netstat input */
-                packets_out=new_stats.p_send-stats.p_send > 0 ? new_stats.p_send-stats.p_send : 0;
-                packets_in=new_stats.p_rec-stats.p_rec > 0 ? new_stats.p_rec-stats.p_rec : 0;
 				if (errors_in) wattron(stdscr, A_REVERSE);
                 wprintw(stdscr,"%13.2f P/s",(double)packets_in*multiplier);
 				if (errors_in) wattroff(stdscr, A_REVERSE);
@@ -239,8 +241,6 @@ void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stat
 				if (errors_out || errors_in) wattroff(stdscr, A_REVERSE);
             } else {
                 char bytes_buf[20];
-                bytess=new_stats.send-stats.send > 0 ? new_stats.send-stats.send : 0;
-                bytesr=new_stats.rec-stats.rec > 0 ? new_stats.rec-stats.rec : 0;
                 /* output Bytes/s */
 				if (errors_in) wattron(stdscr, A_REVERSE);
                 wprintw(stdscr,"%s",convert_bytes((double)(bytesr*multiplier),bytes_buf,20));
@@ -267,15 +267,11 @@ void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stat
 #endif					
 					show_packets) {
                 /* show packets/s if asked for or netstat input */
-                packets_out=new_stats.p_send-stats.p_send > 0 ? new_stats.p_send-stats.p_send : 0;
-                packets_in=new_stats.p_rec-stats.p_rec > 0 ? new_stats.p_rec-stats.p_rec : 0;
                 printf("%13.2f P/s ",(double)packets_in*multiplier);
                 printf("%13.2f P/s ",(double)packets_out*multiplier);
                 printf("%13.2f P/s\n",(double)(packets_out+packets_in)*multiplier);
             } else {
                 char bytes_buf[20];
-                bytess=new_stats.send-stats.send > 0 ? new_stats.send-stats.send : 0;
-                bytesr=new_stats.rec-stats.rec > 0 ? new_stats.rec-stats.rec : 0;
                 /* output Bytes/s */
                 printf("%s ",convert_bytes((double)(bytesr*multiplier),bytes_buf,20));
                 printf("%s ",convert_bytes((double)(bytess*multiplier),bytes_buf,20));
@@ -292,8 +288,6 @@ void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stat
 #endif					
 					show_packets) {
 				/* show packets/s if asked for or netstat input */
-                packets_out=new_stats.p_send-stats.p_send > 0 ? new_stats.p_send-stats.p_send : 0;
-                packets_in=new_stats.p_rec-stats.p_rec > 0 ? new_stats.p_rec-stats.p_rec :0;
                 printf("<td class='bwm-ng-out'>");
 				if (errors_in) printf("<span class='bwm-ng-error'>"); else printf("<span class='bwm-ng-dummy'>");
 				printf("%13.2f P/s</span> </td>",(double)packets_in*multiplier);
@@ -308,8 +302,6 @@ void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stat
 				printf("%13.2f P/s</span></td><tr>\n",(double)(packets_out+packets_in)*multiplier);
             } else {
                 char bytes_buf[20];
-                bytess=new_stats.send-stats.send > 0 ? new_stats.send-stats.send : 0;
-                bytesr=new_stats.rec-stats.rec > 0 ? new_stats.rec-stats.rec : 0;
                 /* output Bytes/s */
                 printf("<td class='bwm-ng-out'>");
 				if (errors_in) printf("<span class='bwm-ng-error'>"); else printf("<span class='bwm-ng-dummy'>");
@@ -336,14 +328,10 @@ void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stat
 					!(input_method==NETSTAT_IN) && 
 #endif					
 					!show_packets) {
-                bytess=new_stats.send-stats.send > 0 ? new_stats.send-stats.send : 0;
-                bytesr=new_stats.rec-stats.rec > 0 ? new_stats.rec-stats.rec : 0;
                 /* output Bytes/s */
                 fprintf(out_file,"%.2f%c%.2f%c%.2f%c",(double)(bytess*multiplier),csv_char,(double)(bytesr*multiplier),csv_char,(double)((bytess+bytesr)*multiplier),csv_char);
             }
             /* show packets/s if asked for or netstat input */
-            packets_out=new_stats.p_send-stats.p_send > 0 ? new_stats.p_send-stats.p_send : 0;
-            packets_in=new_stats.p_rec-stats.p_rec > 0 ? new_stats.p_rec-stats.p_rec : 0;
             fprintf(out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu\n",(double)packets_out*multiplier,csv_char,(double)packets_in*multiplier,csv_char,(double)(packets_out+packets_in)*multiplier,csv_char,errors_out,csv_char,errors_in);
             break;
 #endif			

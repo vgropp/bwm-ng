@@ -29,6 +29,7 @@ inline char *output_type2str() {
         case RATE_OUT:
             return "rate";
             break;
+#if EXTENDED_STATS            
         case MAX_OUT:
             return "max";
             break;
@@ -38,6 +39,7 @@ inline char *output_type2str() {
         case AVG_OUT:
             return "avg";
             break;
+#endif            
     }
     return "";
 }
@@ -161,6 +163,7 @@ inline unsigned long long direction2value(char mode,struct inout_long stats) {
     return 0;
 }
 
+#if EXTENDED_STATS
 inline double direction_max2value(char mode,struct inouttotal_double stats) {
     switch (mode) {
         case 0:
@@ -172,7 +175,7 @@ inline double direction_max2value(char mode,struct inouttotal_double stats) {
     }
     return 0;
 }
-
+#endif
 
 inline char *dyn_byte_value2str(double value,char *str,int buf_size) {
     if (dynamic) {
@@ -197,7 +200,11 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
     char speed[3];
     double value=0;
     char *str_buf=NULL;
-    if (output_type==RATE_OUT || output_type==MAX_OUT || output_type==AVG_OUT) 
+    if (output_type==RATE_OUT 
+#if EXTENDED_STATS
+            || output_type==MAX_OUT || output_type==AVG_OUT
+#endif
+            ) 
         strcpy(speed,"/s"); 
     else 
         strcpy(speed,"  ");
@@ -207,11 +214,12 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
 #endif
         output_unit==PACKETS_OUT) {
         switch (output_type) {
-            case SUM_OUT:
-                value=direction2value(mode,full_stats.sum.packets);
-                break;
             case RATE_OUT:
                 value=(double)direction2value(mode,stats.packets)*multiplier;
+                break;
+#if EXTENDED_STATS                
+            case SUM_OUT:
+                value=direction2value(mode,full_stats.sum.packets);
                 break;
             case MAX_OUT:
                 value=(double)direction_max2value(mode,full_stats.max.packets);
@@ -219,6 +227,7 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
             case AVG_OUT:
                 value=(double)direction_max2value(mode,full_stats.avg.value.packets);
                 break;
+#endif                
         }
         snprintf(str,buf_size,"%16.2f P%s",(double)value,speed);
     } else {
@@ -227,17 +236,19 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
             case BYTES_OUT:
                 if (output_unit==BYTES_OUT) byte_char='B';
                 switch (output_type) {
-                    case SUM_OUT:
-                        value=direction2value(mode,full_stats.sum.bytes);
-                        break;
                     case RATE_OUT:
                         value=(double)direction2value(mode,stats.bytes)*multiplier;
+                        break;
+#if EXTENDED_STATS
+                    case SUM_OUT:
+                        value=direction2value(mode,full_stats.sum.bytes);
                         break;
                     case MAX_OUT:
                         value=(double)direction_max2value(mode,full_stats.max.bytes);
                         break;
                     case AVG_OUT:
                         value=(double)direction_max2value(mode,full_stats.avg.value.bytes);
+#endif
                 }
                 if (output_unit==BITS_OUT) {
                     byte_char='b';
@@ -248,11 +259,12 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
                 break;
             case ERRORS_OUT:
                 switch (output_type) {
-                    case SUM_OUT:
-                        value=direction2value(mode,full_stats.sum.errors);
-                        break;
                     case RATE_OUT:
                         value=(double)direction2value(mode,stats.errors)*multiplier;
+                        break;
+#if EXTENDED_STATS
+                    case SUM_OUT:
+                        value=direction2value(mode,full_stats.sum.errors);
                         break;
                     case MAX_OUT:
                         value=(double)direction_max2value(mode,full_stats.max.errors);
@@ -260,6 +272,7 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
                     case AVG_OUT:
                         value=(double)direction_max2value(mode,full_stats.avg.value.errors);
                         break;
+#endif
                 }
                 snprintf(str,buf_size,"%16.2f E%s",(double)value,speed);
                 break;

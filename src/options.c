@@ -63,6 +63,7 @@ inline int str2output_unit(char *optarg) {
     return BYTES_OUT;
 }
 
+#if EXTENDED_STATS
 inline int str2output_type(char *optarg) {
     if (optarg) {
         if (!strcasecmp(optarg,"rate")) return RATE_OUT;
@@ -72,7 +73,7 @@ inline int str2output_type(char *optarg) {
     }
     return RATE_OUT;
 }
-                    
+#endif  
 
 inline int str2out_method(char *optarg) {
     if (optarg) {
@@ -171,8 +172,10 @@ char *token, *value;
         if (value) dynamic=value[0]=='0' ? 1 : 0;
     } else if( strcasecmp( token, "UNIT" ) == 0 ) {
         if (value) output_unit=str2output_unit(value);
+#if EXTENDED_STATS
     } else if( strcasecmp( token, "TYPE" ) == 0 ) {
         if (value) output_type=str2output_type(value);
+#endif        
     } else if( strcasecmp( token, "ALLIF" ) == 0 ) {
         if (value) show_all_if=value[0];
     } else if( strcasecmp( token, "INTERFACES" ) == 0 ) {
@@ -239,7 +242,9 @@ void get_cmdln_options(int argc, char *argv[]) {
         {"version",0,0,'V'},
         {"allif",1,0,'a'},
         {"unit",1,0,'u'},
+#if EXTENDED_STATS        
         {"type",1,0,'T'},
+#endif        
         {"interfaces",1,0,'I'},
         {"sumhidden",1,0,'S'},
         {"output",1,0,'o'},
@@ -375,9 +380,11 @@ void get_cmdln_options(int argc, char *argv[]) {
             case 't':
                 if ((optarg) && atol(optarg)>0) { delay=atol(optarg); }
                 break;
+#if EXTENDED_STATS                
             case 'T':
                 output_type=str2output_type(optarg);
                 break;
+#endif                
             case 'd':
                 if (optarg) dynamic=atoi(optarg);
                 break;

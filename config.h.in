@@ -52,6 +52,9 @@
 /* define for getpwuid support */
 #undef HAVE_GETPWUID
 
+/* define for extended (sum, max and avg) stats */
+#undef EXTENDED_STATS
+
 /* define for bsd like netstat input */
 #undef NETSTAT_BSD
 

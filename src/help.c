@@ -71,7 +71,9 @@ inline void cmdln_printhelp() {
     printf("\nOutput:\n");
     print_help_line("-o <method>","-o, --output <method>","output method, one of: " OUTPUT_METHODS);
     print_help_line("-u","-u, --unit <value>","unit to show. one of bytes, bits, packets, errors");
+#if EXTENDED_STATS    
     print_help_line("-T","-T, --type <value>","type of stats. one of rate, max, sum, avg");
+#endif    
 #ifdef CSV
     print_help_line("-C <char>","-C, --csvchar <char>","delimiter for csv");
 #endif
@@ -104,7 +106,9 @@ void print_online_help() {
     mvwprintw(helpwin,9,2,"'s'  sum hidden ifaces to total aswell or not");
     mvwprintw(helpwin,10,2,"'n'  cycle: input methods");
     mvwprintw(helpwin,11,2,"'u'  cycle: bytes,bits,packets,errors");
+#if EXTENDED_STATS    
     mvwprintw(helpwin,12,2,"'t'  cycle: current rate, max, sum since start, average for last 30s");
+#endif    
     mvwprintw(helpwin,14,2," press any key to continue... ");
     wrefresh(helpwin);
     timeout(-1);

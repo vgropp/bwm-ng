@@ -241,6 +241,7 @@ fi
 echo "enable html output: yes"
 AC_DEFINE_UNQUOTED(HTML)
 ])
+
 AC_ARG_ENABLE([csv],AS_HELP_STRING([--enable-csv],[enable csv output (default: yes)]),[
 echo "enable csv output: $enableval"
 if [ test $enableval = "yes" ]; then
@@ -249,6 +250,16 @@ fi
 ],[
 echo "enable csv output: yes"
 AC_DEFINE_UNQUOTED(CSV)
+])
+
+AC_ARG_ENABLE([extendedstats],AS_HELP_STRING([--enable-extendedstats],[enable max, sum and avg stats (default: yes)]),[
+echo "enable extended stats: $enableval"
+if [ test $enableval = "yes" ]; then
+    AC_DEFINE_UNQUOTED(EXTENDED_STATS)
+fi
+],[
+echo "enable extended stats: yes"
+AC_DEFINE_UNQUOTED(EXTENDED_STATS)
 ])
 
 AC_ARG_ENABLE([configfile],AS_HELP_STRING([--enable-configfile],[enable configfile support (default: yes)]),[

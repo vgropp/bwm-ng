@@ -208,9 +208,14 @@
 #define ERRORS_OUT 4
 
 #define RATE_OUT 1
+#if EXTENDED_STATS
 #define MAX_OUT 2
 #define SUM_OUT 3
 #define AVG_OUT 4
+#define TYPE_OUT_MAX 4
+#else
+#define TYPE_OUT_MAX 1
+#endif
 
 /* default length of avg in 1/1000sec */
 #define AVG_LENGTH 30000

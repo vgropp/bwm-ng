@@ -68,8 +68,10 @@ void sigint(int sig) FUNCATTR_NORETURN;
 
 void deinit(char *error_msg, ...) {
     va_list    ap;
+#if EXTENDED_STATS
     int local_if_count;
     struct double_list *list_p;
+#endif    
 #ifdef HAVE_CURSES	
 	if (output_method==CURSES_OUT && myscr!=NULL) {
 		/* first close curses, so we dont leave mess behind */
@@ -85,6 +87,7 @@ void deinit(char *error_msg, ...) {
 #endif	
 	/* we should clean if_state, the data array */
 	if (if_stats!=NULL) {
+#if EXTENDED_STATS        
         /* clean avg list for each iface */
         for (local_if_count=0;local_if_count<if_count;local_if_count++) {
             while (if_stats[local_if_count].avg.first!=NULL) {
@@ -93,6 +96,7 @@ void deinit(char *error_msg, ...) {
                 free(list_p);
             }
         }
+#endif
         free(if_stats);
     }
 	/* free the opt iface_list, ifaces to show or hide */

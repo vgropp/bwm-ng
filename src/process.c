@@ -122,6 +122,7 @@ t_iface_speed_stats convert2calced_values(t_iface_speed_stats new, t_iface_speed
 }
 
 
+#if EXTENDED_STATS
 /* sub old values from cached for avg stats */
 inline void sub_avg_values(struct inouttotal_double *values,struct inouttotal_double data,float local_delay) {
     values->in-=data.in/local_delay;
@@ -204,7 +205,7 @@ inline void save_max(struct inouttotal_double *stats,struct inout_long calced_st
     if (multiplier*(calced_stats.out+calced_stats.in)>stats->total)
         stats->total=multiplier*(calced_stats.in+calced_stats.out);
 }
-
+#endif
 
 /* will be called by get_iface_stats for each interface
  * inserts and calcs current stats.
@@ -251,6 +252,7 @@ int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_spe
 #endif
     /* calc new-old, so we have the new bytes,errors,packets */
     calced_stats=convert2calced_values(tmp_if_stats,if_stats[local_if_count].data);
+#if EXTENDED_STATS    
     /* save new max values in both, calced (for output) and ifstats */
     save_max(&if_stats[local_if_count].max.bytes,calced_stats.bytes,multiplier);
     save_max(&if_stats[local_if_count].max.errors,calced_stats.errors,multiplier);
@@ -261,6 +263,7 @@ int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_spe
     save_sum(&if_stats[local_if_count].sum.errors,tmp_if_stats.errors,if_stats[local_if_count].data.errors);
     /* fill avg struct if there is old data */
     save_avg(&if_stats[local_if_count].avg,calced_stats,multiplier); 
+#endif    
     if (verbose) { /* any output at all? */
         /* cycle: show all interfaces, only those which are up, only up and not hidden */
         if (show_iface(iface_list,name,iface_is_up)) {/* is it up or do we show all ifaces? */
@@ -297,6 +300,7 @@ void finish_iface_stats (char verbose, t_iface_speed_stats stats, int hidden_if,
 	float multiplier=(float)1000/delay;
 #endif    
     calced_stats=convert2calced_values(stats,if_stats_total.data);
+#if EXTENDED_STATS    
     /* save new max values in both, calced (for output) and final stats */
     save_max(&if_stats_total.max.bytes,calced_stats.bytes,multiplier);
     save_max(&if_stats_total.max.errors,calced_stats.errors,multiplier);
@@ -305,6 +309,7 @@ void finish_iface_stats (char verbose, t_iface_speed_stats stats, int hidden_if,
     save_sum(&if_stats_total.sum.packets,stats.packets,if_stats_total.data.packets);
     save_sum(&if_stats_total.sum.errors,stats.errors,if_stats_total.data.errors);
     save_avg(&if_stats_total.avg,calced_stats,multiplier);
+#endif
     if (verbose) {
         /* output total ifaces stats */
 #ifdef HAVE_CURSES		

@@ -90,13 +90,15 @@ void handle_gui_input(char c) {
             else 
                 output_unit=1;
 	        break;
+#if EXTENDED_STATS            
         case 't':
         case 'T':
-            if (output_type<4)
+            if (output_type<TYPE_OUT_MAX)
                 output_type++;
             else 
                 output_type=1;
             break;
+#endif            
         case 'h':
             print_online_help();
             break;
@@ -119,7 +121,6 @@ void sigwinch(int sig) {
     struct winsize size;
     if (ioctl(fileno(stdout), TIOCGWINSZ, &size) == 0) {
         resizeterm(size.ws_row, size.ws_col);
-//        delwin(myscr);
         if (endwin()==ERR) deinit("failed to deinit curses: %s\n",strerror(errno));
         init_curses();
     }

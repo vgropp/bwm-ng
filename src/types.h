@@ -27,6 +27,7 @@ struct inout_long {
     unsigned long long out;
 };
 
+#if EXTENDED_STATS
 struct inouttotal_double {
     long double in;
     long double out;
@@ -38,6 +39,7 @@ struct double_types {
     struct inouttotal_double packets;
     struct inouttotal_double errors;
 };
+#endif
 
 struct iface_speed_stats {
     struct inout_long bytes;
@@ -47,6 +49,7 @@ struct iface_speed_stats {
 
 typedef struct iface_speed_stats t_iface_speed_stats;
 
+#if EXTENDED_STATS
 struct double_list {
     struct double_types data;
     float delay;
@@ -61,13 +64,16 @@ struct t_avg {
     /* cached current avg values */
     struct double_types value;
 };
+#endif
 
 struct iface_stats {
     char    *if_name;
     t_iface_speed_stats data;
+#if EXTENDED_STATS    
     struct double_types max;
     struct iface_speed_stats sum;
     struct t_avg avg;
+#endif    
 #if HAVE_GETTIMEOFDAY
     struct timeval time;
 #endif

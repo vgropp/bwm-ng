@@ -59,7 +59,7 @@
 #define MAX_LINE_BUFFER 1024
 
 extern void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stats stats,float multiplier);
-extern int deinit(char *error_msg);
+extern int deinit(char *error_msg, ...);
 
 extern int if_count;
 #ifdef PROC_NET_DEV
@@ -92,7 +92,7 @@ char check_if_up(char *ifname) {
     if (skfd < 0) {
         /* maybe check some /proc file first like net-tools do */
         if ((skfd =  socket(AF_UNIX, SOCK_DGRAM, 0)) < 0) {
-            deinit("socket error");
+            deinit("socket error: %s\n",strerror(errno));
         }
     }
     strncpy(ifr.ifr_name, ifname,sizeof(ifr.ifr_name));
@@ -281,7 +281,7 @@ void get_iface_stats_getifaddrs (char verbose) {
 
     /* dont open proc_net_dev if netstat_i is requested, else try to open and if it fails fallback */
 	if (getifaddrs(&net) != 0) {
-		deinit("sysctl (getifaddr) failed");
+		deinit("sysctl (getifaddr) failed: %s\n",strerror(errno));
 	}
 	net_ptr=net;
     /* loop either while netstat enabled and still lines to read
@@ -334,18 +334,18 @@ void get_iface_stats_proc (char verbose) {
 	memset(&stats,0,(size_t)sizeof(t_iface_stats)); /* init it */
     /* dont open proc_net_dev if netstat_i is requested, else try to open and if it fails fallback */
     if (!(f=fopen(PROC_FILE,"r"))) {
-		deinit("open of procfile failed");
+		deinit("open of procfile failed: %s\n",strerror(errno));
 	}
 	buffer=(char *)malloc(MAX_LINE_BUFFER);
 	/* we skip first 2 lines if not bsd at any mode */
-	if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL ) || (fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) deinit("read of proc failed");
+	if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL ) || (fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) deinit("read of proc failed: %s\n",strerror(errno));
 	name=(char *)malloc(MAX_LINE_BUFFER);
 	while ( (fgets(buffer,MAX_LINE_BUFFER,f) != NULL) ) {
 		memset(&tmp_if_stats,0,(size_t)sizeof(t_iface_stats)); /* reinit it to zero */
         /* get the name */
         ptr=strchr(buffer,':');
         /* wrong format */
-        if (ptr==NULL) { deinit("wrong format of input stream"); }
+        if (ptr==NULL) { deinit("wrong format of input stream\n"); }
 		/* set : to end_of_string and move to first char of "next" string (to first data) */
         *ptr++ = 0;
         sscanf(ptr,"%llu%llu%llu%llu%llu%llu%llu%llu%llu%llu%llu",&tmp_if_stats.rec,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&buf,&buf,&buf,&buf,&buf,&tmp_if_stats.send,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
@@ -383,7 +383,7 @@ void get_iface_stats_libstat (char verbose) {
     
 	network_stats = sg_get_network_io_stats(&num_network_stats);
     if (network_stats == NULL){
-        deinit("libstatgrab error!");
+        deinit("libstatgrab error!\n");
     }
 	
 	name=(char *)malloc(MAX_LINE_BUFFER);
@@ -444,16 +444,16 @@ void get_iface_stats_netstat (char verbose) {
 #endif
 #endif
                     ,"r")))
-        deinit("no input stream found");
+        deinit("no input stream found: %s\n",strerror(errno));
     buffer=(char *)malloc(MAX_LINE_BUFFER);
 #ifdef NETSTAT_LINUX
     /* we skip first 2 lines if not bsd at any mode */
     if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL ) || (fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) 
-		deinit("read of netstat failed");
+		deinit("read of netstat failed: %s\n",strerror(errno));
 #else
 #if NETSTAT_BSD || NETSTAT_BSD_BYTES
 	str_buf=(char *)malloc(MAX_LINE_BUFFER);
-	if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) deinit("read of netstat failed");
+	if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) deinit("read of netstat failed: %s\n",strerror(errno));
 #endif
 #endif
     name=(char *)malloc(MAX_LINE_BUFFER);
@@ -505,18 +505,19 @@ void get_iface_stats_sysctl (char verbose) {
 
     char *name=NULL;
 
-    int hidden_if=0,current_if_num=0;
+    int hidden_if=0,current_if_num=0,my_errno=0;
     t_iface_stats stats,tmp_if_stats; /* local struct, used to calc total values */
 
     memset(&stats,0,(size_t)sizeof(t_iface_stats)); /* init it */
 
     /* dont open proc_net_dev if netstat_i is requested, else try to open and if it fails fallback */
-    if (sysctl(mib, 6, NULL, &size, NULL, 0) < 0) deinit("sysctl failed");
-    if (!(bsd_if_buf = malloc(size))) deinit("no memory");
+    if (sysctl(mib, 6, NULL, &size, NULL, 0) < 0) deinit("sysctl failed: %s\n",strerror(errno));
+    if (!(bsd_if_buf = malloc(size))) deinit("no memory: %s\n",strerror(errno));
     bzero(bsd_if_buf,size);
     if (sysctl(mib, 6, bsd_if_buf, &size, NULL, 0) < 0) {
+        my_errno=errno;
         free(bsd_if_buf);
-        deinit("sysctl failed");
+        deinit("sysctl failed: %s\n",strerror(my_errno));
     }
 
     lim = (bsd_if_buf + size);

@@ -114,11 +114,12 @@ inline void get_iface_stats(char _n) {
 
 
 /* clear stuff */
-int deinit(char *error_msg) FUNCATTR_NORETURN;
+int deinit(char *error_msg, ...) FUNCATTR_NORETURN;
 void sigint(int sig) FUNCATTR_NORETURN;
 
 
-int deinit(char *error_msg) {
+int deinit(char *error_msg, ...) {
+    va_list    ap;
 #ifdef CURSES	
 	if (output_method==CURSES_OUT) {
 		/* first close curses, so we dont leave mess behind */
@@ -142,7 +143,8 @@ int deinit(char *error_msg) {
 #endif	
 	/* output errormsg if given */
 	if (error_msg!=NULL) {
-		if (error_msg[strlen(error_msg)-1]!='\n') printf("%s\n",error_msg); else printf(error_msg);
+        va_start(ap, error_msg);
+		vprintf(error_msg,ap);
 	}
 	/* we are done, say goodbye */
     exit(0);
@@ -258,7 +260,7 @@ int main (int argc, char *argv[]) {
 	  	int nbyt = 0;
 	  	/* lets fork into background */
 		if ((nbyt = fork()) == -1) {
-			deinit("could not fork into background\n");
+			deinit("could not fork into background: %s\n",strerror(errno));
 		}
 		if (nbyt != 0) { /* nbyt is the new child pid here */
 			deinit("forking into background\n");

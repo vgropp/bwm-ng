@@ -8,6 +8,8 @@
                     blacklist
                   - get_options (long_options) cleanup
                   - fixed wrong values on proc/net/dev wrap around.
+                  - fixed several configure and compile issues
+                  - added output correct error messages
   12-20-2004 0.4: pre1:
                   - get_iface_stats cleanup
                   - plain and csv output added

@@ -114,7 +114,6 @@ Bugs:
 Todo:
   - Docs and manpage
   - try to avoid kmod, like net-tools do, for socket() for ioctl
-  - print correct error string (strerror)
   - show the avg of last x seconds (like load avg in uptime)
   - sum and show amount of bytes since startup (NOT bytes per sec)
   - mysql output

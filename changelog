@@ -22,9 +22,11 @@
                   - added bit/second output (Michael Eckhoff)
                   - added errors/s output
                   - removed -p and -b, added -u/--unit <value>
-                  - added max stats (--type,-t and 't')
+                  - added max stats (--type,-T and 't')
                   - added sum stats
-                  - move alot functions from retrieve.c into process.c
+                  - moved alot functions from retrieve.c into process.c
+                  - added average stats
+                  - moved help output into help.c
   12-20-2004 0.4: pre1:
                   - get_iface_stats cleanup
                   - plain and csv output added

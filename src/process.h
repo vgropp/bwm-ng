@@ -1,5 +1,5 @@
 /******************************************************************************
- *  bwm-ng parsing and retrive stuff                                          *
+ *  bwm-ng process data                                                       *
  *                                                                            *
  *  Copyright (C) 2004 Volker Gropp (vgropp@pefra.de)                         *
  *                                                                            *

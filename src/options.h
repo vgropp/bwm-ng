@@ -1,5 +1,5 @@
 /******************************************************************************
- *  bwm-ng parsing stuff                                                      *
+ *  bwm-ng options header                                                     *
  *                                                                            *
  *  Copyright (C) 2004 Volker Gropp (vgropp@pefra.de)                         *
  *                                                                            *
@@ -99,3 +99,5 @@ int input_method=0;
 int html_refresh=5;
 int html_header=0;
 #endif
+
+extern inline void cmdln_printhelp() FUNCATTR_NORETURN;

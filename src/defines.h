@@ -239,9 +239,10 @@
 #define RATE_OUT 1
 #define MAX_OUT 2
 #define SUM_OUT 3
-/* planned for future 
-#define AVERAGE_OUT 4
-*/
+#define AVG_OUT 4
+
+/* length of avg in 1/1000sec */
+#define AVG_LENGTH 30000
 
 #ifndef PATH_MAX
 #define PATH_MAX 4096

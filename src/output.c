@@ -35,6 +35,9 @@ inline char *output_type2str() {
         case SUM_OUT:
             return "sum";
             break;
+        case AVG_OUT:
+            return "avg";
+            break;
     }
     return "";
 }
@@ -194,7 +197,7 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
     char speed[3];
     double value=0;
     char *str_buf=NULL;
-    if (output_type==RATE_OUT || output_type==MAX_OUT) 
+    if (output_type==RATE_OUT || output_type==MAX_OUT || output_type==AVG_OUT) 
         strcpy(speed,"/s"); 
     else 
         strcpy(speed,"  ");
@@ -213,6 +216,9 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
             case MAX_OUT:
                 value=(double)direction_max2value(mode,full_stats.max.packets);
                 break;
+            case AVG_OUT:
+                value=(double)direction_max2value(mode,full_stats.avg.value.packets);
+                break;
         }
         snprintf(str,buf_size,"%16.2f P%s",(double)value,speed);
     } else {
@@ -230,6 +236,8 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
                     case MAX_OUT:
                         value=(double)direction_max2value(mode,full_stats.max.bytes);
                         break;
+                    case AVG_OUT:
+                        value=(double)direction_max2value(mode,full_stats.avg.value.bytes);
                 }
                 if (output_unit==BITS_OUT) {
                     byte_char='b';
@@ -248,6 +256,9 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
                         break;
                     case MAX_OUT:
                         value=(double)direction_max2value(mode,full_stats.max.errors);
+                        break;
+                    case AVG_OUT:
+                        value=(double)direction_max2value(mode,full_stats.avg.value.errors);
                         break;
                 }
                 snprintf(str,buf_size,"%16.2f E%s",(double)value,speed);

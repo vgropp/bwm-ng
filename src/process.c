@@ -1,5 +1,5 @@
 /******************************************************************************
- *  bwm-ng parsing and retrieve stuff                                         *
+ *  bwm-ng process data                                                       *
  *                                                                            *
  *  Copyright (C) 2004 Volker Gropp (vgropp@pefra.de)                         *
  *                                                                            *
@@ -61,7 +61,7 @@ long count_tokens(char *in_str) {
     char *str;
 
     if (in_str==NULL) return 0;
-    str=strdup(in_str);
+    str=in_str;
     while (str[i]!='\0') {
         if (str[i]>32) {
             if (!in_a_token) {
@@ -73,7 +73,6 @@ long count_tokens(char *in_str) {
         }
         i++;
     }
-    free(str);
     return tokens;
 }
 
@@ -97,6 +96,7 @@ float get_time_delay(int iface_num) {
 }
 #endif
 
+/* basically new-old, but handles "overflow" of source aswell */
 inline unsigned long long calc_new_values(unsigned long long new, unsigned long long old) {
     /* FIXME: WRAP_AROUND _might_ be wrong for libstatgrab, where the type is always long long */
     return (new>=old) ? (unsigned long long)(new-old) : (unsigned long long)((
@@ -122,12 +122,69 @@ t_iface_speed_stats convert2calced_values(t_iface_speed_stats new, t_iface_speed
 }
 
 
+/* sub old values from cached for avg stats */
+inline void sub_avg_values(struct inouttotal_double *values,struct inouttotal_double data) {
+    values->in-=data.in/(AVG_LENGTH/delay);
+    values->out-=data.out/(AVG_LENGTH/delay);
+    values->total-=data.total/(AVG_LENGTH/delay);
+}
+
+/* put new-old bytes in inout_long struct into a inouttotal_double struct 
+ * and add values to cached .value struct */
+inline void save_avg_values(struct inouttotal_double *values,struct inouttotal_double *data,struct inout_long calced_stats,float multiplier) {
+    data->in=calced_stats.in*multiplier;
+    data->out=calced_stats.out*multiplier;
+    data->total=(calced_stats.in+calced_stats.out)*multiplier;
+    values->in+=data->in/(AVG_LENGTH/delay);
+    values->out+=data->out/(AVG_LENGTH/delay);
+    values->total+=data->total/(AVG_LENGTH/delay);
+}
+
+/* manages the list of values for avg
+ * saves data in list
+ * removes old entries
+ * calculates the current value */
+void save_avg(struct t_avg *avg,struct iface_speed_stats calced_stats,float multiplier) {
+    struct double_list *list_p;
+    if (avg->first==NULL) { /* first element */
+        avg->first=avg->last=(struct double_list *)malloc(sizeof(struct double_list));
+        /* init it to zero and NULL */
+        memset(avg->first,0,sizeof(struct double_list)); 
+        /* save data and add to cache */
+        save_avg_values(&avg->value.bytes,&avg->first->data.bytes,calced_stats.bytes,multiplier);
+        save_avg_values(&avg->value.errors,&avg->first->data.errors,calced_stats.bytes,multiplier);
+        save_avg_values(&avg->value.packets,&avg->first->data.packets,calced_stats.bytes,multiplier);
+        avg->items=1;
+    } else { /* we already have a list */
+        avg->last->next=(struct double_list *)malloc(sizeof(struct double_list));
+        memset(avg->last->next,0,sizeof(struct double_list));
+        avg->last=avg->last->next;
+        /* save data and add to cache */
+        save_avg_values(&avg->value.bytes,&avg->last->data.bytes,calced_stats.bytes,multiplier);
+        save_avg_values(&avg->value.errors,&avg->last->data.errors,calced_stats.bytes,multiplier);
+        save_avg_values(&avg->value.packets,&avg->last->data.packets,calced_stats.bytes,multiplier);
+        avg->items++;
+        while (avg->items>AVG_LENGTH/delay) {
+            /* list is full, remove first entry */
+            list_p=avg->first;
+            avg->first=avg->first->next;
+            /* sub values from cache */
+            sub_avg_values(&avg->value.bytes,list_p->data.bytes);
+            sub_avg_values(&avg->value.errors,list_p->data.errors);
+            sub_avg_values(&avg->value.packets,list_p->data.packets);
+            free(list_p);
+            avg->items--;
+        }
+    }
+}
+
+/* add current in and out bytes to totals struct */
 inline void save_sum(struct inout_long *stats,struct inout_long new_stats_values,struct inout_long old_stats_values) {
     stats->in+=calc_new_values(new_stats_values.in,old_stats_values.in);
     stats->out+=calc_new_values(new_stats_values.out,old_stats_values.out);
 }
 
-    
+/* lookup old max values and save new if higher */
 inline void save_max(struct inouttotal_double *stats,struct inout_long calced_stats,float multiplier) {
     if (multiplier*calced_stats.in > stats->in)
         stats->in=multiplier*calced_stats.in;
@@ -137,10 +194,10 @@ inline void save_max(struct inouttotal_double *stats,struct inout_long calced_st
         stats->total=multiplier*(calced_stats.in+calced_stats.out);
 }
 
-inline void init_double_types(struct inouttotal_double *in) {
-    in->out=in->in=in->total=0;    
-}
 
+/* will be called by get_iface_stats for each interface
+ * inserts and calcs current stats.
+ * will call output (print_values) aswell if needed */
 int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_speed_stats *stats, char *name, int iface_number, char verbose, char iface_is_up) {
 #if HAVE_GETTIMEOFDAY
     float multiplier;
@@ -188,9 +245,12 @@ int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_spe
     save_max(&if_stats[local_if_count].max.bytes,calced_stats.bytes,multiplier);
     save_max(&if_stats[local_if_count].max.errors,calced_stats.errors,multiplier);
     save_max(&if_stats[local_if_count].max.packets,calced_stats.packets,multiplier);
+    /* save sum now aswell */
     save_sum(&if_stats[local_if_count].sum.bytes,tmp_if_stats.bytes,if_stats[local_if_count].data.bytes);
     save_sum(&if_stats[local_if_count].sum.packets,tmp_if_stats.packets,if_stats[local_if_count].data.packets);
     save_sum(&if_stats[local_if_count].sum.errors,tmp_if_stats.errors,if_stats[local_if_count].data.errors);
+    /* fill avg struct */
+    save_avg(&if_stats[local_if_count].avg,calced_stats,multiplier); 
     if (verbose) { /* any output at all? */
         /* cycle: show all interfaces, only those which are up, only up and not hidden */
         if ((show_all_if>1 || iface_is_up) && /* is it up or do we show all ifaces? */
@@ -214,6 +274,7 @@ int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_spe
 	return hidden_if;
 }	
 
+/* handles and calls output totals of all interfaces */
 void finish_iface_stats (char verbose, t_iface_speed_stats stats, int hidden_if, int iface_number) {
     int i;
     t_iface_speed_stats calced_stats;
@@ -235,7 +296,7 @@ void finish_iface_stats (char verbose, t_iface_speed_stats stats, int hidden_if,
     save_sum(&if_stats_total.sum.bytes,stats.bytes,if_stats_total.data.bytes);
     save_sum(&if_stats_total.sum.packets,stats.packets,if_stats_total.data.packets);
     save_sum(&if_stats_total.sum.errors,stats.errors,if_stats_total.data.errors);
-
+    save_avg(&if_stats_total.avg,calced_stats,multiplier);
     if (verbose) {
         /* output total ifaces stats */
 #ifdef HAVE_CURSES		

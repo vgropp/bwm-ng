@@ -68,6 +68,8 @@ void sigint(int sig) FUNCATTR_NORETURN;
 
 void deinit(char *error_msg, ...) {
     va_list    ap;
+    int local_if_count;
+    struct double_list *list_p;
 #ifdef HAVE_CURSES	
 	if (output_method==CURSES_OUT && myscr!=NULL) {
 		/* first close curses, so we dont leave mess behind */
@@ -81,9 +83,19 @@ void deinit(char *error_msg, ...) {
 		close(skfd);
 	}
 #endif	
-	/* we should clean if_state, i think, */
-	if (if_stats!=NULL) free(if_stats);
-	/* free the opt iface_list */
+	/* we should clean if_state, the data array */
+	if (if_stats!=NULL) {
+        /* clean avg list for each iface */
+        for (local_if_count=0;local_if_count<if_count;local_if_count++) {
+            while (if_stats[local_if_count].avg.first!=NULL) {
+                list_p=if_stats[local_if_count].avg.first;
+                if_stats[local_if_count].avg.first=if_stats[local_if_count].avg.first->next;
+                free(list_p);
+            }
+        }
+        free(if_stats);
+    }
+	/* free the opt iface_list, ifaces to show or hide */
 	if (iface_list!=NULL) free(iface_list);
 #if CSV || HTML
 	/* close the out_file */
@@ -179,7 +191,7 @@ void handle_gui_input(char c) {
 	        break;
         case 't':
         case 'T':
-            if (output_type<3)
+            if (output_type<4)
                 output_type++;
             else 
                 output_type=1;

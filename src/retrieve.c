@@ -75,9 +75,10 @@ short show_iface(char *instr, char *searchstr) {
 
 
 /* counts the tokens in a string */
-long count_tokens(char *str) {
+long count_tokens(char *in_str) {
     long tokens=0;
     char in_a_token=0;
+    char *str=strdup(in_str);
     while (str!=NULL && str[0]!='\0') {
         if (str[0]>32) {
             if (!in_a_token) {
@@ -89,6 +90,7 @@ long count_tokens(char *str) {
         }
         *str=*str+1; /* dont use ++ to avoid open/net bsd warning */
     }
+    free(str);
     return tokens;
 }
 
@@ -386,6 +388,7 @@ void get_iface_stats_netstat (char verbose) {
 	char *buffer=NULL,*name=NULL;
 #if NETSTAT_BSD	|| NETSTAT_BSD_BYTES || NETSTAT_SOLARIS || NETSTAT_NETBSD
 	char *str_buf=NULL;
+    char *last_name=NULL;
 #endif	
 	FILE *f=NULL;
 	unsigned long long buf;
@@ -422,9 +425,12 @@ void get_iface_stats_netstat (char verbose) {
 #endif
 #if NETSTAT_BSD || NETSTAT_BSD_BYTES || NETSTAT_SOLARIS || NETSTAT_NETBSD
 	str_buf=(char *)malloc(MAX_LINE_BUFFER);
+    last_name=(char *)malloc(MAX_LINE_BUFFER);
+    last_name[0]='\0'; /* init */
 	if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) deinit("read of netstat failed: %s\n",strerror(errno));
 #endif
     name=(char *)malloc(MAX_LINE_BUFFER);
+    /* loop and read each line */
     while ( (fgets(buffer,MAX_LINE_BUFFER,f) != NULL && buffer[0]!='\n') ) {
         memset(&tmp_if_stats,0,(size_t)sizeof(t_iface_stats)); /* reinit it to zero */
 #ifdef NETSTAT_LINUX		
@@ -450,6 +456,12 @@ void get_iface_stats_netstat (char verbose) {
             sscanf(buffer,"%s%llu%s%llu%llu%llu",name,&buf,str_buf,&tmp_if_stats.rec,&tmp_if_stats.send,&tmp_if_stats.e_send);
         tmp_if_stats.e_rec=tmp_if_stats.e_send;
 #endif
+#if NETSTAT_BSD || NETSTAT_BSD_BYTES || NETSTAT_SOLARIS || NETSTAT_NETBSD
+        /* check if we have a new iface or if its only a second line of the same one */
+//        printf("%s\n",name);
+        if (!strcmp(last_name,name)) continue; /* skip this line */
+        strcpy(last_name,name);
+#endif
         /* init new interfaces and add fetched data to old or new one */
         hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose,
 #if NETSTAT_BSD || NETSTAT_BSD_BYTES || NETSTAT_NETBSD
@@ -467,6 +479,7 @@ void get_iface_stats_netstat (char verbose) {
     free(buffer);
 #if NETSTAT_BSD || NETSTAT_NETBSD || NETSTAT_BSD_BYTES || NETSTAT_SOLARIS
 	free(str_buf);
+    free(last_name);
 #endif	
     free(name);
     /* close input stream */

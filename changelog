@@ -15,6 +15,7 @@
                   - fixed NetBSD/OpenBSD compile 
                   - added NetBSD/OpenBSD netstat support
                   - fixed netstat parsing if address field missing
+                  - fixed showing same iface twice on netstat input
   12-20-2004 0.4: pre1:
                   - get_iface_stats cleanup
                   - plain and csv output added

@@ -301,14 +301,13 @@ void get_cmdln_options(int argc, char *argv[]) {
                       else if (!strcmp(argv[optind-1],"-d") || !strcasecmp(argv[optind-1],"--dynamic"))
                             dynamic=1;
                       else if (!strcmp(argv[optind-1],"-D") || !strcasecmp(argv[optind-1],"--daemon"))
-                            daemon=1;
+                            daemonize=1;
                       else if (!strcmp(argv[optind-1],"-S") || !strcasecmp(argv[optind-1],"--sumhidden"))
                             sumhidden=1;    
                           else {
                               printf("%s requires an argument!\n",argv[optind-1]);
                               exit(1);
                           }
-                      }
                       break;
 			case 'D':
 				if (optarg) daemonize=atoi(optarg);

@@ -37,6 +37,8 @@
 #include <sys/socket.h>
 #include <net/if.h>
 #endif
+
+#include <sys/param.h> /* netbsd fix */
 #include <sys/sysctl.h>
 #include <net/route.h>
 #include <net/if_dl.h>
@@ -114,7 +116,7 @@ short show_iface(char *instr, char *searchstr) {
     if (instr==NULL) return success_ret;
     if (instr[0]=='%') {
         success_ret=!success_ret;
-        *instr++;
+        *instr=*instr+1; /* dont use *instr++ to avoid netbsd/openbsd warning here */
     }
 	k = strlen( searchstr );
 	do {
@@ -242,7 +244,7 @@ void finish_iface_stats (char verbose, t_iface_stats stats, int hidden_if, int i
 
     if (verbose) {
         /* output total ifaces stats */
-#ifdef CURSES		
+#ifdef HAVE_CURSES		
         if (output_method==CURSES_OUT)
             mvwprintw(stdscr,5+iface_number-hidden_if,8,"------------------------------------------------------------------");
         else 
@@ -289,7 +291,7 @@ void get_iface_stats_getifaddrs (char verbose) {
     while (net_ptr!=NULL) {
         memset(&tmp_if_stats,0,(size_t)sizeof(t_iface_stats)); /* reinit it to zero */
         /* move getifaddr data to my struct */
-		if (net_ptr->ifa_addr->sa_family != AF_LINK) {
+		if (net_ptr->ifa_addr==NULL || net_ptr->ifa_addr->sa_family != AF_LINK) {
 			net_ptr=net_ptr->ifa_next;
 			continue;
 		}
@@ -297,13 +299,18 @@ void get_iface_stats_getifaddrs (char verbose) {
 			name=strdup(net_ptr->ifa_name);
 		else 
 			name=strdup("");
-		net_data=(struct if_data *)net_ptr->ifa_data;
-        tmp_if_stats.rec=net_data->ifi_ibytes;
-        tmp_if_stats.send=net_data->ifi_obytes;
-        tmp_if_stats.p_rec=net_data->ifi_ipackets;
-        tmp_if_stats.p_send=net_data->ifi_opackets;
-        tmp_if_stats.e_rec=net_data->ifi_ierrors;
-        tmp_if_stats.e_send=net_data->ifi_oerrors;
+        if (net_ptr->ifa_data!=NULL) {
+		    net_data=(struct if_data *)net_ptr->ifa_data;
+            tmp_if_stats.rec=net_data->ifi_ibytes;
+            tmp_if_stats.send=net_data->ifi_obytes;
+            tmp_if_stats.p_rec=net_data->ifi_ipackets;
+            tmp_if_stats.p_send=net_data->ifi_opackets;
+            tmp_if_stats.e_rec=net_data->ifi_ierrors;
+            tmp_if_stats.e_send=net_data->ifi_oerrors;
+        } else {
+            net_ptr=net_ptr->ifa_next;
+            continue;
+        }
 		iface_is_up= (show_all_if || (net_ptr->ifa_flags & IFF_UP));
 		net_ptr=net_ptr->ifa_next;
         /* init new interfaces and add fetched data to old or new one */

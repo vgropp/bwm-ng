@@ -24,7 +24,9 @@
 #include "bwm-ng.h"
 
 #if HAVE_SYS_VARARGS_H
-#include <sys/varargs.h>
+#include <sys/varargs.h> /* solaris */
+#else
+#include <stdarg.h>
 #endif
 
 extern void get_cmdln_options(int argc, char *argv[]);
@@ -124,7 +126,7 @@ void sigint(int sig) FUNCATTR_NORETURN;
 
 int deinit(char *error_msg, ...) {
     va_list    ap;
-#ifdef CURSES	
+#ifdef HAVE_CURSES	
 	if (output_method==CURSES_OUT) {
 		/* first close curses, so we dont leave mess behind */
 		endwin();
@@ -162,7 +164,7 @@ void sigint(int sig) {
 }
 
 
-#ifdef CURSES
+#ifdef HAVE_CURSES
 /* handle key input by user in gui (curses) mode */
 void handle_gui_input(char c) {
     switch (c) {
@@ -240,7 +242,7 @@ int main (int argc, char *argv[]) {
 #endif	
 	get_cmdln_options(argc,argv);
 	memset(&if_stats_total,0,(size_t)sizeof(t_iface_stats));
-#ifdef CURSES
+#ifdef HAVE_CURSES
 	if (output_method==CURSES_OUT) {
 		/* init curses */
 		initscr(); 
@@ -296,14 +298,14 @@ int main (int argc, char *argv[]) {
 			output_count--;
 			if (output_count==0) break;
 		}
-#ifdef CURSES		
+#ifdef HAVE_CURSES		
 		if (output_method==CURSES_OUT) {
 			refresh();
 			handle_gui_input(getch());
 		} else {
 #endif			
 			usleep(delay*1000);
-#ifdef CURSES			
+#ifdef HAVE_CURSES			
 		}
 #endif		
 		c='\0'; /* not really needed, but i like it this way */

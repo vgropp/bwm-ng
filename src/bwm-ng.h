@@ -47,7 +47,7 @@
 #endif
 
 #if HAVE_LIBCURSES || HAVE_LIBNCURSES
-#define CURSES
+#define HAVE_CURSES
 #endif
 
 #if HAVE_STRUCT_IF_DATA_IFI_IBYTES
@@ -75,7 +75,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#ifdef CURSES
+#ifdef HAVE_CURSES
 #include <curses.h>
 #endif
 
@@ -104,7 +104,7 @@
 #define WRAP_AROUND 18446744073709551616ull
 #endif
 
-#ifdef CURSES
+#ifdef HAVE_CURSES
 #define CURSES_OUT 0
 #endif
 #define PLAIN_OUT 1
@@ -172,7 +172,7 @@
 /* build output methods string: curses, plain, csv, html */
 #define OUTPUT_METHODS_0 "plain"
 
-#ifdef CURSES 
+#ifdef HAVE_CURSES 
 #define OUTPUT_METHODS_1 OUTPUT_METHODS_0 ", curses"
 #else 
 #define OUTPUT_METHODS_1 OUTPUT_METHODS_0

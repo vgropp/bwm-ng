@@ -1,0 +1,14 @@
+LIBS = @LIBS@
+CC = @CC@
+CFLAGS = @CFLAGS@
+CPPFLAGS = @CPPFLAGS@
+OBJS = bwm-ng.o retrieve.o output.o options.o
+BINARY = bwm-ng
+TARGET = $(BINARY)
+
+bwm-ng:	$(OBJS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LIBS) -o ${TARGET} $(OBJS)
+
+
+clean:
+	-rm -f *~ *.o ${TARGET}

@@ -48,7 +48,7 @@ unsigned int delay=500;
 char show_kb=1;
 char show_all_if=0;
 char show_packets=0;
-#ifdef CURSES
+#ifdef HAVE_CURSES
 int output_method=CURSES_OUT;
 #else
 int output_method=PLAIN_OUT;
@@ -216,7 +216,7 @@ int printhelp() {
 int str2out_method(char *optarg) {
     if (optarg) {
         if (!strcasecmp(optarg,"plain")) return PLAIN_OUT;
-#ifdef CURSES
+#ifdef HAVE_CURSES
             else
         if (!strcasecmp(optarg,"curses")) return CURSES_OUT;
 #endif

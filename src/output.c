@@ -56,7 +56,7 @@ char *convert_bytes(double bytes,char * buffer, int buf_size) {
 
 int print_header(int option) {
 	switch (output_method) {
-#ifdef CURSES
+#ifdef HAVE_CURSES
 		case CURSES_OUT:
 	        erase();
 		    mvwprintw(stdscr,1,8,"bwm-ng v%i.%i%s (probing every %2.3fs), press 'q' to end this",MAJOR,MINOR,EXTRA,(float)delay/1000);
@@ -220,7 +220,7 @@ void print_values(int y,int x,char *if_name,t_iface_stats new_stats,t_iface_stat
     bytess=((long long)(new_stats.send-stats.send) >= 0) ? new_stats.send-stats.send : (WRAP_AROUND-stats.send)+new_stats.send;
     bytesr=((long long)(new_stats.rec-stats.rec) >= 0) ? new_stats.rec-stats.rec : (WRAP_AROUND-stats.rec)+new_stats.rec;
     switch (output_method) {
-#ifdef CURSES		
+#ifdef HAVE_CURSES		
         case CURSES_OUT:
             mvwprintw(stdscr,y,x,"%12s:",if_name); /* output the name */
             if (

@@ -23,8 +23,11 @@ Platforms
 Tested and running on:
 Linux 2.4, Linux 2.6
 freeBSD 4.8, freeBSD 5.3
-MacOS X 10.3 (10.2 getifaddrs fails)
+MacOS X 10.3 
+MacOS X 10.1, 10.2 (--without-getifaddrs)
 SunOS 5.9 sparc Solaris 9
+OpenBSD 3.4
+NetBSD 1.6.1
 
 please notify me of working or not working platforms.
 

@@ -74,6 +74,25 @@ short show_iface(char *instr, char *searchstr) {
 }
 
 
+/* counts the tokens in a string */
+long count_tokens(char *str) {
+    long tokens=0;
+    char in_a_token=0;
+    while (str!=NULL && str[0]!='\0') {
+        if (str[0]>32) {
+            if (!in_a_token) {
+                tokens++;
+                in_a_token=1;
+            }
+        } else {
+            if (in_a_token) in_a_token=0;
+        }
+        *str=*str+1; /* dont use ++ to avoid open/net bsd warning */
+    }
+    return tokens;
+}
+
+
 #if HAVE_GETTIMEOFDAY
 /* Returns: the time difference in milliseconds. */
 long tvdiff(struct timeval newer, struct timeval older) {
@@ -101,9 +120,10 @@ int process_if_data (int hidden_if, t_iface_stats tmp_if_stats,t_iface_stats *st
 	float multiplier=(float)1000/delay;
 #endif    
 	int local_if_count;
-
+    
+    /* if_count starts at 1 for 1 interface, local_if_count starts at 0 */
     for (local_if_count=0;local_if_count<if_count;local_if_count++) {
-        /*check if its the correct if */
+        /* check if its the correct if */
         if (!strcmp(name,if_stats[local_if_count].if_name)) break;
     }
     if (local_if_count==if_count) {
@@ -364,7 +384,7 @@ void get_iface_stats_libstat (char verbose) {
 void get_iface_stats_netstat (char verbose) {
     int current_if_num=0,hidden_if=0;
 	char *buffer=NULL,*name=NULL;
-#if NETSTAT_BSD	|| NETSTAT_BSD_BYTES || NETSTAT_SOLARIS
+#if NETSTAT_BSD	|| NETSTAT_BSD_BYTES || NETSTAT_SOLARIS || NETSTAT_NETBSD
 	char *str_buf=NULL;
 #endif	
 	FILE *f=NULL;
@@ -389,6 +409,9 @@ void get_iface_stats_netstat (char verbose) {
 #if NETSTAT_SOLARIS
             NETSTAT_PATH " -i -f inet -f inet6"
 #endif
+#if NETSTAT_NETBSD
+            NETSTAT_PATH " -ibd"
+#endif
                     ,"r")))
         deinit("no input stream found: %s\n",strerror(errno));
     buffer=(char *)malloc(MAX_LINE_BUFFER);
@@ -397,7 +420,7 @@ void get_iface_stats_netstat (char verbose) {
     if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL ) || (fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) 
 		deinit("read of netstat failed: %s\n",strerror(errno));
 #endif
-#if NETSTAT_BSD || NETSTAT_BSD_BYTES || NETSTAT_SOLARIS
+#if NETSTAT_BSD || NETSTAT_BSD_BYTES || NETSTAT_SOLARIS || NETSTAT_NETBSD
 	str_buf=(char *)malloc(MAX_LINE_BUFFER);
 	if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) deinit("read of netstat failed: %s\n",strerror(errno));
 #endif
@@ -407,15 +430,29 @@ void get_iface_stats_netstat (char verbose) {
 #ifdef NETSTAT_LINUX		
         sscanf(buffer,"%s%llu%llu%llu%llu%llu%llu%llu%llu",name,&buf,&buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&buf,&buf,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
 #endif
-#if NETSTAT_BSD_BYTES
-		sscanf(buffer,"%s%llu%s%s%llu%llu%llu%llu%llu%llu",name,&buf,str_buf,str_buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send,&tmp_if_stats.send);
+#if NETSTAT_BSD_BYTES 
+        if (count_tokens(buffer)==10) /* including address */
+    		sscanf(buffer,"%s%llu%s%s%llu%llu%llu%llu%llu%llu",name,&buf,str_buf,str_buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send,&tmp_if_stats.send);
+        else /* w/o address */
+            sscanf(buffer,"%s%llu%s%llu%llu%llu%llu%llu%llu",name,&buf,str_buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send,&tmp_if_stats.send);
 #endif
 #if NETSTAT_BSD	|| NETSTAT_SOLARIS	
-		 sscanf(buffer,"%s%llu%s%s%llu%llu%llu%llu",name,&buf,str_buf,str_buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
+        if (count_tokens(buffer)==8) /* including address */
+		    sscanf(buffer,"%s%llu%s%s%llu%llu%llu%llu",name,&buf,str_buf,str_buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
+        else /* w/o address */
+            sscanf(buffer,"%s%llu%s%llu%llu%llu%llu",name,&buf,str_buf,&tmp_if_stats.p_rec,&tmp_if_stats.e_rec,&tmp_if_stats.p_send,&tmp_if_stats.e_send);
+         
+#endif
+#if NETSTAT_NETBSD
+        if (count_tokens(buffer)==7) /* including address */
+            sscanf(buffer,"%s%llu%s%s%llu%llu%llu",name,&buf,str_buf,str_buf,&tmp_if_stats.rec,&tmp_if_stats.send,&tmp_if_stats.e_send);
+        else
+            sscanf(buffer,"%s%llu%s%llu%llu%llu",name,&buf,str_buf,&tmp_if_stats.rec,&tmp_if_stats.send,&tmp_if_stats.e_send);
+        tmp_if_stats.e_rec=tmp_if_stats.e_send;
 #endif
         /* init new interfaces and add fetched data to old or new one */
         hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose,
-#if NETSTAT_BSD || NETSTAT_BSD_BYTES
+#if NETSTAT_BSD || NETSTAT_BSD_BYTES || NETSTAT_NETBSD
 		(name[strlen(name)-1]!='*')
 #else
 		1
@@ -428,7 +465,7 @@ void get_iface_stats_netstat (char verbose) {
     finish_iface_stats (verbose, stats, hidden_if,current_if_num);
     /* clean buffers */
     free(buffer);
-#ifdef NETSTAT_BSD	
+#if NETSTAT_BSD || NETSTAT_NETBSD || NETSTAT_BSD_BYTES || NETSTAT_SOLARIS
 	free(str_buf);
 #endif	
     free(name);

@@ -320,7 +320,7 @@ fi
 AC_ARG_WITH([netstatsolaris],AS_HELP_STRING([--with-netstatsolaris],[enable solaris like netstat -i (ARG=PATH)]),[
 if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
-        echo "solrais like version forced: $withval"
+        echo "solaris like version forced: $withval"
         AC_DEFINE_UNQUOTED(HAVE_NETSTAT_PATH,$withval)
     else
         echo "solaris like version forced"
@@ -332,6 +332,23 @@ else
     echo "disable netstat: solaris like version"
 fi
 ])
+
+AC_ARG_WITH([netstatnetbsd],AS_HELP_STRING([--with-netstatnetbsd],[enable NetBSD/OpenBSD like netstat -i (ARG=PATH)]),[
+if [ test $withval != "no" ]; then
+    if [ test $withval != "yes" ]; then
+        echo "NetBSD/OpenBSD like version forced: $withval"
+        AC_DEFINE_UNQUOTED(HAVE_NETSTAT_PATH,$withval)
+    else
+        echo "NetBSD/OpenBSD like version forced"
+    fi
+    AC_DEFINE_UNQUOTED(NETSTAT_NETBSD)
+    NETSTAT_DEFINED="1"
+else
+    NETSTAT_DEFINED="1"
+    echo "disable netstat: NetBSD/OpenBSD like version"
+fi
+])
+
 
 
 if [ test $NETSTAT_DEFINED != "1" ]; then
@@ -369,10 +386,16 @@ if [ test "${EGREP}" ]; then
                     echo "solaris version found"
                     AC_DEFINE_UNQUOTED(NETSTAT_SOLARIS)
                 else 
-    				echo "unknown netstat version - disabled
+                    net_test=`${NETSTAT_CMD} -ibd 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ibytes +Obytes +Drops"`
+                    if [ test "${net_test}" ]; then
+                        echo "Net/OpenBSD version found"
+                        AC_DEFINE_UNQUOTED(NETSTAT_NETBSD)
+                    else
+        				echo "unknown netstat version - disabled
 *********************************************
   please mail 'netstat -i' output to author
 *********************************************"
+                    fi
                 fi
             fi
         fi

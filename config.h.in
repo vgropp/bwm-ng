@@ -64,6 +64,9 @@
 /* define for solaris like netstat input */
 #undef NETSTAT_SOLARIS
 
+/* define for NetBSD/OpenBSD like netstat input */
+#undef NETSTAT_NETBSD
+
 /* define for beeing able to pass the netstat path */
 #undef ALLOW_NETSTATPATH
 

@@ -52,7 +52,6 @@ typedef struct iface_speed_stats t_iface_speed_stats;
 #if EXTENDED_STATS
 struct double_list {
     struct double_types data;
-    float delay;
     struct double_list *next;
 };
 
@@ -62,7 +61,7 @@ struct t_avg {
     /* number of items in list */
     int items;
     /* cached current avg values */
-    struct double_types value;
+    struct double_types item_sum;
 };
 #endif
 

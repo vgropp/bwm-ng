@@ -9,6 +9,9 @@
 	* changelog: renamed to ChangeLog and changed to a proper format
 
 	* THANKS: added
+	
+	* process.c: fixed avg was wrong on startup and when delay was changed
+	while running
 
 
 02-20-2005	(0.5)	Volker Gropp <bwmng(at)gropp.org>

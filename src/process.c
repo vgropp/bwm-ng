@@ -101,16 +101,16 @@ t_iface_speed_stats convert2calced_values(t_iface_speed_stats new, t_iface_speed
 
 #if EXTENDED_STATS
 /* sub old values from cached for avg stats */
-inline void sub_avg_values(struct inouttotal_double *values,struct inouttotal_double data,float local_delay) {
-    values->in-=data.in/local_delay;
-    values->out-=data.out/local_delay;
-    values->total-=data.total/local_delay;
+inline void sub_avg_values(struct inouttotal_double *values,struct inouttotal_double data) {
+    values->in-=data.in;
+    values->out-=data.out;
+    values->total-=data.total;
 }
 
-inline void add_avg_values(struct inouttotal_double *values,struct inouttotal_double data,float local_delay) {
-    values->in+=data.in/local_delay;
-    values->out+=data.out/local_delay;
-    values->total+=data.total/local_delay;
+inline void add_avg_values(struct inouttotal_double *values,struct inouttotal_double data) {
+    values->in+=data.in;
+    values->out+=data.out;
+    values->total+=data.total;
 }
 
 
@@ -120,7 +120,7 @@ inline void save_avg_values(struct inouttotal_double *values,struct inouttotal_d
     data->in=calced_stats.in*multiplier;
     data->out=calced_stats.out*multiplier;
     data->total=(calced_stats.in+calced_stats.out)*multiplier;
-    add_avg_values(values,*data,avg_length/(1000/multiplier));
+    add_avg_values(values,*data);
 }
 
 
@@ -135,20 +135,18 @@ void save_avg(struct t_avg *avg,struct iface_speed_stats calced_stats,float mult
         /* init it to zero and NULL */
         memset(avg->first,0,sizeof(struct double_list)); 
         /* save data and add to cache */
-        save_avg_values(&avg->value.bytes,&avg->first->data.bytes,calced_stats.bytes,multiplier);
-        save_avg_values(&avg->value.errors,&avg->first->data.errors,calced_stats.errors,multiplier);
-        save_avg_values(&avg->value.packets,&avg->first->data.packets,calced_stats.packets,multiplier);
-        avg->first->delay=avg_length/(1000/multiplier);
+        save_avg_values(&avg->item_sum.bytes,&avg->first->data.bytes,calced_stats.bytes,multiplier);
+        save_avg_values(&avg->item_sum.errors,&avg->first->data.errors,calced_stats.errors,multiplier);
+        save_avg_values(&avg->item_sum.packets,&avg->first->data.packets,calced_stats.packets,multiplier);
         avg->items=1;
     } else { /* we already have a list */
         avg->last->next=(struct double_list *)malloc(sizeof(struct double_list));
         memset(avg->last->next,0,sizeof(struct double_list));
         avg->last=avg->last->next;
         /* save data and add to cache */
-        save_avg_values(&avg->value.bytes,&avg->last->data.bytes,calced_stats.bytes,multiplier);
-        save_avg_values(&avg->value.errors,&avg->last->data.errors,calced_stats.errors,multiplier);
-        save_avg_values(&avg->value.packets,&avg->last->data.packets,calced_stats.packets,multiplier);
-        avg->last->delay=avg_length/(1000/multiplier);
+        save_avg_values(&avg->item_sum.bytes,&avg->last->data.bytes,calced_stats.bytes,multiplier);
+        save_avg_values(&avg->item_sum.errors,&avg->last->data.errors,calced_stats.errors,multiplier);
+        save_avg_values(&avg->item_sum.packets,&avg->last->data.packets,calced_stats.packets,multiplier);
         avg->items++;
         /* remove only entries if at least two items added, 
          * else we might leave an empty list 
@@ -158,9 +156,9 @@ void save_avg(struct t_avg *avg,struct iface_speed_stats calced_stats,float mult
             list_p=avg->first;
             avg->first=avg->first->next;
             /* sub values from cache */
-            sub_avg_values(&avg->value.bytes,list_p->data.bytes,list_p->delay);
-            sub_avg_values(&avg->value.errors,list_p->data.errors,list_p->delay);
-            sub_avg_values(&avg->value.packets,list_p->data.packets,list_p->delay);
+            sub_avg_values(&avg->item_sum.bytes,list_p->data.bytes);
+            sub_avg_values(&avg->item_sum.errors,list_p->data.errors);
+            sub_avg_values(&avg->item_sum.packets,list_p->data.packets);
             free(list_p);
             avg->items--;
         }

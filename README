@@ -107,8 +107,6 @@ Misc
 Bugs/Known Problems:
   - curses output coredumps on netbsd 1.6.1 (maybe others) with unknown TERM
     set and configfile support compiled in
-  - average value is not correct for avg_length when timeout/delay was changed
-    during runtime.
   - no other yet, wow ;) (please report if you found one)
  
 Todo:

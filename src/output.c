@@ -168,14 +168,14 @@ inline unsigned long long direction2value(char mode,struct inout_long stats) {
 }
 
 #if EXTENDED_STATS
-inline double direction_max2value(char mode,struct inouttotal_double stats) {
+inline double direction_max2value(char mode,struct inouttotal_double stats,int items) {
     switch (mode) {
         case 0:
-            return stats.in;
+            return (double)(stats.in/items);
         case 1:
-            return stats.out;
+            return (double)(stats.out/items);
         case 2:
-            return stats.total;
+            return (double)(stats.total/items);
     }
     return 0;
 }
@@ -226,10 +226,10 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
                 value=direction2value(mode,full_stats.sum.packets);
                 break;
             case MAX_OUT:
-                value=(double)direction_max2value(mode,full_stats.max.packets);
+                value=(double)direction_max2value(mode,full_stats.max.packets,1);
                 break;
             case AVG_OUT:
-                value=(double)direction_max2value(mode,full_stats.avg.value.packets);
+                value=(double)direction_max2value(mode,full_stats.avg.item_sum.packets,full_stats.avg.items);
                 break;
 #endif                
         }
@@ -238,7 +238,6 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
         switch (output_unit) {
             case BITS_OUT:
             case BYTES_OUT:
-                if (output_unit==BYTES_OUT) byte_char='B';
                 switch (output_type) {
                     case RATE_OUT:
                         value=(double)direction2value(mode,stats.bytes)*multiplier;
@@ -248,16 +247,17 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
                         value=direction2value(mode,full_stats.sum.bytes);
                         break;
                     case MAX_OUT:
-                        value=(double)direction_max2value(mode,full_stats.max.bytes);
+                        value=(double)direction_max2value(mode,full_stats.max.bytes,1);
                         break;
                     case AVG_OUT:
-                        value=(double)direction_max2value(mode,full_stats.avg.value.bytes);
+                        value=(double)direction_max2value(mode,full_stats.avg.item_sum.bytes,full_stats.avg.items);
 #endif
                 }
                 if (output_unit==BITS_OUT) {
                     byte_char='b';
                     value*=8;
-                }
+                } else
+                     byte_char='B';
                 str_buf=(char *)malloc(buf_size);
                 snprintf(str,buf_size,"%s%c%s",dyn_byte_value2str(value,str_buf,buf_size),byte_char,speed);
                 break;
@@ -271,10 +271,10 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
                         value=direction2value(mode,full_stats.sum.errors);
                         break;
                     case MAX_OUT:
-                        value=(double)direction_max2value(mode,full_stats.max.errors);
+                        value=(double)direction_max2value(mode,full_stats.max.errors,1);
                         break;
                     case AVG_OUT:
-                        value=(double)direction_max2value(mode,full_stats.avg.value.errors);
+                        value=(double)direction_max2value(mode,full_stats.avg.item_sum.errors,full_stats.avg.items);
                         break;
 #endif
                 }

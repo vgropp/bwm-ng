@@ -170,6 +170,10 @@ void handle_gui_input(char c) {
             /* switch kilobyte/autoassign */
             show_kb=!show_kb;
             break;
+	case 'b':
+	    /* switch show bits */
+	    show_bits=!show_bits;
+	    break;
     }
 }	
 #endif

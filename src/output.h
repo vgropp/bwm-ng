@@ -28,6 +28,7 @@
 #include <time.h>
 
 extern char show_kb;
+extern char show_bits;
 extern char show_all_if;
 extern char show_packets;
 extern int output_method;

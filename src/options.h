@@ -46,6 +46,7 @@ char NETSTAT_FILE[PATH_MAX];
 #endif
 unsigned int delay=500;
 char show_kb=1;
+char show_bits=0;
 char show_all_if=0;
 char show_packets=0;
 #ifdef HAVE_CURSES

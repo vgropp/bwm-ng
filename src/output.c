@@ -27,11 +27,18 @@
 /* convert doube bytes/s value to some nice string */
 inline char *convert_bytes(double bytes,char * buffer, int buf_size) {
     if (bytes<0) bytes=0;
-    if (bytes<1024 && !show_kb)
+    if (bytes<1024 && !show_kb && !show_bits) 
         snprintf(buffer,buf_size,"%12.2f  B/s",bytes);
-    else if (bytes<1048576 || show_kb)
+    else if (bytes<1024 && !show_kb && show_bits) 
+        snprintf(buffer,buf_size,"%12.2f  b/s",bytes*8);
+    else if ((bytes<1048576 || show_kb) && !show_bits) 
         snprintf(buffer,buf_size,"%12.2f KB/s",bytes/1024);
-    else snprintf(buffer,buf_size,"%12.2f MB/s",bytes/1048576);
+    else if ((bytes<1048576 || show_kb) && show_bits) 
+        snprintf(buffer,buf_size,"%12.2f Kb/s",bytes/1024*8);
+    else if (!show_bits)
+	snprintf(buffer,buf_size,"%12.2f MB/s",bytes/1048576);
+    else
+	snprintf(buffer,buf_size,"%12.2f Mb/s",bytes/1048576*8);
     return buffer;
 }
 

@@ -230,7 +230,7 @@ void get_cmdln_options(int argc, char *argv[]) {
         {"netstat",1,0,'n'},
 #endif
         {"input",1,0,'i'},
-        {"dynamic",0,0,'d'},
+        {"dynamic",1,0,'d'},
         {"help", 0, 0, 'h'},
         {"version",0,0,'V'},
         {"allif",1,0,'a'},
@@ -293,11 +293,16 @@ void get_cmdln_options(int argc, char *argv[]) {
             case '?': printf("unknown option: %s\n",argv[optind-1]);
                       exit(0);
                       break;
+            /* ugly workaround to handle optional arguments for all platforms */                      
             case ':': if (!strcmp(argv[optind-1],"-a") || !strcasecmp(argv[optind-1],"--allif")) 
                           show_all_if=1;
                       else {
-                          printf("%s requires an argument!\n",argv[optind-1]);
-                          exit(1);
+                          if (!strcmp(argv[optind-1],"-d") || !strcasecmp(argv[optind-1],"--dynamic"))
+                              dynamic=1;
+                          else {
+                              printf("%s requires an argument!\n",argv[optind-1]);
+                              exit(1);
+                          }
                       }
                       break;
 			case 'D':
@@ -363,7 +368,7 @@ void get_cmdln_options(int argc, char *argv[]) {
                 output_type=str2output_type(optarg);
                 break;
             case 'd':
-                dynamic=1;
+                if (optarg) dynamic=atoi(optarg);
                 break;
             case 'u':
                 output_unit=str2output_unit(optarg);

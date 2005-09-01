@@ -125,11 +125,11 @@ int print_header(int option) {
 		        fprintf(tmp_out_file,"<link rel=\"stylesheet\" href=\"bwm-ng.css\" type=\"text/css\" media=\"screen,projection,print\">\n");
 		        fprintf(tmp_out_file,"<title>bwm-ng stats</title>\n</head>\n<body>\n");
 			}
-	        fprintf(tmp_out_file,"<div class='bwm-ng-header'>bwm-ng bwm-ng v" VERSION " (refresh %is); input: ",html_refresh);
+	        fprintf(tmp_out_file,"<div class=\"bwm-ng-header\">bwm-ng bwm-ng v" VERSION " (refresh %is); input: ",html_refresh);
             fprintf(tmp_out_file,input2str());
             fprintf(tmp_out_file,show_all_if2str());
-	        fprintf(tmp_out_file,"</div><table class='bwm-ng-output'>");
-			fprintf(tmp_out_file,"<tr class='bwm-ng-head'><td class='bwm-ng-name'>Interface</td><td>Rx</td><td>Tx</td><td>Total</td></tr>");
+	        fprintf(tmp_out_file,"</div><table class=\"bwm-ng-output\">");
+			fprintf(tmp_out_file,"<tr class=\"bwm-ng-head\"><td class=\"bwm-ng-name\">Interface</td><td>Rx</td><td>Tx</td><td>Total</td></tr>");
 			break;
 #endif			
 		case PLAIN_OUT_ONCE:
@@ -333,12 +333,12 @@ void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float mult
 #ifdef HTML			
 		case HTML_OUT:
             tmp_out_file=out_file==NULL ? stdout : out_file;
-			fprintf(tmp_out_file,"<tr><td class='bwm-ng-name'>%12s:</td><td class='bwm-ng-in'><span class='bwm-ng-%s'>",if_name,
+			fprintf(tmp_out_file,"<tr><td class=\"bwm-ng-name\">%12s:</td><td class=\"bwm-ng-in\"><span class=\"bwm-ng-%s\">",if_name,
                     (stats.errors.in && output_unit!=ERRORS_OUT) ? "error" : "dummy");
-            fprintf(tmp_out_file,"%s</span> </td><td class='bwm-ng-out'><span class='bwm-ng-%s'>",
+            fprintf(tmp_out_file,"%s</span> </td><td class=\"bwm-ng-out\"><span class=\"bwm-ng-%s\">",
                     values2str(0,stats,full_stats,multiplier,buffer,49),
                     (stats.errors.out && output_unit!=ERRORS_OUT) ? "error" : "dummy");
-            fprintf(tmp_out_file,"%s</span> </td><td class='bwm-ng-total'><span class='bwm-ng-%s'>",
+            fprintf(tmp_out_file,"%s</span> </td><td class=\"bwm-ng-total\"><span class=\"bwm-ng-%s\">",
                     values2str(1,stats,full_stats,multiplier,buffer,49),
                     ((stats.errors.out || stats.errors.in) && output_unit!=ERRORS_OUT) ? "error" : "dummy" );
             fprintf(tmp_out_file,"%s</span></td><tr>\n",values2str(2,stats,full_stats,multiplier,buffer,49));

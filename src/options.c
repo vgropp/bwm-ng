@@ -193,6 +193,7 @@ char *token, *value;
         if (value) { 
             if (out_file) fclose(out_file);
             out_file=fopen(value,"a"); 
+            if (!out_file) deinit("failed to open outfile\n");
             if (out_file_path) free(out_file_path);
             out_file_path=strdup(value);
         }
@@ -223,7 +224,7 @@ char *token, *value;
 void get_cmdln_options(int argc, char *argv[]) {
 	int o;
 #if CONFIG_FILE && HAVE_GETPWUID
-    struct passwd *pwd_entry;
+    static struct passwd *pwd_entry;
     char *str;
 #endif
 #ifdef LONG_OPTIONS
@@ -340,6 +341,7 @@ void get_cmdln_options(int argc, char *argv[]) {
                 if (optarg) { 
                     if (out_file) fclose(out_file);
                     out_file=fopen(optarg,"a"); 
+                    if (!out_file) deinit("failed to open outfile\n");
                     if (out_file_path) free(out_file_path);
                     out_file_path=strdup(optarg);
                 }

@@ -123,11 +123,11 @@ char *dud = str;
 int i;
 
    /* beginning whitespace first */
-   while( isspace((int)*dud) )
+   while( (int)*dud && isspace((int)*dud) )
       ++dud;
    /* now trailing whitespace */
    i = strlen(dud) - 1;
-   while( isspace((int)dud[i]) )
+   while( i>=0 && isspace((int)dud[i]) )
       --i;
    dud[i+1] = 0;
    return dud;

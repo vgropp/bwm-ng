@@ -27,6 +27,9 @@
 	* src/bwm-ng.c: fixed html footer output to stdout when deamon, header and
 	outfile set
 
+	* src/options.c: hopefully fixed segfault when empty lines in config in
+	openbsd 3.8 (reply is welcome)
+
 02-20-2005	(0.5)	Volker Gropp <bwmng(at)gropp.org>
 	
 	* added: outfile and daemonize for html output

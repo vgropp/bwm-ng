@@ -18,17 +18,19 @@
 	* bwm-ng.c: fixed memleak of if_name and myscr in deinit().
 
 	* src/output.c: fixed from single to double quotes in order to valide with
-	w3c
+	w3c (reported by -f <f@obiit.org>)
 
-	* bwm-ng.conf-example: fixed default procfile to /proc/net/dev
+	* bwm-ng.conf-example: fixed default procfile to /proc/net/dev (reported
+	by -f <f@obiit.org>)
 
-	* src/options.c: fixed error and exit if outfile cant be open
+	* src/options.c: fixed error and exit if outfile cant be open (reported by
+	-f <f@obiit.org>)
 
 	* src/bwm-ng.c: fixed html footer output to stdout when deamon, header and
-	outfile set
+	outfile set (reported by -f <f@obiit.org>)
 
 	* src/options.c: hopefully fixed segfault when empty lines in config in
-	openbsd 3.8 (reply is welcome)
+	openbsd 3.8 (reply is welcome) (reported by -f <f@obiit.org>)
 
 02-20-2005	(0.5)	Volker Gropp <bwmng(at)gropp.org>
 	

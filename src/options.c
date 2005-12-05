@@ -81,6 +81,8 @@ inline int str2out_method(char *optarg) {
 #ifdef HAVE_CURSES
             else
         if (!strcasecmp(optarg,"curses")) return CURSES_OUT;
+	    else
+        if (!strcasecmp(optarg,"curses2")) return CURSES2_OUT;
 #endif
 #ifdef CSV
             else

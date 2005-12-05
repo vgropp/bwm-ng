@@ -75,7 +75,7 @@ void deinit(...) {
     struct double_list *list_p;
 #endif    
 #ifdef HAVE_CURSES	
-	if (output_method==CURSES_OUT && myscr!=NULL) {
+	if ((output_method==CURSES_OUT || output_method==CURSES2_OUT) && myscr!=NULL) {
 		/* first close curses, so we dont leave mess behind */
 #if HAVE_CURS_SET
         curs_set(1);
@@ -158,7 +158,7 @@ int main (int argc, char *argv[]) {
     /* init total stats to zero */
 	memset(&if_stats_total,0,(size_t)sizeof(t_iface_stats));
 #ifdef HAVE_CURSES
-	if (output_method==CURSES_OUT) {
+	if (output_method==CURSES_OUT || output_method==CURSES2_OUT) {
 		/* init curses */
         if (init_curses())
             signal(SIGWINCH,sigwinch);
@@ -227,7 +227,7 @@ int main (int argc, char *argv[]) {
 		}
         /* either refresh the output and handle gui input */
 #ifdef HAVE_CURSES		
-		if (output_method==CURSES_OUT) {
+		if (output_method==CURSES_OUT || output_method==CURSES2_OUT) {
 			refresh();
 			handle_gui_input(getch());
 		} else 

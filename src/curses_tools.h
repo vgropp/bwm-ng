@@ -45,6 +45,10 @@ extern int input_method;
 extern unsigned int delay;
 extern char *iface_list;
 extern int if_count;
+extern unsigned int max_rt;
+extern unsigned int show_only_if;
+extern unsigned short cols;
+extern unsigned short rows;
 
 /* global buffer to store all data of interfaces in */
 extern t_iface_stats *if_stats;

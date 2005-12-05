@@ -1,4 +1,11 @@
-..-..-.... (0.6-pre1-cvs)	Volker Gropp <bwmng(at)gropp.org>
+05-12-2005 (0.6-pre2-cvs)   Bastian Riehl <mail(at)bastian-riehl.de>
+
+	* src/bwm-ng.c,src/curses_tools.c,src/curses_tools.h,src/defines.h,
+	src/help.c,src/help.h,src/options.c,src/options.h,
+	src/output.c,src/output.h: added first curses2 support, some nice bar
+	chart (submitted by Bastian Riehl)
+	
+04-12-2005 (0.6-pre1-cvs)	Volker Gropp <bwmng(at)gropp.org>
 	
 	* acinclude.m4, configure.in, aclocal.m4, Makefile.in, Makefile.am: added 
 	full auto* support for a proper `make install`
@@ -31,6 +38,8 @@
 
 	* src/options.c: hopefully fixed segfault when empty lines in config in
 	openbsd 3.8 (reply is welcome) (reported by -f <f@obiit.org>)
+	
+	* src/defines.h,src/help.c,src/options.c: fixed return codes
 
 02-20-2005	(0.5)	Volker Gropp <bwmng(at)gropp.org>
 	

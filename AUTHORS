@@ -7,6 +7,8 @@ Main developers:
     Volker Gropp <vgropp(at)pefra.de>
 
 Contributors:
+    Bastian Riehl <mail(at)bastian-riehl.de>
+      - curses2 output
     Michael Eckhoff <mreckhof(at)gmail.com>
       - bit/s display
     Daniel Elstner  <daniel.elstner(at)gmx.net>

@@ -57,6 +57,11 @@ char show_all_if=0;
 int output_method=CURSES_OUT;
 WINDOW *mywin=NULL;
 SCREEN *myscr=NULL;
+unsigned short cols;
+unsigned short rows;
+unsigned int max_rt=32;
+unsigned int scale=0;
+unsigned int show_only_if=0;
 #else
 int output_method=PLAIN_OUT;
 #endif

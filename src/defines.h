@@ -157,8 +157,10 @@
 
 /* build output methods string: curses, plain, csv, html */
 #ifdef HAVE_CURSES 
-#define CURSES_OUTPUT_METHODS ", curses"
+#define CURSES_OUTPUT_METHODS ", curses, curses2"
 #define CURSES_OUT 0
+#define CURSES2_OUT 5
+#define IDLE_CHARS2 "   >--<   "
 #else
 #define CURSES_OUTPUT_METHODS
 #endif

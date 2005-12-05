@@ -49,3 +49,10 @@ extern unsigned int delay;
 #if EXTENDED_STATS
 extern unsigned int avg_length;
 #endif
+#ifdef HAVE_CURSES
+extern unsigned int max_rt;
+extern unsigned int scale;
+extern unsigned int show_only_if;
+extern unsigned short cols;
+extern unsigned short rows;
+#endif

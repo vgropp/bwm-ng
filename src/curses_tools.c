@@ -80,15 +80,20 @@ void handle_gui_input(char c) {
         case 'D':
         case 'k':
         case 'K':
-            /* switch kilobyte/autoassign */
-            dynamic=!dynamic;
+	    if (output_method==CURSES2_OUT)
+	      /* cycle through interfaces */
+	      show_only_if++;
+	    else
+	      /* switch kilobyte/autoassign */
+	      dynamic=!dynamic;
             break;
         case 'u':
         case 'U':
+	  if (output_method==CURSES_OUT) {
             if (output_unit<4) 
                 output_unit++;
             else 
-                output_unit=1;
+	      output_unit=1; };
 	        break;
 #if EXTENDED_STATS            
         case 't':
@@ -97,6 +102,7 @@ void handle_gui_input(char c) {
                 output_type++;
             else 
                 output_type=1;
+	    if (output_method==CURSES2_OUT) max_rt=32;
             break;
 #endif            
         case 'h':
@@ -106,8 +112,9 @@ void handle_gui_input(char c) {
 }	
 
 int init_curses() {
+    struct winsize size;
     myscr=newterm(NULL,stdout,stdin);
-    if (myscr!=NULL) {
+    if (myscr!=NULL && !(output_method==CURSES2_OUT && !has_colors())) {
         cbreak();
         noecho();
         nonl();
@@ -115,6 +122,12 @@ int init_curses() {
         curs_set(0);
 #endif        
         timeout(delay); /* set the timeout of getch to delay in ms) */
+	if (output_method==CURSES2_OUT) {
+	  start_color();
+	  init_pair(1,COLOR_BLACK,COLOR_GREEN); init_pair(2,COLOR_BLACK,COLOR_RED); 
+	  if (ioctl(fileno(stdout), TIOCGWINSZ, &size) == 0) { 
+	    cols=size.ws_col; rows=size.ws_row; sleep(1); };
+	}
         return 1;
     } else {
         printf("curses newterm() failed: %s\n",strerror(errno));
@@ -125,12 +138,12 @@ int init_curses() {
 }
 
 void sigwinch(int sig) {
-    struct winsize size;
-    if (ioctl(fileno(stdout), TIOCGWINSZ, &size) == 0) {
-        if (endwin()==ERR) deinit("failed to deinit curses: %s\n",strerror(errno));
-        if (myscr) delscreen(myscr);
-        init_curses();
-    }
+     struct winsize size;
+     if (ioctl(fileno(stdout), TIOCGWINSZ, &size) == 0) { 
+       if (endwin()==ERR) deinit("failed to deinit curses: %s\n",strerror(errno));
+       if (myscr) delscreen(myscr);
+       init_curses();
+     }
 }
 
 

@@ -100,7 +100,12 @@ inline char *show_all_if2str() {
 int print_header(int option) {
 #if HTML
     FILE *tmp_out_file;
-#endif    
+#endif
+#ifdef HAVE_CURSES
+    unsigned int row=0;
+    unsigned int col=0;
+    unsigned int width=0;
+#endif
 	switch (output_method) {
 #ifdef HAVE_CURSES
 		case CURSES_OUT:
@@ -114,6 +119,45 @@ int print_header(int option) {
 			if (option>3) option=0;
 	        mvwprintw(stdscr,4,2,"===========================================================================");
 			break;
+		case CURSES2_OUT:
+	        erase();
+		if (cols<48 || rows<45) mvwprintw(stdscr,1,2,"window size too small.\n  it has to be at least 48x45.");
+		else {
+		  width=(cols-3-16-4)/3;
+		  mvwprintw(stdscr,1,2,"+---{ bwm-ng v" VERSION" }");
+		  for (col=17+sizeof(VERSION);col<32+cols-48;col++) mvwprintw(stdscr,1,col,"-");
+		  mvwprintw(stdscr,1,32+cols-48,"+- -- - -- -->");
+		  mvwprintw(stdscr,2,2,"|"), mvwprintw(stdscr,2,32+cols-48,"|------.");
+		  for (col=0;col<width-2;col++) { 
+		    mvwaddch(stdscr,2,col+6,ACS_HLINE); 
+		    attron(COLOR_PAIR(1));mvwprintw(stdscr,35,col+6," ");attroff(COLOR_PAIR(1));
+		    mvwaddch(stdscr,2,2*width+6+col,ACS_HLINE); 
+		    attron(COLOR_PAIR(2));mvwprintw(stdscr,35,2*width+6+col," ");attroff(COLOR_PAIR(2));
+		  };
+		  for (row=3;row<=36;row++) { mvwprintw(stdscr,row,2,"|"); mvwprintw(stdscr,row,32+cols-48,"|"); }
+		  mvwprintw(stdscr,34,33+cols-48,"<"); mvwprintw(stdscr,35,33+cols-48,"------'");
+		  mvwprintw(stdscr,36,((width-8)/2)+5,"%c%c%cRx%c%c%c",IDLE_CHARS2[option+2],IDLE_CHARS2[option+1],IDLE_CHARS2[option],IDLE_CHARS2[9-option],IDLE_CHARS2[8-option],IDLE_CHARS2[7-option]);
+		  mvwprintw(stdscr,36,((width-8)/2)+5+2*width,"%c%c%cTx%c%c%c",IDLE_CHARS2[9-option],IDLE_CHARS2[8-option],IDLE_CHARS2[7-option],IDLE_CHARS2[option+2],IDLE_CHARS2[option+1],IDLE_CHARS2[option]);
+
+
+		  mvwprintw(stdscr,37,2,"+"); mvwprintw(stdscr,37,32+cols-48,"+");
+		  for (col=3;col<32+cols-48;col++) mvwprintw(stdscr,37,col,"-");
+
+
+
+		  mvwprintw(stdscr,38,2,"`+--> %c probing every: %2.3fs",(char)IDLE_CHARS[option],(float)delay/1000);
+		  mvwprintw(stdscr,39,2," +-----> interface: wait...   ");
+		  mvwprintw(stdscr,40,2," +--------> type: %s",output_type2str());
+		  mvwprintw(stdscr,41,2," `-----------> input: %s",input2str());
+		  scale=max_rt/32;
+		  /* print scale */
+		  if (max_rt>=1024) for (row=0;row<=31;row++) mvwprintw(stdscr,row+3,34+cols-48,"%2.2fM|",(float)(max_rt-row*scale)/1024);
+		  else for (row=0;row<=31;row++) mvwprintw(stdscr,row+3,34+cols-48,"%4uk|",max_rt-row*scale);
+		};
+		  /* go to next char for next run */
+		  option++;
+		  if (option>3) option=0;
+		break;
 #endif
 #ifdef HTML
 		case HTML_OUT:
@@ -292,6 +336,13 @@ void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float mult
 #if CSV || HTML
 	FILE *tmp_out_file;
 #endif
+#ifdef HAVE_CURSES
+	unsigned int row=0;
+	unsigned int col=0;
+	unsigned int width=0;
+	int i=0, j=0;
+	char adjust=0;
+#endif
     switch (output_method) {
 #ifdef HAVE_CURSES		
         case CURSES_OUT:
@@ -319,6 +370,62 @@ void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float mult
 #if HAVE_WATTRON            
             if ((stats.errors.out || stats.errors.in) && output_unit!=ERRORS_OUT) wattroff(stdscr, A_REVERSE);
 #endif            
+            break;
+        case CURSES2_OUT:
+	  if (cols<48 || rows<45) mvwprintw(stdscr,1,2,"window size too small.\n  it has to be at least 49x46.");
+	  else {
+	    if (show_only_if+5==y) { /* show only one interface at a time */
+	      width=(cols-3-16-4)/3;
+	      mvwprintw(stdscr,39,2," +-----> interface: %s        ",if_name); /* output the name */
+	      switch (output_type) {
+	      case RATE_OUT:
+		i=(int)(stats.bytes.in*multiplier/1024); /* incoming */
+		j=(int)(stats.bytes.out*multiplier/1024); /* outgoing */
+		break;
+#ifdef EXTENDED_STATS
+	      case MAX_OUT:
+		i=(int)(full_stats.max.bytes.in*multiplier/1024);
+		j=(int)(full_stats.max.bytes.out*multiplier/1024);
+		break;
+	      case SUM_OUT:
+		i=(int)(full_stats.sum.bytes.in*multiplier/1024);
+		j=(int)(full_stats.sum.bytes.out*multiplier/1024);
+		break;
+	      case AVG_OUT:
+		i=(int)(full_stats.avg.item_sum.bytes.in*multiplier/1024);
+		j=(int)(full_stats.avg.item_sum.bytes.out*multiplier/1024);
+		break;
+#endif
+	      };
+	      /* adjust scale */
+	      if (i>max_rt || j>max_rt) {
+		adjust=1;
+		if (i>j) max_rt=i; else max_rt=j;
+	      } else if (i<=max_rt-24*scale && j<=max_rt-24*scale) { adjust=1; max_rt=31*scale; };
+	      if (adjust) {
+		adjust=!adjust;
+		if (max_rt<32) max_rt=32;
+		/* print scale */
+		scale=max_rt/32;
+		if (max_rt>=1024) for (row=0;row<=31;row++) mvwprintw(stdscr,row+3,34+cols-48,"%2.2fM|",(float)(max_rt-row*scale)/1024);
+		else for (row=0;row<=31;row++) mvwprintw(stdscr,row+3,3+cols-484,"%4uk|",max_rt-row*scale);
+	      };
+	      /* print bar (incoming) */
+	      if (i>0) { if (i<(max_rt-31*scale)) i=1; else i=(i-(max_rt-31*scale))/scale+2; };
+	      for (row=34;row>=3;row--) {
+		if (i>0) attron(COLOR_PAIR(1));
+		for (col=0;col<width;col++) mvwaddch(stdscr,row,col+5,ACS_HLINE);
+		if (i>0) { attroff(COLOR_PAIR(1)); i--; }
+	      };
+	      /* print bar (outgoing) */
+	      if (j>0) { if (j<(max_rt-31*scale)) j=1; else j=(j-(max_rt-31*scale))/scale+2; };
+	      for (row=34;row>=3;row--) {
+		if (j>0) attron(COLOR_PAIR(2));
+		for (col=0;col<width;col++) mvwaddch(stdscr,row,2*width+5+col,ACS_HLINE);
+		if (j>0) { attroff(COLOR_PAIR(2)); j--; }
+	      };
+	    } else if (show_only_if+6==y) if (strcmp("total",if_name)==0) show_only_if=0;
+	  };
             break;
 #endif
 		case PLAIN_OUT_ONCE:

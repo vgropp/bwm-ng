@@ -89,7 +89,7 @@ inline void cmdln_printhelp() {
     print_help_line("-c <num>","-c, --count <num>","number of query/output for plain & csv");
     print_help_line("","","(ie 1 for one single output)");
     printf("\n");
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
 
 #ifdef HAVE_CURSES

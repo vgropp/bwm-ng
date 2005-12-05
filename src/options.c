@@ -302,7 +302,7 @@ void get_cmdln_options(int argc, char *argv[]) {
         if (o==-1) break;
         switch (o) {
             case '?': printf("unknown option: %s\n",argv[optind-1]);
-                      exit(0);
+                      exit(EXIT_FAILURE);
                       break;
             /* ugly workaround to handle optional arguments for all platforms */                      
             case ':': if (!strcmp(argv[optind-1],"-a") || !strcasecmp(argv[optind-1],"--allif")) 
@@ -319,7 +319,7 @@ void get_cmdln_options(int argc, char *argv[]) {
                             sumhidden=1;    
                           else {
                               printf("%s requires an argument!\n",argv[optind-1]);
-                              exit(1);
+                              exit(EXIT_FAILURE);
                           }
                       break;
 			case 'D':
@@ -403,7 +403,7 @@ void get_cmdln_options(int argc, char *argv[]) {
 #endif                
             case 'V':
                 print_version;
-                exit(0);
+                exit(EXIT_SUCCESS);
                 break;
         }
     }

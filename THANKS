@@ -1,20 +1,22 @@
 thanks and praises go to:
 
-    Gentoo packaging
-        Benedikt Boehm      <hollow(at)gentoo dot org>
-        Adrian von Buttlar
-
-    Ubuntu packaging
-        Daniel Holbach      <dh(at)mailempfang dot de>
+    Packaging
+        (Gentoo)
+        Benedikt Boehm      <hollow(at)gentoo org>
+        Adrian von Buttlar  <adrian(at)netzkind org>
+        (Ubuntu)
+        Daniel Holbach      <dh(at)mailempfang de>
+        (rh/fc spec)
+        Michael Lang        <Michael.Lang(at)jackal-net at>
 
     General input / clues
-        Daniel Holbach      <dh(at)mailempfang dot de>
-        Adrian von Buttlar
-        Charley Krooﬂ       don(at)chemicalkungfu dot de
+        Daniel Holbach      <dh(at)mailempfang de>
+        Adrian von Buttlar  <adrian(at)netzkind org>
+        Charley Krooﬂ       <don(at)chemicalkungfu de>
 
     Testing
-        Jens Mayer          <mail(at)jensmayer dot de>
-        Markus Nospers      <markus(at)nospers dot de>
+        Jens Mayer          <mail(at)jensmayer de>
+        Markus Nospers      <markus(at)nospers de>
 
 
 Thanks to all mailing me and help me improving bwm-ng

@@ -34,8 +34,8 @@ new ones dynamically while its running or hide those which are not up.
 
 
 .SH INPUT METHODS
-The used input methods pretty much depends on your OS and system.
-You can choose the prefered either at start or in curses during runtime.
+The input methods used pretty much depends on your OS and system.
+You can choose the preferred method either at start or in curses during run-time.
 Each method can only be used if 
 .B bwm-ng 
 was compiled with support for it.
@@ -81,7 +81,7 @@ You can use one of:
 .TP .4i
 .BR "curses" :
 This is the default output method. Usually this fits you the most.
-In \fIcurses\fP mode you can control \fBbwm-ng\fP with severy keys. 
+In \fIcurses\fP mode you can control \fBbwm-ng\fP with several keys. 
 Press 'h' for a online help. To quit using this mode either press 'q'
 or ctrl-c.
 .TP
@@ -102,7 +102,7 @@ bwm-ng -o csv -c 0
 .fi
 .TP
 .BR "html" :
-This is designed for use in the WWW. It uses the CSS file bwm-nd.css in 
+This is designed for use in the WWW. It uses the CSS file bwm-ng.css in 
 current working dir. "--htmlrefresh" only affects the refresh of the page
 by the browser. For best results use the same value for --timeout and 
 --htmlrefresh.
@@ -127,7 +127,7 @@ selects the file to parse in \fBproc input method\fP. This is usually
 \fI/proc/net/dev\fP.
 .TP
 .BI "-n, --netstat " "path"
-specifies the binary to execute for \fBnetstat intput method\fP. Because
+specifies the binary to execute for \fBnetstat input method\fP. Because
 this may be a security flaw support for this option is \fInot\fP compiled
 in 
 .B bwm-ng 
@@ -138,7 +138,7 @@ These options select the way to output the data and several options for
 the output.
 .TP
 .BI "-o, --output " "method"
-selects which method to use for otput. It can be one of the above (see
+selects which method to use for output. It can be one of the above (see
 \fBOUTPUT METHODS\fP) if support for it was compiled in.
 .TP
 .BI "-u, --unit " "value"
@@ -166,7 +166,7 @@ only affects \fICSV\fP and \fIHTML\fP mode.
 .BI "-R, --htmlrefresh " "seconds"
 sets the \fIHTML\fP Meta refresh field to seconds in \fIHTML\fP mode. 
 This will result in a reload of the page every \fIn\fP seconds by
-the browser. If set this you want to use \fI--htmlheader\fP aswell.
+the browser. If this is set you want to use \fI--htmlheader\fP as well.
 .TP
 .BI "-H, --htmlheader " "[value]"
 if this option is used, \fBbwm-ng\fP will print the correct \fIHTML\fP
@@ -192,7 +192,7 @@ selected interfaces (\fImode\fP=2). If no interface list given
 (\fI--interfaces\fP) \fImode\fP=1 and \fImode\fP=2 are the same.
 .TP
 .BI "-I, --interfaces " "list"
-show only interfaces which are in this comma seperated list (\fBwhitelist\fP). 
+show only interfaces which are in this comma separated list (\fBwhitelist\fP). 
 If the list is prefixed by a '%' its meaning is negated and interfaces in this
 list are hidden from output (\fBblacklist\fP). (Example: %eth0,tun0)
 .TP
@@ -205,7 +205,7 @@ sets the span in which the stats for average mode are collected. Default
 is 30 seconds or 2*\fItimeout\fP.
 .TP
 .BI "-D, --daemon " "[value]"
-fork into background and daeonize if given and the optional value is not 0.
+fork into background and daemonize if given and the optional value is not 0.
 This only affects \fIHTML\fP and \fICSV\fP mode and \fI--outfile\fP is 
 required.
 .TP
@@ -218,9 +218,9 @@ print version info
 .SH CONFIGFILE
 The behavior of \fBbwm-ng\fP can be also controlled by a \fIconfigfile\fP. 
 By default \fBbwm-ng\fP first reads /etc/bwm-ng.conf and then 
-~/.bwm-ng.conf. If specified in commandline \fBbwm-ng\fP skips those.
-It consists of the same long-options as used for commandline as keys 
-followed by a '=' and the value. Lines starting with a # or not known
+~/.bwm-ng.conf. If specified on command line \fBbwm-ng\fP skips those.
+It consists of the same long-options as used for command line as keys 
+followed by a '=' and the value. Lines starting with a # or unknown
 key will be ignored.
 
 For example:

@@ -122,12 +122,13 @@ int init_curses() {
         curs_set(0);
 #endif        
         timeout(delay); /* set the timeout of getch to delay in ms) */
-	if (output_method==CURSES2_OUT) {
-	  start_color();
-	  init_pair(1,COLOR_BLACK,COLOR_GREEN); init_pair(2,COLOR_BLACK,COLOR_RED); 
-	  if (ioctl(fileno(stdout), TIOCGWINSZ, &size) == 0) { 
-	    cols=size.ws_col; rows=size.ws_row; sleep(1); };
-	}
+		if (output_method==CURSES2_OUT) {
+			start_color();
+			init_pair(1,COLOR_BLACK,COLOR_GREEN); init_pair(2,COLOR_BLACK,COLOR_RED); 
+			if (ioctl(fileno(stdout), TIOCGWINSZ, &size) == 0) { 
+				cols=size.ws_col; rows=size.ws_row; 
+			}
+		}
         return 1;
     } else {
         printf("curses newterm() failed: %s\n",strerror(errno));

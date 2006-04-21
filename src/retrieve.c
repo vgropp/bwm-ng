@@ -56,7 +56,7 @@ char check_if_up(char *ifname) {
      * if not open it now */
     if (skfd < 0) {
         if ((skfd =  socket(AF_UNIX, SOCK_DGRAM, 0)) < 0) {
-            deinit("socket error: %s\n",strerror(errno));
+            deinit(1, "socket error: %s\n",strerror(errno));
         }
     }
     /* setup the struct */
@@ -88,7 +88,7 @@ void get_iface_stats_getifaddrs (char verbose) {
 
     /* dont open proc_net_dev if netstat_i is requested, else try to open and if it fails fallback */
 	if (getifaddrs(&net) != 0) {
-		deinit("getifaddr failed: %s\n",strerror(errno));
+		deinit(1, "getifaddr failed: %s\n",strerror(errno));
 	}
 	net_ptr=net;
     /* loop either while netstat enabled and still lines to read
@@ -144,17 +144,17 @@ void get_iface_stats_proc (char verbose) {
 	memset(&stats,0,(size_t)sizeof(t_iface_speed_stats)); /* init it */
     /* dont open proc_net_dev if netstat_i is requested, else try to open and if it fails fallback */
     if (!(f=fopen(PROC_FILE,"r"))) {
-		deinit("open of procfile failed: %s\n",strerror(errno));
+		deinit(1, "open of procfile failed: %s\n",strerror(errno));
 	}
 	buffer=(char *)malloc(MAX_LINE_BUFFER);
 	/* we skip first 2 lines if not bsd at any mode */
-	if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL ) || (fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) deinit("read of proc failed: %s\n",strerror(errno));
+	if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL ) || (fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) deinit(1, "read of proc failed: %s\n",strerror(errno));
 	name=(char *)malloc(MAX_LINE_BUFFER);
 	while ( (fgets(buffer,MAX_LINE_BUFFER,f) != NULL) ) {
         /* get the name */
         ptr=strchr(buffer,':');
         /* wrong format */
-        if (ptr==NULL) { deinit("wrong format of input stream\n"); }
+        if (ptr==NULL) { deinit(1, "wrong format of input stream\n"); }
 		/* set : to end_of_string and move to first char of "next" string (to first data) */
         *ptr++ = 0;
         sscanf(ptr,"%llu%llu%llu%*i%*i%*i%*i%*i%llu%llu%llu",&tmp_if_stats.bytes.in,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.bytes.out,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out);
@@ -192,7 +192,7 @@ void get_iface_stats_libstat (char verbose) {
     
 	network_stats = sg_get_network_io_stats(&num_network_stats);
     if (network_stats == NULL){
-        deinit("libstatgrab error!\n");
+        deinit(1, "libstatgrab error!\n");
     }
 	
 	for (current_if_num=0;current_if_num<num_network_stats;current_if_num++) {
@@ -258,24 +258,24 @@ void get_iface_stats_netstat (char verbose) {
             NETSTAT_PATH " -ib"
 #endif
                     ,"r")))
-        deinit("no input stream found: %s\n",strerror(errno));
+        deinit(1, "no input stream found: %s\n",strerror(errno));
 #if NETSTAT_NETBSD
     if (!(f2=popen( NETSTAT_PATH " -i","r")))
-        deinit("no input stream found: %s\n",strerror(errno));
+        deinit(1, "no input stream found: %s\n",strerror(errno));
     buffer2=(char *)malloc(MAX_LINE_BUFFER);
-    if ((fgets(buffer2,MAX_LINE_BUFFER,f2) == NULL )) deinit("read of netstat failed: %s\n",strerror(errno));
+    if ((fgets(buffer2,MAX_LINE_BUFFER,f2) == NULL )) deinit(1, "read of netstat failed: %s\n",strerror(errno));
     str_buf=(char *)malloc(MAX_LINE_BUFFER);
 #endif
     buffer=(char *)malloc(MAX_LINE_BUFFER);
 #ifdef NETSTAT_LINUX
     /* we skip first 2 lines if not bsd at any mode */
     if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL ) || (fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) 
-		deinit("read of netstat failed: %s\n",strerror(errno));
+		deinit(1, "read of netstat failed: %s\n",strerror(errno));
 #endif
 #if NETSTAT_BSD || NETSTAT_BSD_BYTES || NETSTAT_SOLARIS || NETSTAT_NETBSD
     last_name=(char *)malloc(MAX_LINE_BUFFER);
     last_name[0]='\0'; /* init */
-	if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) deinit("read of netstat failed: %s\n",strerror(errno));
+	if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) deinit(1, "read of netstat failed: %s\n",strerror(errno));
 #endif
     name=(char *)malloc(MAX_LINE_BUFFER);
     /* loop and read each line */
@@ -360,13 +360,13 @@ void get_iface_stats_sysctl (char verbose) {
     memset(&stats,0,(size_t)sizeof(t_iface_speed_stats)); /* init it */
 
     /* dont open proc_net_dev if netstat_i is requested, else try to open and if it fails fallback */
-    if (sysctl(mib, 6, NULL, &size, NULL, 0) < 0) deinit("sysctl failed: %s\n",strerror(errno));
-    if (!(bsd_if_buf = malloc(size))) deinit("no memory: %s\n",strerror(errno));
+    if (sysctl(mib, 6, NULL, &size, NULL, 0) < 0) deinit(1, "sysctl failed: %s\n",strerror(errno));
+    if (!(bsd_if_buf = malloc(size))) deinit(1, "no memory: %s\n",strerror(errno));
     bzero(bsd_if_buf,size);
     if (sysctl(mib, 6, bsd_if_buf, &size, NULL, 0) < 0) {
         my_errno=errno;
         free(bsd_if_buf);
-        deinit("sysctl failed: %s\n",strerror(my_errno));
+        deinit(1, "sysctl failed: %s\n",strerror(my_errno));
     }
 
     lim = (bsd_if_buf + size);
@@ -423,7 +423,7 @@ void get_iface_stats_kstat (char verbose) {
     
     memset(&stats,0,(size_t)sizeof(t_iface_speed_stats)); /* init it */
     kc = kstat_open();
-    if (kc==NULL) deinit("kstat failed: %s\n",strerror(my_errno));
+    if (kc==NULL) deinit(1, "kstat failed: %s\n",strerror(my_errno));
     name=(char *)malloc(KSTAT_STRLEN);
     /* loop for interfaces */
     for (ksp = kc->kc_chain;ksp != NULL;ksp = ksp->ks_next) {

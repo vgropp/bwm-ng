@@ -28,9 +28,9 @@
 extern void print_online_help();
 extern inline void get_iface_stats(char _n);
 #ifdef __STDC__
-extern void deinit(char *error_msg, ...) FUNCATTR_NORETURN;
+extern void deinit(int code, char *error_msg, ...) FUNCATTR_NORETURN;
 #else
-extern void deinit(...) FUNCATTR_NORETURN;
+extern void deinit(int code, ...) FUNCATTR_NORETURN;
 #endif
 
 extern WINDOW *mywin;

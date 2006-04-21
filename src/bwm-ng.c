@@ -63,11 +63,11 @@ inline void get_iface_stats(char _n) {
 
 /* clear stuff and exit */
 #ifdef __STDC__
-void deinit(char *error_msg, ...) FUNCATTR_NORETURN;
-void deinit(char *error_msg, ...) {
+void deinit(int code, char *error_msg, ...) FUNCATTR_NORETURN;
+void deinit(int code, char *error_msg, ...) {
 #else
-void deinit(...) FUNCATTR_NORETURN;
-void deinit(...) {
+void deinit(int code, ...) FUNCATTR_NORETURN;
+void deinit(int code, ...) {
 #endif
     va_list    ap;
 #if EXTENDED_STATS
@@ -124,7 +124,7 @@ void deinit(...) {
     vprintf(ap);
 #endif
 	/* we are done, say goodbye */
-    exit(0);
+    exit(code);
 }
 
 
@@ -134,7 +134,7 @@ void sigint(int sig) FUNCATTR_NORETURN;
 /* sigint handler */
 void sigint(int sig) {
 	/* we got a sigint, call deinit and exit */
-	deinit(NULL);
+	deinit(0, NULL);
 }
 
 
@@ -151,9 +151,9 @@ int main (int argc, char *argv[]) {
 	get_cmdln_options(argc,argv);
     /* check them */
     if (output_method<0)
-        deinit("invalid output selected\n");
+        deinit(1,"invalid output selected\n");
     if (input_method<0)
-        deinit("invalid input selected\n");
+        deinit(1,"invalid input selected\n");
     
     /* init total stats to zero */
 	memset(&if_stats_total,0,(size_t)sizeof(t_iface_stats));
@@ -178,10 +178,10 @@ int main (int argc, char *argv[]) {
 	  	int nbyt = 0;
 	  	/* lets fork into background */
 		if ((nbyt = fork()) == -1) {
-			deinit("could not fork into background: %s\n",strerror(errno));
+			deinit(1,"could not fork into background: %s\n",strerror(errno));
 		}
 		if (nbyt != 0) { /* nbyt is the new child pid here */
-			deinit("forking into background\n");
+			deinit(1,"forking into background\n");
 		}
 		setsid();
 	}
@@ -255,6 +255,6 @@ int main (int argc, char *argv[]) {
 		print_header(0);
 		get_iface_stats(1);
 	}
-	deinit(NULL);
+	deinit(0,NULL);
 	return 0; /* only to avoid gcc warning */
 }

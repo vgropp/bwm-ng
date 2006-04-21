@@ -26,7 +26,6 @@
 
 
 extern void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float multiplier,t_iface_stats full_stats);
-extern int deinit(char *error_msg, ...);
 
 extern int if_count;
 extern unsigned int delay;

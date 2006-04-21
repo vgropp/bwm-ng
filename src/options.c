@@ -195,7 +195,7 @@ char *token, *value;
         if (value) { 
             if (out_file) fclose(out_file);
             out_file=fopen(value,"a"); 
-            if (!out_file) deinit("failed to open outfile\n");
+            if (!out_file) deinit(1, "failed to open outfile\n");
             if (out_file_path) free(out_file_path);
             out_file_path=strdup(value);
         }
@@ -343,7 +343,7 @@ void get_cmdln_options(int argc, char *argv[]) {
                 if (optarg) { 
                     if (out_file) fclose(out_file);
                     out_file=fopen(optarg,"a"); 
-                    if (!out_file) deinit("failed to open outfile\n");
+                    if (!out_file) deinit(1, "failed to open outfile\n");
                     if (out_file_path) free(out_file_path);
                     out_file_path=strdup(optarg);
                 }
@@ -418,7 +418,7 @@ void get_cmdln_options(int argc, char *argv[]) {
         else  
             avg_length=(delay*2)+1;
     } else /* avg_length was set via cmdline or config file, better check it */
-        if (delay*2>=avg_length) deinit("avglength needs to be a least twice the value of timeout\n");
+        if (delay*2>=avg_length) deinit(1, "avglength needs to be a least twice the value of timeout\n");
 #endif    
     return;
 }

@@ -74,7 +74,7 @@ void handle_gui_input(char c) {
         case 'q':
         case 'Q':
             /* we are asked to exit */
-            deinit(NULL);
+            deinit(0, NULL);
             break;
         case 'd':
         case 'D':
@@ -141,7 +141,7 @@ int init_curses() {
 void sigwinch(int sig) {
      struct winsize size;
      if (ioctl(fileno(stdout), TIOCGWINSZ, &size) == 0) { 
-       if (endwin()==ERR) deinit("failed to deinit curses: %s\n",strerror(errno));
+       if (endwin()==ERR) deinit(1, "failed to deinit curses: %s\n",strerror(errno));
        if (myscr) delscreen(myscr);
        init_curses();
      }

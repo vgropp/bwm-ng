@@ -110,4 +110,9 @@ int html_header=0;
 #endif
 
 extern inline void cmdln_printhelp() FUNCATTR_NORETURN;
-void deinit(char *error_msg, ...) FUNCATTR_NORETURN;
+#ifdef __STDC__
+extern void deinit(int code, char *error_msg, ...) FUNCATTR_NORETURN;
+#else
+extern void deinit(int code, ...) FUNCATTR_NORETURN;
+#endif
+

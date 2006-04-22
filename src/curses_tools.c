@@ -113,8 +113,9 @@ void handle_gui_input(char c) {
 
 int init_curses() {
     struct winsize size;
+	short fg,bg;
     myscr=newterm(NULL,stdout,stdin);
-    if (myscr!=NULL && !(output_method==CURSES2_OUT && !has_colors())) {
+    if (myscr!=NULL && !(output_method==CURSES2_OUT && !has_colors() && !can_change_color())) {
         cbreak();
         noecho();
         nonl();
@@ -124,9 +125,12 @@ int init_curses() {
         timeout(delay); /* set the timeout of getch to delay in ms) */
 		if (output_method==CURSES2_OUT) {
 			start_color();
-			init_pair(1,COLOR_BLACK,COLOR_GREEN); init_pair(2,COLOR_BLACK,COLOR_RED); 
+			pair_content(0,&fg,&bg);
+			init_pair(1,fg,COLOR_GREEN); 
+			init_pair(2,fg,COLOR_RED); 
 			if (ioctl(fileno(stdout), TIOCGWINSZ, &size) == 0) { 
-				cols=size.ws_col; rows=size.ws_row; 
+				cols=size.ws_col; 
+				rows=size.ws_row; 
 			}
 		}
         return 1;

@@ -51,10 +51,15 @@ inline void get_iface_stats(char _n) {
             get_iface_stats_sysctl(_n);
             break;
 #endif
-#if HAVE_LIBKSTAT
+#ifdef HAVE_LIBKSTAT
         case KSTAT_IN:
             get_iface_stats_kstat(_n);
             break;
+#endif
+#ifdef WIN32
+		case WIN32_IN:
+			get_iface_stats_win32(_n);
+			break;
 #endif
 			
 	}

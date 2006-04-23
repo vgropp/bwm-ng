@@ -102,8 +102,10 @@ void print_online_help() {
     mvwprintw(helpwin,3,2,"'q'  exit");
     mvwprintw(helpwin,4,2,"'+'  increases timeout by 100ms");
     mvwprintw(helpwin,5,2,"'-'  decreases timeout by 100ms");
-    if (output_method==CURSES_OUT) mvwprintw(helpwin,6,2,"'d'  switch KB and auto assign Byte/KB/MB/GB");
-    else mvwprintw(helpwin,6,2,"'d'  cycle: show interfaces step by step");
+    if (output_method==CURSES_OUT) 
+		mvwprintw(helpwin,6,2,"'d'  switch KB and auto assign Byte/KB/MB/GB");
+    else 
+		mvwprintw(helpwin,6,2,"'d'  cycle: show interfaces step by step");
     mvwprintw(helpwin,7,2,"'a'  cycle: show all interfaces, only those which are up,");
     mvwprintw(helpwin,8,2,"            only up and not hidden");
     mvwprintw(helpwin,9,2,"'s'  sum hidden ifaces to total aswell or not");

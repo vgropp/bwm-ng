@@ -120,44 +120,65 @@ int print_header(int option) {
 	        mvwprintw(stdscr,4,2,"===========================================================================");
 			break;
 		case CURSES2_OUT:
-	        erase();
-		if (cols<48 || rows<45) mvwprintw(stdscr,1,2,"window size too small.\n  it has to be at least 48x45.");
-		else {
-		  width=(cols-3-16-4)/3;
-		  mvwprintw(stdscr,1,2,"+---{ bwm-ng v" VERSION" }");
-		  for (col=17+sizeof(VERSION);col<32+cols-48;col++) mvwprintw(stdscr,1,col,"-");
-		  mvwprintw(stdscr,1,32+cols-48,"+- -- - -- -->");
-		  mvwprintw(stdscr,2,2,"|"), mvwprintw(stdscr,2,32+cols-48,"|------.");
-		  for (col=0;col<width-2;col++) { 
-		    mvwaddch(stdscr,2,col+6,ACS_HLINE); 
-		    attron(COLOR_PAIR(1));mvwprintw(stdscr,35,col+6," ");attroff(COLOR_PAIR(1));
-		    mvwaddch(stdscr,2,2*width+6+col,ACS_HLINE); 
-		    attron(COLOR_PAIR(2));mvwprintw(stdscr,35,2*width+6+col," ");attroff(COLOR_PAIR(2));
-		  };
-		  for (row=3;row<=36;row++) { mvwprintw(stdscr,row,2,"|"); mvwprintw(stdscr,row,32+cols-48,"|"); }
-		  mvwprintw(stdscr,34,33+cols-48,"<"); mvwprintw(stdscr,35,33+cols-48,"------'");
-		  mvwprintw(stdscr,36,((width-8)/2)+5,"%c%c%cRx%c%c%c",IDLE_CHARS2[option+2],IDLE_CHARS2[option+1],IDLE_CHARS2[option],IDLE_CHARS2[9-option],IDLE_CHARS2[8-option],IDLE_CHARS2[7-option]);
-		  mvwprintw(stdscr,36,((width-8)/2)+5+2*width,"%c%c%cTx%c%c%c",IDLE_CHARS2[9-option],IDLE_CHARS2[8-option],IDLE_CHARS2[7-option],IDLE_CHARS2[option+2],IDLE_CHARS2[option+1],IDLE_CHARS2[option]);
+			erase();
+			if (cols<48 || rows<45) 
+				mvwprintw(stdscr,1,2,"window size too small.\n  it has to be at least 48x45.");
+			else {
+				width=(cols-3-16-4)/3;
+				mvwprintw(stdscr,1,2,"+---{ bwm-ng v" VERSION" }");
+				for (col=17+sizeof(VERSION);col<32+cols-48;col++) 
+					mvwprintw(stdscr,1,col,"-");
+				mvwprintw(stdscr,1,32+cols-48,"+- -- - -- -->");
+				mvwprintw(stdscr,2,2,"|"), mvwprintw(stdscr,2,32+cols-48,"|------.");
+				for (col=0;col<width-2;col++) { 
+					mvwaddch(stdscr,2,col+6,ACS_HLINE); 
+					attron(COLOR_PAIR(1));mvwprintw(stdscr,35,col+6," ");attroff(COLOR_PAIR(1));
+					mvwaddch(stdscr,2,2*width+6+col,ACS_HLINE); 
+					attron(COLOR_PAIR(2));mvwprintw(stdscr,35,2*width+6+col," ");attroff(COLOR_PAIR(2));
+				};
+				for (row=3;row<=36;row++) { 
+					mvwprintw(stdscr,row,2,"|"); 
+					mvwprintw(stdscr,row,32+cols-48,"|"); 
+				}
+				mvwprintw(stdscr,34,33+cols-48,"<"); mvwprintw(stdscr,35,33+cols-48,"------'");
+				mvwprintw(stdscr,36,((width-8)/2)+5,"%c%c%cRx%c%c%c",
+						IDLE_CHARS2[option+2],
+						IDLE_CHARS2[option+1],
+						IDLE_CHARS2[option],
+						IDLE_CHARS2[9-option],
+						IDLE_CHARS2[8-option],
+						IDLE_CHARS2[7-option]);
+				mvwprintw(stdscr,36,((width-8)/2)+5+2*width,"%c%c%cTx%c%c%c",
+						IDLE_CHARS2[9-option],
+						IDLE_CHARS2[8-option],
+						IDLE_CHARS2[7-option],
+						IDLE_CHARS2[option+2],
+						IDLE_CHARS2[option+1],
+						IDLE_CHARS2[option]);
 
 
-		  mvwprintw(stdscr,37,2,"+"); mvwprintw(stdscr,37,32+cols-48,"+");
-		  for (col=3;col<32+cols-48;col++) mvwprintw(stdscr,37,col,"-");
+				mvwprintw(stdscr,37,2,"+"); mvwprintw(stdscr,37,32+cols-48,"+");
+				for (col=3;col<32+cols-48;col++) 
+					mvwprintw(stdscr,37,col,"-");
 
-
-
-		  mvwprintw(stdscr,38,2,"`+--> %c probing every: %2.3fs",(char)IDLE_CHARS[option],(float)delay/1000);
-		  mvwprintw(stdscr,39,2," +-----> interface: wait...   ");
-		  mvwprintw(stdscr,40,2," +--------> type: %s",output_type2str());
-		  mvwprintw(stdscr,41,2," `-----------> input: %s",input2str());
-		  scale=max_rt/32;
-		  /* print scale */
-		  if (max_rt>=1024) for (row=0;row<=31;row++) mvwprintw(stdscr,row+3,34+cols-48,"%2.2fM|",(float)(max_rt-row*scale)/1024);
-		  else for (row=0;row<=31;row++) mvwprintw(stdscr,row+3,34+cols-48,"%4uk|",max_rt-row*scale);
-		};
-		  /* go to next char for next run */
-		  option++;
-		  if (option>3) option=0;
-		break;
+				mvwprintw(stdscr,38,2,"`+--> %c probing every: %2.3fs",(char)IDLE_CHARS[option],(float)delay/1000);
+				mvwprintw(stdscr,39,2," +-----> interface: wait...   ");
+				mvwprintw(stdscr,40,2," +--------> type: %s",output_type2str());
+				mvwprintw(stdscr,41,2," `-----------> input: %s",input2str());
+				scale=max_rt/32;
+				/* print scale */
+				if (max_rt>=1024) {
+					for (row=0;row<=31;row++) 
+						mvwprintw(stdscr,row+3,34+cols-48,"%2.2fM|",(float)(max_rt-row*scale)/1024);
+				} else {
+					for (row=0;row<=31;row++) 
+						mvwprintw(stdscr,row+3,34+cols-48,"%4uk|",max_rt-row*scale);
+				}
+			};
+			/* go to next char for next run */
+			option++;
+			if (option>3) option=0;
+			break;
 #endif
 #ifdef HTML
 		case HTML_OUT:

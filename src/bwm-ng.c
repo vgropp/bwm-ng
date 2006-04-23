@@ -174,7 +174,7 @@ int main (int argc, char *argv[]) {
 #ifdef HAVE_USLEEP
 		usleep(delay*1000);
 #else
-		Sleep(delay*1000);
+		Sleep(delay);
 #endif
 	}
 #endif
@@ -242,7 +242,7 @@ int main (int argc, char *argv[]) {
 #ifdef HAVE_USLEEP
 			usleep(delay*1000);
 #else
-		Sleep(delay*1000);
+		Sleep(delay);
 #endif
         
         /* quit if we should only output once */

@@ -110,4 +110,8 @@ extern void get_iface_stats_netstat (char verbose);
 extern void get_iface_stats_kstat (char verbose);
 #endif
 
+#ifdef WIN32
+extern void get_iface_stats_win32 (char verbose);
+#endif 
+
 #endif

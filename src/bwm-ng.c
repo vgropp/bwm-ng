@@ -51,15 +51,10 @@ inline void get_iface_stats(char _n) {
             get_iface_stats_sysctl(_n);
             break;
 #endif
-#ifdef HAVE_LIBKSTAT
+#if HAVE_LIBKSTAT
         case KSTAT_IN:
             get_iface_stats_kstat(_n);
             break;
-#endif
-#ifdef WIN32
-		case WIN32_IN:
-			get_iface_stats_win32(_n);
-			break;
 #endif
 			
 	}
@@ -176,9 +171,14 @@ int main (int argc, char *argv[]) {
     /* get stats without verbose if cvs */
 	if (output_method==CSV_OUT && output_count>-1) {
 		get_iface_stats(0);
+#ifdef HAVE_USLEEP
 		usleep(delay*1000);
+#else
+		Sleep(delay*1000);
+#endif
 	}
-#endif	
+#endif
+#ifdef HAVE_FORK
 	if (daemonize) {
 	  	int nbyt = 0;
 	  	/* lets fork into background */
@@ -190,6 +190,7 @@ int main (int argc, char *argv[]) {
 		}
 		setsid();
 	}
+#endif
 	if (output_count==0) output_count=-1;
 	if (output_method==PLAIN_OUT && output_count==1) output_method=PLAIN_OUT_ONCE;
 	if (output_method==PLAIN_OUT) printf("\033[2J"); /* clear screen for plain out */
@@ -238,7 +239,11 @@ int main (int argc, char *argv[]) {
 		} else 
 #endif			
         /* or just wait delay ms */
+#ifdef HAVE_USLEEP
 			usleep(delay*1000);
+#else
+		Sleep(delay*1000);
+#endif
         
         /* quit if we should only output once */
 		if (output_method==PLAIN_OUT_ONCE 

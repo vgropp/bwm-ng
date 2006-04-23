@@ -21,6 +21,10 @@
  *                                                                            *
  *****************************************************************************/
 
+#ifdef __OUTPUT_H
+#else
+#define __OUTPUT_H 1
+
 #include "defines.h"
 #include "types.h"
 
@@ -55,4 +59,6 @@ extern unsigned int scale;
 extern unsigned int show_only_if;
 extern unsigned short cols;
 extern unsigned short rows;
+#endif
+
 #endif

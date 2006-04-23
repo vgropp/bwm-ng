@@ -66,7 +66,7 @@ fi
 
 AC_CHECK_FUNCS([wattron])
 AC_CHECK_FUNCS([curs_set])
-
+AC_CHECK_FUNCS([usleep])
 
 AC_ARG_WITH([time],AS_HELP_STRING([--with-time],[enable accurate time calculating (ARG=PATH)]),[
 AC_MSG_CHECKING([for accurate time calc])
@@ -209,6 +209,12 @@ if [ test $withval != "no" ]; then
 fi
 ],[
 AC_CHECK_LIB([kstat],[kstat_open])
+])
+
+
+AC_ARG_WITH([win32],AS_HELP_STRING([--with-win32],[enable win32 input]),[
+echo "enable win32 support"
+AC_DEFINE_UNQUOTED([WIN32],[1],[enable win32 support])
 ])
 
 

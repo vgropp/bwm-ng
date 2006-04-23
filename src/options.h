@@ -22,6 +22,10 @@
  *****************************************************************************/
 
 
+#ifdef __OPTIONS_H
+#else
+#define __OPTIONS_H 1
+
 #include "defines.h"
 #include "types.h"
 
@@ -95,8 +99,12 @@ int input_method=KSTAT_IN;
 #ifdef NETSTAT
 int input_method=NETSTAT_IN;
 #else
+#ifdef WIN32
+int input_method=WIN32_IN;
+#else
 #error "NO INPUT DEFINED!"
 int input_method=0;
+#endif
 #endif
 #endif 
 #endif
@@ -116,3 +124,4 @@ extern void deinit(int code, char *error_msg, ...) FUNCATTR_NORETURN;
 extern void deinit(int code, ...) FUNCATTR_NORETURN;
 #endif
 
+#endif

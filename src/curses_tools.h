@@ -21,6 +21,10 @@
  *                                                                            *
  *****************************************************************************/
 
+#ifdef __CURSES_TOOLS_H
+#else
+#define __CURSES_TOOLS_H 1
+
 #include "defines.h"
 #include "types.h"
 
@@ -55,4 +59,5 @@ extern t_iface_stats *if_stats;
 /* total struct */
 extern t_iface_stats if_stats_total;
 
+#endif
 #endif

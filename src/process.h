@@ -21,6 +21,10 @@
  *                                                                            *
  *****************************************************************************/
 
+#if __PROCESS_H || __HELP_H || __BWM_NG_H || __RETRIEVE_H || __CURSES_TOOLS_H || __OPTIONS_H || __OUTPUT_H
+#else
+#define __PROCESS_H 1
+
 #include "defines.h"
 #include "types.h"
 
@@ -45,3 +49,5 @@ extern unsigned int avg_length;
 t_iface_stats *if_stats=NULL;
 /* total struct */
 t_iface_stats if_stats_total;
+
+#endif

@@ -21,6 +21,10 @@
  *                                                                            *
  *****************************************************************************/
 
+#ifdef __HELP_H
+#else
+#define __HELP_H 1
+
 #include "defines.h"
 #include "types.h"
 
@@ -30,4 +34,5 @@ extern int output_method;
 /* print cmdline help */
 inline void cmdln_printhelp() FUNCATTR_NORETURN;
 
-
+extern t_iface_stats *if_stats;
+#endif

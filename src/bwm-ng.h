@@ -21,8 +21,16 @@
  *                                                                            *
  *****************************************************************************/
 
+#ifdef __BWM_NG_H
+#else
+#define __BWM_NG_H 1
+
 #include "defines.h"
 #include "types.h"
+
+#ifdef WIN32
+#include <windows.h>
+#endif
 
 #ifdef __STDC__
 #include <stdarg.h>
@@ -102,7 +110,4 @@ extern void get_iface_stats_netstat (char verbose);
 extern void get_iface_stats_kstat (char verbose);
 #endif
 
-#ifdef WIN32
-extern void get_iface_stats_win32 (char verbose);
 #endif
-

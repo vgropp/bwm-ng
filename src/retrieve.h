@@ -21,6 +21,10 @@
  *                                                                            *
  *****************************************************************************/
 
+#ifdef __RETRIEVE_H
+#else
+#define __RETRIEVE_H 1
+
 #include "defines.h"
 #include "types.h"
 
@@ -63,12 +67,6 @@
 #include <statgrab.h>
 #endif
 
-#ifdef WIN32
-#include <windows.h>
-#include <Iphlpapi.h>
-#endif
-
-
 #define MAX_LINE_BUFFER 1024
 
 extern int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_speed_stats *stats, char *name, int iface_number,char verbose, char iface_is_up);
@@ -99,3 +97,4 @@ extern char *iface_list;
 int skfd = -1;
 #endif
 
+#endif

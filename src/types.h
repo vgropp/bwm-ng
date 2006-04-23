@@ -21,6 +21,9 @@
  *                                                                            *
  *****************************************************************************/
 
+#ifdef __TYPES_H
+#else
+#define __TYPES_H
 
 struct inout_long {
     unsigned long long in;
@@ -80,3 +83,4 @@ struct iface_stats {
 
 typedef struct iface_stats t_iface_stats;
 
+#endif

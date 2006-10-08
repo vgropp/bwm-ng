@@ -1,6 +1,6 @@
-bwm-ng v0.5
+bwm-ng v0.6
 Copyright (C) 2004,2005 Volker Gropp (bwmng@gropp.org)
-http://www.gropp.org
+http://www.gropp.org/?id=projects&sub=bwm-ng
 
 What is this?
 =============
@@ -35,11 +35,13 @@ Supported Platforms
 sucessfully tested on:
 Linux 2.4, Linux 2.6
 FreeBSD 4.8, 5.3
-MacOS X 10.1, 10.2, 10.3 
+MacOS X 10.1 and above
+Solaris 10 64bit x86
 SunOS 5.9 sparc Solaris 9
-OpenBSD 3.4
+OpenBSD 3.4, 3.6
 NetBSD 1.6.1, 2.0
 IRIX64 6.5
+WinXP (sorry couldnt resist ,-)) 
 
 please email me of working or not working platforms.
 

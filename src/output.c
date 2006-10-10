@@ -274,9 +274,15 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
             || output_type==MAX_OUT || output_type==AVG_OUT
 #endif
             ) 
-        strcpy(speed,"/s"); 
+#if HAVE_STRLCPY
+        strlcpy(speed,"/s",2);
+    else
+        strlcpy(speed,"  ",2);
+#else
+        strcpy(speed,"/s");
     else 
         strcpy(speed,"  ");
+#endif	 
     if (
 #if !NETSTAT_BSD_BYTES && !NETSTAT_NETBSD && NETSTAT
         input_method==NETSTAT_IN ||

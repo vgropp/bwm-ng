@@ -309,7 +309,11 @@ void get_iface_stats_netstat (char verbose) {
 #if NETSTAT_BSD || NETSTAT_BSD_BYTES || NETSTAT_SOLARIS || NETSTAT_NETBSD
         /* check if we have a new iface or if its only a second line of the same one */
         if (!strcmp(last_name,name)) continue; /* skip this line */
+#if HAVE_STRLCPY		  
+		  strlcpy(last_name,name,MAX_LINE_BUFFER - 1);
+#else		  
         strcpy(last_name,name);
+#endif		  
 #endif
         /* init new interfaces and add fetched data to old or new one */
         hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose,

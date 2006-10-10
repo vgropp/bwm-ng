@@ -275,9 +275,9 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
 #endif
             ) 
 	 {
-        strlcpy(speed,"/s",2);
+        strlcpy(speed,"/s",3);
 	 } else {
-        strlcpy(speed,"  ",2);
+        strlcpy(speed,"  ",3);
 	 }
     if (
 #if !NETSTAT_BSD_BYTES && !NETSTAT_NETBSD && NETSTAT

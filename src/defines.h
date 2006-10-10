@@ -264,3 +264,7 @@
 #ifndef EXIT_FAILURE
 #define EXIT_FAILURE 1
 #endif
+
+#ifndef HAVE_STRLCPY
+#define strlcpy(_a,_b,_c) strncpy((_a),(_b),(_c)); (_a)[(_c) - 1]='\0';
+#endif

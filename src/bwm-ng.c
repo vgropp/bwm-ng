@@ -1,7 +1,7 @@
 /******************************************************************************
  *  bwm-ng                                                                    *
  *                                                                            *
- *  Copyright (C) 2004 Volker Gropp (bwmng@gropp.org)                         *
+ *  Copyright (C) 2004-2006 Volker Gropp (bwmng@gropp.org)                    *
  *                                                                            *
  *  for more info read README.                                                *
  *                                                                            *

@@ -184,7 +184,7 @@
 	
 	* changed: -lncurses instead of -lcurses, hope this will work on more
 	boxes
-  
+
 
 09-16-2004	(0.3)	Volker Gropp <bwmng(at)gropp.org>
 

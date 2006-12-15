@@ -285,7 +285,7 @@ void get_cmdln_options(int argc, char *argv[]) {
         pwd_entry=getpwuid(getuid());
         if (pwd_entry!=NULL) {
             str=(char*)malloc(strlen(pwd_entry->pw_dir)+14);
-            snprintf(str,strlen(pwd_entry->pw_dir)+13,"%s/.bwm-ng.conf",pwd_entry->pw_dir);
+            snprintf(str,strlen(pwd_entry->pw_dir)+14,"%s/.bwm-ng.conf",pwd_entry->pw_dir);
             read_config(str);
             free(str);
         }

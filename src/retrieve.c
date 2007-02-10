@@ -362,7 +362,7 @@ void get_iface_stats_sysctl (char verbose) {
     /* dont open proc_net_dev if netstat_i is requested, else try to open and if it fails fallback */
     if (sysctl(mib, 6, NULL, &size, NULL, 0) < 0) deinit(1, "sysctl failed: %s\n",strerror(errno));
     if (!(bsd_if_buf = malloc(size))) deinit(1, "no memory: %s\n",strerror(errno));
-    bzero(bsd_if_buf,size);
+    memset(bsd_if_buf,0,size);
     if (sysctl(mib, 6, bsd_if_buf, &size, NULL, 0) < 0) {
         my_errno=errno;
         free(bsd_if_buf);

@@ -82,5 +82,6 @@ struct iface_stats {
 };
 
 typedef struct iface_stats t_iface_stats;
+typedef struct double_types t_double_types;
 
 #endif

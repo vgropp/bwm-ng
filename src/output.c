@@ -97,6 +97,8 @@ inline char *show_all_if2str() {
     return "";
 }
 
+
+
 int print_header(int option) {
 #if HTML
     FILE *tmp_out_file;
@@ -355,10 +357,12 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
 
 /* do the actual output */
 void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float multiplier,t_iface_stats full_stats) {
-    char buffer[50];
+   char buffer[50];
 #if CSV || HTML
 	FILE *tmp_out_file;
 #endif
+   t_iface_speed_stats *stats_csv = NULL;
+   t_double_types stats_csv_d;
 #ifdef HAVE_CURSES
 	unsigned int row=0;
 	unsigned int col=0;
@@ -476,16 +480,46 @@ void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float mult
 #endif
 #ifdef CSV
         case CSV_OUT:
-			tmp_out_file=out_file==NULL ? stdout : out_file;
+				tmp_out_file=out_file==NULL ? stdout : out_file;
             fprintf(tmp_out_file,"%i%c%s%c",(int)time(NULL),csv_char,if_name,csv_char);
+				if (output_type == RATE_OUT || output_type == SUM_OUT) {
+					if (output_type == RATE_OUT) 
+						stats_csv = &stats;
+					else
+						stats_csv = &full_stats.sum;
 #if !NETSTAT_BSD_BYTES && !NETSTAT_NETBSD && NETSTAT
-			if (input_method!=NETSTAT_IN)
+					if (input_method!=NETSTAT_IN)
 #endif                    
-                /* output Bytes/s */
-                fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu%c",(double)(stats.bytes.out*multiplier),csv_char,(double)(stats.bytes.in*multiplier),csv_char,(double)((stats.bytes.out+stats.bytes.in)*multiplier),csv_char,stats.bytes.in,csv_char,stats.bytes.out,csv_char);
-            /* show packets/s and errors/s */
-            fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu",(double)stats.packets.out*multiplier,csv_char,(double)stats.packets.in*multiplier,csv_char,(double)(stats.packets.out+stats.packets.in)*multiplier,csv_char,stats.packets.in,csv_char,stats.packets.out);
-            fprintf(tmp_out_file,"%c%.2f%c%.2f%c%llu%c%llu\n",csv_char,stats.errors.out*multiplier,csv_char,stats.errors.in*multiplier,csv_char,stats.errors.in,csv_char,stats.errors.out);
+						 /* output Bytes/s */
+						 fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu%c",(double)(stats_csv->bytes.out*multiplier),csv_char,(double)(stats_csv->bytes.in*multiplier),csv_char,(double)((stats_csv->bytes.out+stats_csv->bytes.in)*multiplier),csv_char,stats_csv->bytes.in,csv_char,stats_csv->bytes.out,csv_char);
+					/* show packets/s and errors/s */
+					fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu",(double)stats_csv->packets.out*multiplier,csv_char,(double)stats_csv->packets.in*multiplier,csv_char,(double)(stats_csv->packets.out+stats_csv->packets.in)*multiplier,csv_char,stats_csv->packets.in,csv_char,stats_csv->packets.out);
+					fprintf(tmp_out_file,"%c%.2f%c%.2f%c%llu%c%llu\n",csv_char,stats_csv->errors.out*multiplier,csv_char,stats_csv->errors.in*multiplier,csv_char,stats_csv->errors.in,csv_char,stats_csv->errors.out);
+
+					} else { /* MAX_OUT or AVG_OUT */
+                  if (output_type == MAX_OUT)
+                     stats_csv_d = full_stats.max;
+						else {
+							stats_csv_d.bytes.out = full_stats.avg.item_sum.bytes.out/full_stats.avg.items;
+							stats_csv_d.bytes.in = full_stats.avg.item_sum.bytes.in/full_stats.avg.items;
+							stats_csv_d.bytes.total = full_stats.avg.item_sum.bytes.total/full_stats.avg.items;
+                     stats_csv_d.packets.out = full_stats.avg.item_sum.packets.out/full_stats.avg.items;
+                     stats_csv_d.packets.in = full_stats.avg.item_sum.packets.in/full_stats.avg.items;
+                     stats_csv_d.packets.total = full_stats.avg.item_sum.packets.total/full_stats.avg.items;
+                     stats_csv_d.errors.out = full_stats.avg.item_sum.errors.out/full_stats.avg.items;
+                     stats_csv_d.errors.in = full_stats.avg.item_sum.errors.in/full_stats.avg.items;
+                     stats_csv_d.errors.total = full_stats.avg.item_sum.errors.total/full_stats.avg.items;
+						}
+#if !NETSTAT_BSD_BYTES && !NETSTAT_NETBSD && NETSTAT
+               if (input_method!=NETSTAT_IN)
+#endif
+                   /* output Bytes/s */
+                   fprintf(tmp_out_file,"%.2Lf%c%.2Lf%c%.2Lf%c%.2Lf%c%.2Lf%c",stats_csv_d.bytes.out,csv_char,stats_csv_d.bytes.in,csv_char,stats_csv_d.bytes.total,csv_char,stats_csv_d.bytes.in,csv_char,stats_csv_d.bytes.out,csv_char);
+               /* show packets/s and errors/s */
+               fprintf(tmp_out_file,"%.2Lf%c%.2Lf%c%.2Lf%c%.2Lf%c%.2Lf",stats_csv_d.packets.out,csv_char,stats_csv_d.packets.in,csv_char,stats_csv_d.packets.total,csv_char,stats_csv_d.packets.in,csv_char,stats_csv_d.packets.out);
+               fprintf(tmp_out_file,"%c%.2Lf%c%.2Lf%c%.2Lf%c%.2Lf\n",csv_char,stats_csv_d.errors.out*multiplier,csv_char,stats_csv_d.errors.in*multiplier,csv_char,stats_csv_d.errors.in,csv_char,stats_csv_d.errors.out);
+						
+					}
             break;
 #endif			
     }

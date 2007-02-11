@@ -46,11 +46,13 @@ AC_DEFUN([AC_CHECK_WORKING_GETIFADDRS],
   ]])],[
     AC_MSG_RESULT(yes)
     AC_DEFINE_UNQUOTED([HAVE_WORKING_GETIFADDRS],[1],[getifaddrs works as espected])
+	 INPUT_FOUND=1
   ],[
     AC_MSG_RESULT(no)
   ],[
     AC_MSG_RESULT(cross-compiling, assume yes)
     AC_DEFINE_UNQUOTED([HAVE_WORKING_GETIFADDRS],[1],[getifaddrs works as espected])
+	 INPUT_FOUND=1
   ])
 ])
 

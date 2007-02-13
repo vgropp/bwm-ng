@@ -1,3 +1,97 @@
+2007-02-13 12:49  Volker Gropp <bwmng(at)gropp.org>
+
+	* README, bwm-ng.1, bwm-ng.conf-example, configure.in,
+	  src/bwm-ng.c, src/bwm-ng.h, src/curses_tools.c, src/defines.h,
+	  src/help.c, src/options.c, src/options.h, src/output.c,
+	  src/process.c, src/retrieve.c, src/retrieve.h: add diskio stats
+	  using linux 2.6 /proc/diskstats and libstatgrab
+
+2007-02-11 12:51  Volker Gropp <bwmng(at)gropp.org>
+
+	* acinclude.m4, configure.in: only check for libstat if no other
+	  net-input found
+
+2007-02-10 19:03  Volker Gropp <bwmng(at)gropp.org>
+
+	* src/output.c, src/retrieve.c, src/types.h: fix csv output didnt
+	  respect --type
+
+2006-12-15 16:43  Volker Gropp <bwmng(at)gropp.org>
+
+	* ChangeLog, src/options.c: fixes
+	  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=403099
+
+2006-10-13 15:25  Volker Gropp <bwmng(at)gropp.org>
+
+	* .: ignore eclipse project files
+
+2006-10-13 15:16  Volker Gropp <bwmng(at)gropp.org>
+
+	* src/bwm-ng.c: changed copyright years (svn test)
+
+2006-10-10 23:25  Volker Gropp <bwmng(at)gropp.org>
+
+	* src/output.c: fixed length of string, was broken in OpenBSD
+	  aswell
+
+2006-10-10 23:07  Volker Gropp <bwmng(at)gropp.org>
+
+	* src/defines.h, src/output.c, src/retrieve.c: added strlcpy makro
+	  for systems without it builtin
+
+2006-10-10 22:41  Volker Gropp <bwmng(at)gropp.org>
+
+	* configure.in, src/output.c, src/retrieve.c: merged OpenBSD
+	  patches for strlcpy by niallo
+
+2006-10-08 11:05  Volker Gropp <bwmng(at)gropp.org>
+
+	* README: small url and platforms update
+
+2006-04-23 18:56  Volker Gropp <bwmng(at)gropp.org>
+
+	* src/help.c, src/output.c: indent fixes
+
+2006-04-23 15:44  Volker Gropp <bwmng(at)gropp.org>
+
+	* src/bwm-ng.c, src/bwm-ng.h, src/retrieve.c, src/retrieve.h:
+	  readded win32 functions which were accidently removed
+
+2006-04-23 15:17  Volker Gropp <bwmng(at)gropp.org>
+
+	* src/bwm-ng.c: fix win32 Sleep
+
+2006-04-23 15:11  Volker Gropp <bwmng(at)gropp.org>
+
+	* configure.in, src/bwm-ng.c, src/bwm-ng.h, src/curses_tools.h,
+	  src/help.h, src/options.h, src/output.h, src/process.h,
+	  src/retrieve.c, src/retrieve.h, src/types.h: fix win32 compile
+	  (mingw gcc)
+
+2006-04-22 20:24  Volker Gropp <bwmng(at)gropp.org>
+
+	* src/curses_tools.c: fixed small curses2 issues
+
+2006-04-22 19:18  Volker Gropp <bwmng(at)gropp.org>
+
+	* src/bwm-ng.c, src/bwm-ng.h, src/defines.h, src/retrieve.c,
+	  src/retrieve.h: added win32 input
+
+2006-04-21 14:36  Volker Gropp <bwmng(at)gropp.org>
+
+	* src/bwm-ng.c, src/curses_tools.c, src/curses_tools.h,
+	  src/options.c, src/options.h, src/process.h, src/retrieve.c,
+	  src/retrieve.h: fixed set error code to 1 on exit with error
+
+2006-04-19 14:22  Volker Gropp <bwmng(at)gropp.org>
+
+	* bwm-ng.1: fixed more typos in manpage, thx to D. Viano
+	  <debian@damianv.com.ar>
+
+2006-04-19 14:17  Volker Gropp <bwmng(at)gropp.org>
+
+	* bwm-ng.1, src/curses_tools.c: fixed typo in manpage
+
 05-12-2005 (0.6-pre2-cvs)   Bastian Riehl <mail(at)bastian-riehl.de>
 
 	* src/bwm-ng.c,src/curses_tools.c,src/curses_tools.h,src/defines.h,

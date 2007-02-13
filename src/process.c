@@ -100,9 +100,11 @@ t_iface_speed_stats convert2calced_values(t_iface_speed_stats new, t_iface_speed
 
 /* calc actual new-old values */
 t_iface_speed_stats convert2calced_disk_values(t_iface_speed_stats new, t_iface_speed_stats old) {
-    t_iface_speed_stats calced_stats;
-	calced_stats.bytes.out=calc_new_values(new.bytes.out,old.bytes.out)*512;
-	calced_stats.bytes.in=calc_new_values(new.bytes.in,old.bytes.in)*512;
+   t_iface_speed_stats calced_stats;
+	int mult=1;
+	if (input_method==DISKLINUX_IN) mult=512;
+	calced_stats.bytes.out=calc_new_values(new.bytes.out,old.bytes.out)*mult;
+	calced_stats.bytes.in=calc_new_values(new.bytes.in,old.bytes.in)*mult;
 	calced_stats.packets.out=calc_new_values(new.packets.out,old.packets.out)*(calc_new_values(new.errors.out,old.errors.out)+1);
 	calced_stats.packets.in=calc_new_values(new.packets.in,old.packets.in)*(calc_new_values(new.errors.in,old.errors.in)+1);
 	calced_stats.errors.in=0;

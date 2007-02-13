@@ -1,8 +1,8 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([bwm-ng],[0.6-pre3],[bwmng@gropp.org],[bwm-ng])
-AM_INIT_AUTOMAKE([bwm-ng],[0.6-pre3])
+AC_INIT([bwm-ng],[0.6-rc1],[bwmng@gropp.org],[bwm-ng])
+AM_INIT_AUTOMAKE([bwm-ng],[0.6-rc1])
 AC_CONFIG_SRCDIR(src/bwm-ng.c)
 AC_CONFIG_HEADERS(config.h)
 AC_CONFIG_MACRO_DIR(./)

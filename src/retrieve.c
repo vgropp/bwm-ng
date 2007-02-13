@@ -519,12 +519,13 @@ void get_iface_stats_win32 (char verbose) {
 
 
 #ifdef PROC_DISKSTATS
+#define LOOP_MAJOR 7
 /* do the actual work, get and print stats if verbose */
 void get_disk_stats_proc (char verbose) {
    FILE *f=NULL;
    char *buffer=NULL,*name=NULL;
 	unsigned long long tmp_long;
-	int n;
+	int n,major;
 
    int hidden_if=0,current_if_num=0;
    t_iface_speed_stats stats; /* local struct, used to calc total values */
@@ -539,15 +540,17 @@ void get_disk_stats_proc (char verbose) {
    name=(char *)malloc(MAX_LINE_BUFFER);
 
    while ( (fgets(buffer,MAX_LINE_BUFFER,f) != NULL) ) {
-      n = sscanf(buffer,"%*i %*i %s %llu%llu%llu%llu%llu%llu%llu%*i",name,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.bytes.in,&tmp_long,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out,&tmp_if_stats.bytes.out);
-		if (n == 5) {
+      n = sscanf(buffer,"%i %*i %s %llu%llu%llu%llu%llu%llu%llu%*i",&major,name,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.bytes.in,&tmp_long,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out,&tmp_if_stats.bytes.out);
+		/* skip loop devices, we dont see stats anyway */
+		if (major==7) continue;
+		if (n == 6) {
 			tmp_if_stats.packets.out=tmp_if_stats.bytes.in;
 			tmp_if_stats.bytes.in=tmp_if_stats.errors.in;
 			tmp_if_stats.bytes.out=tmp_long;
 			tmp_if_stats.errors.in=0;
 			tmp_if_stats.errors.out=0;
 		} else 
-			if (n != 8) {
+			if (n != 9) {
 				free(name);
 				free(buffer);
 				deinit(1, "wrong format of procfile. %i: %s\n",n,buffer);

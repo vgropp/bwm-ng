@@ -277,7 +277,7 @@
 #define WRAP_AROUND 18446744073709551615ull
 #endif
 
-#define print_version printf("Bandwidth Monitor NG (" PACKAGE_NAME ") v" VERSION "\nCopyright (C) 2004,2005 Volker Gropp <" PACKAGE_BUGREPORT ">\n"); 
+#define print_version printf("Bandwidth Monitor NG (" PACKAGE_NAME ") v" VERSION "\nCopyright (C) 2004-2007 Volker Gropp <" PACKAGE_BUGREPORT ">\n"); 
 
 #ifndef EXIT_SUCCESS
 #define EXIT_SUCCESS 0

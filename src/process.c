@@ -98,6 +98,19 @@ t_iface_speed_stats convert2calced_values(t_iface_speed_stats new, t_iface_speed
     return calced_stats;
 }
 
+/* calc actual new-old values */
+t_iface_speed_stats convert2calced_disk_values(t_iface_speed_stats new, t_iface_speed_stats old) {
+    t_iface_speed_stats calced_stats;
+	calced_stats.bytes.out=calc_new_values(new.bytes.out,old.bytes.out)*512;
+	calced_stats.bytes.in=calc_new_values(new.bytes.in,old.bytes.in)*512;
+	calced_stats.packets.out=calc_new_values(new.packets.out,old.packets.out)*(calc_new_values(new.errors.out,old.errors.out)+1);
+	calced_stats.packets.in=calc_new_values(new.packets.in,old.packets.in)*(calc_new_values(new.errors.in,old.errors.in)+1);
+	calced_stats.errors.in=0;
+	calced_stats.errors.out=0;
+	return calced_stats;
+}
+
+
 
 #if EXTENDED_STATS
 /* sub old values from cached for avg stats */
@@ -212,7 +225,7 @@ int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_spe
             if_stats[if_count-1].if_name=(char*)strdup("unknown");
         /* set it to current value, so there is no peak at first announce */
         if_stats[local_if_count].data=tmp_if_stats;
-        if (show_iface(iface_list,name,iface_is_up)) {
+        if (show_iface(iface_list,name,iface_is_up) && (net_input_method(input_method) || iface_is_up)) {
             /* add the values to total stats now */
             if_stats_total.data.bytes.out+=tmp_if_stats.bytes.out;
             if_stats_total.data.bytes.in+=tmp_if_stats.bytes.in;
@@ -226,7 +239,10 @@ int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_spe
     multiplier=(float)get_time_delay(local_if_count);
 #endif
     /* calc new-old, so we have the new bytes,errors,packets */
-    calced_stats=convert2calced_values(tmp_if_stats,if_stats[local_if_count].data);
+	 if (net_input_method(input_method))
+	    calced_stats=convert2calced_values(tmp_if_stats,if_stats[local_if_count].data);
+	 else
+		 calced_stats=convert2calced_disk_values(tmp_if_stats,if_stats[local_if_count].data);
 #if EXTENDED_STATS    
     /* save new max values in both, calced (for output) and ifstats */
     save_max(&if_stats[local_if_count].max.bytes,calced_stats.bytes,multiplier);
@@ -249,7 +265,7 @@ int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_spe
     /* save current stats for the next run */
     if_stats[local_if_count].data=tmp_if_stats;
     /* add stats to new total */
-    if (show_iface(iface_list,name,iface_is_up)) {
+    if (show_iface(iface_list,name,iface_is_up) && (net_input_method(input_method) || iface_is_up)) {
         stats->bytes.out+=tmp_if_stats.bytes.out;
         stats->bytes.in+=tmp_if_stats.bytes.in;
         stats->packets.out+=tmp_if_stats.packets.out;
@@ -273,8 +289,11 @@ void finish_iface_stats (char verbose, t_iface_speed_stats stats, int hidden_if,
     if_stats_total.time.tv_usec=now.tv_usec;
 #else
 	float multiplier=(float)1000/delay;
-#endif    
-    calced_stats=convert2calced_values(stats,if_stats_total.data);
+#endif   
+	if (net_input_method(input_method))
+		calced_stats=convert2calced_values(stats,if_stats_total.data);
+	else
+		calced_stats=convert2calced_disk_values(stats,if_stats_total.data);
 #if EXTENDED_STATS    
     /* save new max values in both, calced (for output) and final stats */
     save_max(&if_stats_total.max.bytes,calced_stats.bytes,multiplier);

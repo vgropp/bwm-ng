@@ -49,6 +49,9 @@ extern int if_count;
 #ifdef PROC_NET_DEV
 extern char PROC_FILE[PATH_MAX];
 #endif
+#ifdef PROC_DISKSTATS
+extern char PROC_DISKSTATS_FILE[PATH_MAX];
+#endif
 extern unsigned int delay;
 extern char dynamic;
 extern char show_all_if;
@@ -92,6 +95,7 @@ extern void get_iface_stats_proc (char verbose);
 
 #ifdef LIBSTATGRAB
 extern void get_iface_stats_libstat (char verbose);
+extern void get_iface_stats_libstatdisk (char verbose);
 #endif
 
 #ifdef GETIFADDRS
@@ -113,5 +117,9 @@ extern void get_iface_stats_kstat (char verbose);
 #ifdef WIN32
 extern void get_iface_stats_win32 (char verbose);
 #endif 
+
+#ifdef PROC_DISKSTATS
+extern void get_disk_stats_proc (char verbose);
+#endif
 
 #endif

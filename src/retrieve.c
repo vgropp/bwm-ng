@@ -135,20 +135,24 @@ void get_iface_stats_proc (char verbose) {
 	char *ptr;
 
 	FILE *f=NULL;
-    char *buffer=NULL,*name=NULL;
+	char *buffer=NULL,*name=NULL;
     
 	int hidden_if=0,current_if_num=0;
 	t_iface_speed_stats stats; /* local struct, used to calc total values */
-    t_iface_speed_stats tmp_if_stats;
+	t_iface_speed_stats tmp_if_stats;
 
 	memset(&stats,0,(size_t)sizeof(t_iface_speed_stats)); /* init it */
-    /* dont open proc_net_dev if netstat_i is requested, else try to open and if it fails fallback */
-    if (!(f=fopen(PROC_FILE,"r"))) {
+	/* dont open proc_net_dev if netstat_i is requested, else try to open and if it fails fallback */
+	if (!(f=fopen(PROC_FILE,"r"))) {
 		deinit(1, "open of procfile failed: %s\n",strerror(errno));
 	}
 	buffer=(char *)malloc(MAX_LINE_BUFFER);
+
 	/* we skip first 2 lines if not bsd at any mode */
-	if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL ) || (fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) deinit(1, "read of proc failed: %s\n",strerror(errno));
+	if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL ) || 
+			(fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) 
+		deinit(1, "read of proc failed: %s\n",strerror(errno));
+
 	name=(char *)malloc(MAX_LINE_BUFFER);
 	while ( (fgets(buffer,MAX_LINE_BUFFER,f) != NULL) ) {
         /* get the name */
@@ -510,6 +514,89 @@ void get_iface_stats_win32 (char verbose) {
 
 	free(if_table);
 	return;
+}
+#endif
+
+
+#ifdef PROC_DISKSTATS
+/* do the actual work, get and print stats if verbose */
+void get_disk_stats_proc (char verbose) {
+   FILE *f=NULL;
+   char *buffer=NULL,*name=NULL;
+	unsigned long long tmp_long;
+	int n;
+
+   int hidden_if=0,current_if_num=0;
+   t_iface_speed_stats stats; /* local struct, used to calc total values */
+   t_iface_speed_stats tmp_if_stats;
+
+   memset(&stats,0,(size_t)sizeof(t_iface_speed_stats)); /* init it */
+   /* dont open proc_net_dev if netstat_i is requested, else try to open and if it fails fallback */
+   if (!(f=fopen(PROC_DISKSTATS_FILE,"r"))) {
+      deinit(1, "open of procfile failed: %s\n",strerror(errno));
+   }
+   buffer=(char *)malloc(MAX_LINE_BUFFER);
+   name=(char *)malloc(MAX_LINE_BUFFER);
+
+   while ( (fgets(buffer,MAX_LINE_BUFFER,f) != NULL) ) {
+      n = sscanf(buffer,"%*i %*i %s %llu%llu%llu%llu%llu%llu%llu%*i",name,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.bytes.in,&tmp_long,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out,&tmp_if_stats.bytes.out);
+		if (n == 5) {
+			tmp_if_stats.packets.out=tmp_if_stats.bytes.in;
+			tmp_if_stats.bytes.in=tmp_if_stats.errors.in;
+			tmp_if_stats.bytes.out=tmp_long;
+			tmp_if_stats.errors.in=0;
+			tmp_if_stats.errors.out=0;
+		} else 
+			if (n != 8) {
+				free(name);
+				free(buffer);
+				deinit(1, "wrong format of procfile. %i: %s\n",n,buffer);
+			}
+      /* init new interfaces and add fetched data to old or new one */
+      hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose
+					,(n==8)
+            );
+      current_if_num++;
+    } /* fgets done (while) */
+   /* add to total stats and output current stats if verbose */
+   finish_iface_stats (verbose, stats, hidden_if,current_if_num);
+    /* clean buffers */
+   free(buffer);
+   free(name);
+   /* close input stream */
+   fclose(f);
+    return;
+}
+#endif
+
+#ifdef LIBSTATGRAB
+/* do the actual work, get and print stats if verbose */
+void get_iface_stats_libstatdisk (char verbose) {
+   sg_disk_io_stats *disk_stats=NULL;
+   int num_disk_stats,current_if_num=0,hidden_if=0;
+
+   t_iface_speed_stats stats; /* local struct, used to calc total values */
+   t_iface_speed_stats tmp_if_stats;
+   memset(&stats,0,(size_t)sizeof(t_iface_speed_stats)); /* init it */
+
+   disk_stats = sg_get_disk_io_stats(&num_disk_stats);
+    if (disk_stats == NULL){
+        deinit(1, "libstatgrab error!\n");
+    }
+
+   for (current_if_num=0;current_if_num<num_disk_stats;current_if_num++) {
+		tmp_if_stats.bytes.in=disk_stats->read_bytes;
+      tmp_if_stats.bytes.out=disk_stats->write_bytes;
+      tmp_if_stats.packets.in=0;
+      tmp_if_stats.packets.out=0;
+      tmp_if_stats.errors.in=0;
+      tmp_if_stats.errors.out=0;
+      hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, disk_stats->disk_name, current_if_num, verbose,1);
+      disk_stats++;
+   }
+   finish_iface_stats (verbose, stats, hidden_if,current_if_num);
+
+   return;
 }
 #endif
 

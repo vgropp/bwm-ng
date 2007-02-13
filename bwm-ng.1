@@ -19,15 +19,15 @@
 .\"
 .\"
 .SH NAME
-bwm-ng \- Bandwidth Monitor NG (Next Generation), a live bandwidth monitor
+bwm-ng \- Bandwidth Monitor NG (Next Generation), a live bandwidth monitor for network and disk io
 .SH SYNOPSIS
 .BI "bwm-ng "[options] " ... "[configfile] "
 .SH DESCRIPTION
 .B bwm-ng
 can be used to monitor the current Bandwidth of all or some specific 
-Interfaces. It shows total of in and out as well as total of all
-Interfaces. Several different output methods are supported (curses,
-plain, csv and html).
+network interfaces or blockdevices and partitions (on Linux 2.6). It shows 
+total of in and out as well as total of all interfaces/devices. Several 
+different output methods are supported (curses, curses2, plain, csv and html).
 
 \fBbwm-ng\fP is not limited in the number of interfaces and can handle
 new ones dynamically while its running or hide those which are not up.
@@ -69,6 +69,9 @@ This is a Backup for systems without the above, or other problems.
 can use the external library libstatgrab to gather the data. please 
 refer to \fIhttp://www.i-scream.org/libstatgrab/\fP for more info about
 this.
+.TP
+.BR "disk" :
+Shows the diskio on Linux 2.6+ systems using /proc/diskstats.
 .RE
 
 .SH OUTPUT METHODS
@@ -84,6 +87,9 @@ This is the default output method. Usually this fits you the most.
 In \fIcurses\fP mode you can control \fBbwm-ng\fP with several keys. 
 Press 'h' for a online help. To quit using this mode either press 'q'
 or ctrl-c.
+.TP
+.BR "curses2" :
+Shows bar charts of the current IO, using curses output.
 .TP
 .BR "plain" :
 \fIPlain\fP or \fIASCII\fP is mostly a backup if curses is not 
@@ -125,6 +131,10 @@ selects which method to use. It can be one of the above (see
 .BI "-f, --procfile " "filename"
 selects the file to parse in \fBproc input method\fP. This is usually 
 \fI/proc/net/dev\fP.
+.TP
+.BI "    --diskstatsfile "filename"
+selects the file to pars in \fBdisk input method\fP. This is usually 
+\fI/proc/diskstats\fP.
 .TP
 .BI "-n, --netstat " "path"
 specifies the binary to execute for \fBnetstat input method\fP. Because

@@ -65,6 +65,9 @@ inline void cmdln_printhelp() {
 #ifdef PROC_NET_DEV
     print_help_line("-f <file>","-f, --procfile <file>","filename to read raw data from. (" PROC_NET_DEV ")");
 #endif
+#ifdef PROC_DISKSTATS
+	 print_help_line("","    --diskstatsfile <file>","filename to read diskstats from. (" PROC_DISKSTATS ")");
+#endif	 
 #if ALLOW_NETSTATPATH
 #ifdef NETSTAT
     print_help_line("-n <path>","-n, --netstat <path>","use <path> as netstat binary");

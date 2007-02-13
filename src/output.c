@@ -63,8 +63,11 @@ inline char *input2str() {
 #endif
 #ifdef LIBSTATGRAB
         case LIBSTAT_IN:
-            return "libstatgrab";
+            return "libstatnet";
             break;
+			case LIBSTATDISK_IN:
+				return "libstatdisk";
+				break;
 #endif
 #ifdef GETIFADDRS
         case GETIFADDRS_IN:
@@ -81,6 +84,9 @@ inline char *input2str() {
             return "kstat";
             break;
 #endif
+		  case DISKLINUX_IN:
+				return "disk IO";
+				break;
     }
     return "";
 }
@@ -88,10 +94,16 @@ inline char *input2str() {
 inline char *show_all_if2str() {
     switch (show_all_if) {
         case 1:
-            return " (all)";
+				if (net_input_method(input_method))
+					return " (all)";
+				else
+					return " (block devices and partitions)";
             break;
         case 2:
-            return " (all and down)";
+				if (net_input_method(input_method))
+	            return " (all and down)";
+				else
+					return " (block devices and partitions)";
             break;
     }
     return "";
@@ -302,7 +314,7 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
                 break;
 #endif                
         }
-        snprintf(str,buf_size,"%16.2f P%s",(double)value,speed);
+        snprintf(str,buf_size,"%16.2f %c%s",(double)value,net_input_method(input_method) ? 'P' : '#',speed);
     } else {
         switch (output_unit) {
             case BITS_OUT:

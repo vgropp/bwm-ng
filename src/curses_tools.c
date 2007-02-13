@@ -89,12 +89,13 @@ void handle_gui_input(char c) {
             break;
         case 'u':
         case 'U':
-	  if (output_method==CURSES_OUT) {
-            if (output_unit<4) 
-                output_unit++;
+			if (output_method==CURSES_OUT) {
+            if (output_unit<(!net_input_method(input_method) ? (input_method==DISKLINUX_IN ? 3 : 2) : 4)) 
+               output_unit++;
             else 
-	      output_unit=1; };
-	        break;
+					output_unit=1; 
+			};
+	      break;
 #if EXTENDED_STATS            
         case 't':
         case 'T':

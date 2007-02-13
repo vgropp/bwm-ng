@@ -35,6 +35,9 @@ inline void get_iface_stats(char _n) {
 		case LIBSTAT_IN: 
             get_iface_stats_libstat(_n); 
             break; 
+		case LIBSTATDISK_IN:
+				get_iface_stats_libstatdisk(_n);
+				break;
 #endif 
 #ifdef PROC_NET_DEV 
 	    case PROC_IN: 
@@ -61,7 +64,11 @@ inline void get_iface_stats(char _n) {
             get_iface_stats_win32(_n);
             break;
 #endif
-			
+#ifdef PROC_DISKSTATS				
+		  case DISKLINUX_IN:
+				get_disk_stats_proc(_n);
+				break;
+#endif				
 	}
 }
 
@@ -149,9 +156,13 @@ int main (int argc, char *argv[]) {
 	char ch;
 
 #ifdef PROC_NET_DEV 
-	strcpy(PROC_FILE,PROC_NET_DEV);
+	strncpy(PROC_FILE,PROC_NET_DEV,PATH_MAX);
 #endif
-    
+
+#ifdef PROC_DISKSTATS
+	strncpy(PROC_DISKSTATS_FILE,PROC_DISKSTATS,PATH_MAX);
+#endif    
+
     /* handle all cmd line and configfile options */
 	get_cmdln_options(argc,argv);
     /* check them */

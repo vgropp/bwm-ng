@@ -114,6 +114,9 @@ inline int str2in_method(char *optarg) {
 #ifdef SYSCTL
         if (!strcasecmp(optarg,"sysctl")) return SYSCTL_IN;
 #endif
+#ifdef PROC_DISKSTATS
+		  if (!strcasecmp(optarg,"disk")) return DISKLINUX_IN;
+#endif		  
     }
     return -1;
 }
@@ -161,6 +164,10 @@ char *token, *value;
 #ifdef PROC_NET_DEV
     } else if( strcasecmp( token, "PROCFILE" ) == 0 ) {
         if (value && (strlen(value)<PATH_MAX)) strcpy(PROC_FILE,value);
+#endif
+#ifdef PROC_DISKSTATS
+    } else if( strcasecmp( token, "DISKSTATSFILE" ) == 0 ) {
+        if (value && (strlen(value)<PATH_MAX)) strcpy(PROC_DISKSTATS_FILE,value);		  
 #endif
 #if ALLOW_NETSTATPATH
 #ifdef NETSTAT
@@ -236,6 +243,9 @@ void get_cmdln_options(int argc, char *argv[]) {
 #ifdef PROC_NET_DEV
         {"procfile",1,0,'f'},
 #endif
+#ifdef PROC_DISKSTATS
+			{"diskstatsfile",1,0,1000},
+#endif		  
 #if NETSTAT && ALLOW_NETSTATPATH
         {"netstat",1,0,'n'},
 #endif
@@ -297,7 +307,7 @@ void get_cmdln_options(int argc, char *argv[]) {
     /* get command line arguments, kinda ugly, wanna rewrite it? */
     while (1) {
 #ifdef LONG_OPTIONS
-        o=getopt_long (argc,argv,SHORT_OPTIONS,long_options, &option_index);
+		o=getopt_long (argc,argv,SHORT_OPTIONS,long_options, &option_index);
 #else
 		o=getopt (argc,argv,SHORT_OPTIONS);
 #endif		
@@ -324,6 +334,11 @@ void get_cmdln_options(int argc, char *argv[]) {
                               exit(EXIT_FAILURE);
                           }
                       break;
+#ifdef PROC_DISKSTATS
+			case 1000:
+				if (strlen(optarg)<PATH_MAX) 
+					strcpy(PROC_DISKSTATS_FILE,optarg);
+#endif							 
 			case 'D':
 				if (optarg) daemonize=atoi(optarg);
 				break;
@@ -420,6 +435,9 @@ void get_cmdln_options(int argc, char *argv[]) {
     } else /* avg_length was set via cmdline or config file, better check it */
         if (delay*2>=avg_length) deinit(1, "avglength needs to be a least twice the value of timeout\n");
 #endif    
+	 if ((output_unit==ERRORS_OUT && !net_input_method(input_method)) || 
+			 (output_unit==PACKETS_OUT && input_method==LIBSTATDISK_IN)) 
+		output_unit=BYTES_OUT;
     return;
 }
 

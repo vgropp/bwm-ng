@@ -1,8 +1,8 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([bwm-ng],[0.6-pre1],[bwmng@gropp.org],[bwm-ng])
-AM_INIT_AUTOMAKE([bwm-ng],[0.6-pre1])
+AC_INIT([bwm-ng],[0.6-pre3],[bwmng@gropp.org],[bwm-ng])
+AM_INIT_AUTOMAKE([bwm-ng],[0.6-pre3])
 AC_CONFIG_SRCDIR(src/bwm-ng.c)
 AC_CONFIG_HEADERS(config.h)
 AC_CONFIG_MACRO_DIR(./)
@@ -228,17 +228,17 @@ INPUT_FOUND=1
 ])
 
 
-AC_ARG_WITH([procnetdev],AS_HELP_STRING([--with-procnetdev],[enable proc/net/dev like input (ARG=PATH)]),[
-AC_MSG_CHECKING([for /proc/net/dev style input])
+AC_ARG_WITH([procnetdev],AS_HELP_STRING([--with-procnetdev],[enable /proc/net/dev input (ARG=PATH)]),[
+AC_MSG_CHECKING([for /proc/net/dev input])
 AC_MSG_RESULT($withval)
 if [ test $withval = "yes" ]; then
-    AC_DEFINE_UNQUOTED([HAVE__PROC_NET_DEV],[1],[enable proc/net/dev support])
+    AC_DEFINE_UNQUOTED([HAVE__PROC_NET_DEV],[1],[enable /proc/net/dev support])
 	 INPUT_FOUND=1
 else
     if [ test $withval != "no" ]; then
         AC_CHECK_FILES([$withval],[
-			AC_DEFINE_UNQUOTED([PROC_NET_DEV_PATH],[$withval],[set path to proc/net/dev raw-file])
-			AC_DEFINE_UNQUOTED([HAVE__PROC_NET_DEV],[1],[enable proc/net/dev support])
+			AC_DEFINE_UNQUOTED([PROC_NET_DEV_PATH],[$withval],[set path to /proc/net/dev raw-file])
+			AC_DEFINE_UNQUOTED([HAVE__PROC_NET_DEV],[1],[enable /proc/net/dev support])
 			INPUT_FOUND=1
         ])
     fi
@@ -247,9 +247,42 @@ fi
 AC_CHECK_FILES([/proc/net/dev],[INPUT_FOUND=1])
 ])
 
-if [ test $INPUT_FOUND -ne 1 ]; then
-	AC_ASK_OPTLIB(statgrab, sg_get_network_io_stats, statgrab.h, [     Use libstatgrab to gather statistics.], libstatgrab, HAVE_LIBSTATGRAB, HAVE_STATGRAB_H)
+DISK_INPUT_FOUND=0
+
+AC_ARG_WITH([diskstats],AS_HELP_STRING([--with-diskstats],[enable /proc/diskstats input (diskio) (ARG=PATH)]),[
+AC_MSG_CHECKING([for /proc/diskstats input])
+AC_MSG_RESULT($withval)
+if [ test $withval = "yes" ]; then
+    AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats support])
+    INPUT_FOUND=1
+else
+    if [ test $withval != "no" ]; then
+        AC_CHECK_FILES([$withval],[
+         AC_DEFINE_UNQUOTED([PROC_DISKSTATS_PATH],[$withval],[set path to /proc/disktstats raw-file])
+         AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats support])
+         INPUT_FOUND=1
+        ])
+    fi
 fi
+],[
+AC_CHECK_FILES([/proc/diskstats],[DISK_INPUT_FOUND=1])
+])
+
+AC_ARG_WITH([libstatgrab],AS_HELP_STRING([--with-libstatgrab],[Use libstatgrab to gather statistics]),[
+AC_MSG_CHECKING([for libstatgrab input])
+AC_MSG_RESULT($withval)
+if [ test $withval != "no" ]; then
+    OLD_CPPFLAGS=$CPPFLAGS
+    if [ test $withval != "yes" ]; then
+        CPPFLAGS="$CPPFLAGS -I$withval"
+    fi
+	 AC_CHECK_LIB([statgrab],[sg_get_network_io_stats,sg_get_disk_io_stats],,[ CPPFLAGS=$OLD_CPPFLAGS ])
+fi
+],[
+if [ test $INPUT_FOUND -ne 1 ] || [ test $DISK_INPUT_FOUND -ne 1 ]; then
+	AC_CHECK_LIB([statgrab],[sg_get_network_io_stats,sg_get_disk_io_stats])
+fi
+])
 
 #################################################
 # inputs check done

@@ -45,6 +45,9 @@ int if_count=0;
 #ifdef PROC_NET_DEV
 char PROC_FILE[PATH_MAX];
 #endif
+#ifdef PROC_DISKSTATS
+char PROC_DISKSTATS_FILE[PATH_MAX];
+#endif
 #ifdef NETSTAT
 char NETSTAT_FILE[PATH_MAX];
 #endif

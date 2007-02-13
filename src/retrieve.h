@@ -87,6 +87,9 @@ extern int if_count;
 #ifdef PROC_NET_DEV
 extern char PROC_FILE[PATH_MAX];
 #endif
+#ifdef PROC_DISKSTATS
+extern char PROC_DISKSTATS_FILE[PATH_MAX];
+#endif
 extern unsigned int delay;
 extern char dynamic;
 extern char show_all_if;

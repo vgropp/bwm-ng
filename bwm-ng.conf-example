@@ -1,6 +1,7 @@
 DYNAMIC=1
 UNIT=bits
 PROCFILE=/proc/net/dev
+DISKSTATSFILE=/proc/diskstats
 OUTPUT=plain
 TIMEOUT=666
 NETSTAT=netstat

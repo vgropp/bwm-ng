@@ -132,6 +132,7 @@ inline void init() {
 	output_count=-1;
 	daemonize=0;
 	sumhidden=0;
+/* gcc doesnt support #elifdef so we have to use this ugly piece */
 #ifdef PROC_NET_DEV
 	input_method=PROC_IN;
 #else

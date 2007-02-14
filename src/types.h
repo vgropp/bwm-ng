@@ -24,9 +24,15 @@
 #ifndef __TYPES_H
 #define __TYPES_H
 
+#ifdef HAVE_UNSIGNED_LONG_LONG
+#define ullong unsigned long long
+#else
+#define ullong unsigned long
+#endif
+
 struct inout_long {
-    unsigned long long in;
-    unsigned long long out;
+    ullong in;
+    ullong out;
 };
 
 #if EXTENDED_STATS

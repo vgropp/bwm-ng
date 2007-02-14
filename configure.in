@@ -24,6 +24,8 @@ if test -z "${CFLAGS}"; then
 fi
 ])
 
+AC_CHECK_TYPES(unsigned long long)
+
 # Checks for libraries.
 CURSES_CHECKED="0"
 
@@ -260,7 +262,7 @@ else
         AC_CHECK_FILES([$withval],[
          AC_DEFINE_UNQUOTED([PROC_DISKSTATS_PATH],[$withval],[set path to /proc/disktstats raw-file])
          AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats support])
-         INPUT_FOUND=1
+         DISK_INPUT_FOUND=1
         ])
     fi
 fi
@@ -276,19 +278,31 @@ if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
         CPPFLAGS="$CPPFLAGS -I$withval"
     fi
-	 AC_CHECK_LIB([statgrab],[sg_get_network_io_stats,sg_get_disk_io_stats],,[ CPPFLAGS=$OLD_CPPFLAGS ])
+	 AC_CHECK_LIB([statgrab],[sg_get_network_io_stats,sg_get_disk_io_stats],[INPUT_FOUND=1],[ CPPFLAGS=$OLD_CPPFLAGS ])
 fi
 ],[
 if [ test $INPUT_FOUND -ne 1 ] || [ test $DISK_INPUT_FOUND -ne 1 ]; then
-	AC_CHECK_LIB([statgrab],[sg_get_network_io_stats,sg_get_disk_io_stats])
+	AC_CHECK_LIB([statgrab],[sg_get_network_io_stats,sg_get_disk_io_stats],[INPUT_FOUND=1])
 fi
 ])
+
+if [ test $INPUT_FOUND -ne 1 ] && [ test $DISK_INPUT_FOUND -ne 1 ]; then
+	AC_MSG_ERROR(["NO INPUT FOUND"]);
+fi
 
 #################################################
 # inputs check done
 #################################################
 
+#check for getifaddrs
+linux_if_h_includes="
+            #if HAVE_SYS_SOCKET_H
+            # include <sys/socket.h>
+            #endif
+            "
+
 AC_CHECK_FUNCS([ioctl])
+AC_CHECK_HEADERS([sys/socket.h linux/if.h],,,[$linux_if_h_includes])
 
 AC_ARG_ENABLE([html],AS_HELP_STRING([--enable-html],[enable html output (default: yes)]),[
 echo "enable html output: $enableval"
@@ -537,6 +551,7 @@ else
 fi
 
 AC_CHECK_CC_OPT(Wno-long-double)
+AC_CHECK_CC_OPT(Wno-long-long)
 
 AC_CONFIG_FILES([
     Makefile

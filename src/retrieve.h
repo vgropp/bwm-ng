@@ -58,7 +58,11 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
+#ifdef HAVE_LINUX_IF_H
+#include <linux/if.h>
+#else
 #include <net/if.h>
+#endif
 #endif
 
 

@@ -276,8 +276,12 @@
 #define WRAP_32BIT 4294967295ul
 
 #ifdef SYS_64BIT
+#ifdef HAVE_UNSIGNED_LONG_LONG
+
 #undef WRAP_AROUND
 #define WRAP_AROUND 18446744073709551615ull
+
+#endif
 #endif
 
 #define print_version printf("Bandwidth Monitor NG (" PACKAGE_NAME ") v" VERSION "\nCopyright (C) 2004-2007 Volker Gropp <" PACKAGE_BUGREPORT ">\n"); 

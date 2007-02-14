@@ -191,7 +191,7 @@ char *token, *value;
     } else if( strcasecmp( token, "ALLIF" ) == 0 ) {
         if (value) show_all_if=value[0];
     } else if( strcasecmp( token, "INTERFACES" ) == 0 ) {
-        if (value) iface_list=strdup(value);
+        if (value) iface_list=(char *)strdup(value);
     } else if( strcasecmp( token, "OUTPUT" ) == 0 ) {
         if (value) output_method=str2out_method(value);
 #ifdef CSV
@@ -205,7 +205,7 @@ char *token, *value;
             out_file=fopen(value,"a"); 
             if (!out_file) deinit(1, "failed to open outfile\n");
             if (out_file_path) free(out_file_path);
-            out_file_path=strdup(value);
+            out_file_path=(char *)strdup(value);
         }
 #endif
     } else if( strcasecmp( token, "COUNT" ) == 0 ) {
@@ -361,7 +361,7 @@ void get_cmdln_options(int argc, char *argv[]) {
                     out_file=fopen(optarg,"a"); 
                     if (!out_file) deinit(1, "failed to open outfile\n");
                     if (out_file_path) free(out_file_path);
-                    out_file_path=strdup(optarg);
+                    out_file_path=(char *)strdup(optarg);
                 }
                 break;
 #endif
@@ -384,7 +384,7 @@ void get_cmdln_options(int argc, char *argv[]) {
                 }
 				break;				
             case 'I':
-                if (optarg) iface_list=strdup(optarg);
+                if (optarg) iface_list=(char *)strdup(optarg);
                 break;
             case 'S':
                 if (optarg) sumhidden=atoi(optarg);

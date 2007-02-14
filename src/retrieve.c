@@ -242,7 +242,7 @@ void get_iface_stats_netstat (char verbose) {
 	t_iface_speed_stats stats; /* local struct, used to calc total values */
     t_iface_speed_stats tmp_if_stats;
     memset(&stats,0,(size_t)sizeof(t_iface_speed_stats)); /* init it */
-	if (!(f=popen(
+	if (!(f=(FILE *)popen(
 #if NETSTAT_BSD || NETSTAT_BSD_BYTES
 #if NETSTAT_BSD_LINK
 	        NETSTAT_PATH " -iW -f link"
@@ -263,7 +263,7 @@ void get_iface_stats_netstat (char verbose) {
             NETSTAT_PATH " -ib"
 #endif
                     ,"r")))
-        deinit(1, "no input stream found: %s\n",strerror(errno));
+		deinit(1, "no input stream found: %s\n",strerror(errno));
 #if NETSTAT_NETBSD
     if (!(f2=popen( NETSTAT_PATH " -i","r")))
         deinit(1, "no input stream found: %s\n",strerror(errno));
@@ -533,7 +533,7 @@ void get_iface_stats_win32 (char verbose) {
 void get_disk_stats_proc (char verbose) {
    FILE *f=NULL;
    char *buffer=NULL,*name=NULL;
-	unsigned long long tmp_long;
+	ullong tmp_long;
 	int n,major;
 
    int hidden_if=0,current_if_num=0;
@@ -615,6 +615,7 @@ void get_iface_stats_libstatdisk (char verbose) {
 
    return;
 }
+#endif
 
 /* chooses the correct get_iface_stats() to use */
 inline void get_iface_stats(char _n) {
@@ -664,7 +665,4 @@ inline void get_iface_stats(char _n) {
 #endif
    }
 }
-
-
-#endif
 

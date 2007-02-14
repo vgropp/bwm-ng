@@ -74,9 +74,9 @@ float get_time_delay(int iface_num) {
 #endif
 
 /* basically new-old, but handles "overflow" of source aswell */
-inline unsigned long long calc_new_values(unsigned long long new, unsigned long long old) {
+inline ullong calc_new_values(ullong new, ullong old) {
     /* FIXME: WRAP_AROUND _might_ be wrong for libstatgrab, where the type is always long long */
-    return (new>=old) ? (unsigned long long)(new-old) : (unsigned long long)((
+    return (new>=old) ? (ullong)(new-old) : (ullong)((
 #ifdef HAVE_LIBKSTAT
             (input_method==KSTAT_IN) ?
             WRAP_32BIT :

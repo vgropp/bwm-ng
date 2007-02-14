@@ -235,7 +235,7 @@ int print_header(int option) {
 }
 
 
-inline unsigned long long direction2value(char mode,struct inout_long stats) {
+inline ullong direction2value(char mode,struct inout_long stats) {
     switch (mode) {
         case 0:
             return stats.in;

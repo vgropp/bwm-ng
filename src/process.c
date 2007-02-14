@@ -21,8 +21,8 @@
  *                                                                            *
  *****************************************************************************/
 
+#include "global_vars.h"
 #include "process.h"
-
 
 /* returns the whether to show the iface or not
  * if is in list return 1, if list is prefaced with ! or 

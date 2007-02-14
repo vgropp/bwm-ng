@@ -21,43 +21,20 @@
  *                                                                            *
  *****************************************************************************/
 
-#ifdef __CURSES_TOOLS_H
-#else
-#define __CURSES_TOOLS_H 1
+#ifndef __CURSES_TOOLS_H
+#define __CURSES_TOOLS_H 
 
 #include "defines.h"
 #include "types.h"
+#include "help.h"
+#include "options.h"
 
 #ifdef HAVE_CURSES
-extern void print_online_help();
-extern inline void get_iface_stats(char _n);
-#ifdef __STDC__
-extern void deinit(int code, char *error_msg, ...) FUNCATTR_NORETURN;
-#else
-extern void deinit(int code, ...) FUNCATTR_NORETURN;
+/* handle key input by user in gui (curses) mode */
+void handle_gui_input(char c);
+int init_curses();
+void sigwinch(int sig);
 #endif
 
-extern WINDOW *mywin;
-extern SCREEN *myscr;
-extern char dynamic;
-extern char show_all_if;
-extern char sumhidden;
-extern int output_method;
-extern char output_unit;
-extern char output_type;
-extern int input_method;
-extern unsigned int delay;
-extern char *iface_list;
-extern int if_count;
-extern unsigned int max_rt;
-extern unsigned int show_only_if;
-extern unsigned short cols;
-extern unsigned short rows;
 
-/* global buffer to store all data of interfaces in */
-extern t_iface_stats *if_stats;
-/* total struct */
-extern t_iface_stats if_stats_total;
-
-#endif
 #endif

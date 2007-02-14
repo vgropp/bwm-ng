@@ -21,18 +21,18 @@
  *                                                                            *
  *****************************************************************************/
 
-#ifdef __HELP_H
-#else
-#define __HELP_H 1
+#ifndef __HELP_H
+#define __HELP_H 
 
 #include "defines.h"
 #include "types.h"
-
-extern unsigned int delay;
-extern int output_method;
+#include "options.h"
 
 /* print cmdline help */
 inline void cmdln_printhelp() FUNCATTR_NORETURN;
 
-extern t_iface_stats *if_stats;
+#ifdef HAVE_CURSES
+void print_online_help();
+#endif
+
 #endif

@@ -21,33 +21,15 @@
  *                                                                            *
  *****************************************************************************/
 
-#if __PROCESS_H || __HELP_H || __BWM_NG_H || __RETRIEVE_H || __CURSES_TOOLS_H || __OPTIONS_H || __OUTPUT_H
-#else
-#define __PROCESS_H 1
+#ifndef __PROCESS_H
+#define __PROCESS_H 
 
 #include "defines.h"
 #include "types.h"
+#include "output.h"
+#include "options.h"
 
-
-extern void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float multiplier,t_iface_stats full_stats);
-
-extern int if_count;
-extern unsigned int delay;
-extern char dynamic;
-extern char show_all_if;
-extern char sumhidden;
-extern char output_unit;
-extern char output_type;
-extern int output_method;
-extern int input_method;
-extern char *iface_list;
-#if EXTENDED_STATS
-extern unsigned int avg_length;
-#endif
-
-/* global buffer to store all data of interfaces in */
-t_iface_stats *if_stats=NULL;
-/* total struct */
-t_iface_stats if_stats_total;
+void finish_iface_stats (char verbose, t_iface_speed_stats stats, int hidden_if, int iface_number);
+int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_speed_stats *stats, char *name, int iface_number, char verbose, char iface_is_up);
 
 #endif

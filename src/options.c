@@ -1,7 +1,7 @@
 /******************************************************************************
  *  bwm-ng handle cmdline and config file options                             *
  *                                                                            *
- *  Copyright (C) 2004 Volker Gropp (vgropp@pefra.de)                         *
+ *  Copyright (C) 2004-2007 Volker Gropp (bwmng@gropp.org)                    *
  *                                                                            *
  *  for more info read README.                                                *
  *                                                                            *
@@ -21,7 +21,8 @@
  *                                                                            *
  *****************************************************************************/
 
-
+#define EXTERN 
+#include "global_vars.h"
 #include "options.h"
 
 #ifdef CONFIG_FILE

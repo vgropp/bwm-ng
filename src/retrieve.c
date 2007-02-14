@@ -21,6 +21,7 @@
  *                                                                            *
  *****************************************************************************/
 
+#include "global_vars.h"
 #include "retrieve.h"
 
 #if NETSTAT_BSD || NETSTAT_SOLARIS || NETSTAT_BSD_BYTES || NETSTAT_NETBSD
@@ -614,5 +615,56 @@ void get_iface_stats_libstatdisk (char verbose) {
 
    return;
 }
+
+/* chooses the correct get_iface_stats() to use */
+inline void get_iface_stats(char _n) {
+   switch (input_method) {
+#ifdef NETSTAT
+       case NETSTAT_IN:
+         get_iface_stats_netstat(_n);
+           break;
+#endif
+#ifdef LIBSTATGRAB
+      case LIBSTAT_IN:
+            get_iface_stats_libstat(_n);
+            break;
+      case LIBSTATDISK_IN:
+            get_iface_stats_libstatdisk(_n);
+            break;
+#endif
+#ifdef PROC_NET_DEV
+       case PROC_IN:
+            get_iface_stats_proc(_n);
+            break;
+#endif
+#ifdef GETIFADDRS
+       case GETIFADDRS_IN:
+            get_iface_stats_getifaddrs(_n);
+            break;
+#endif
+#ifdef SYSCTL
+        case SYSCTL_IN:
+            get_iface_stats_sysctl(_n);
+            break;
+#endif
+#if HAVE_LIBKSTAT
+        case KSTAT_IN:
+            get_iface_stats_kstat(_n);
+            break;
+#endif
+#ifdef WIN32
+        case WIN32_IN:
+            get_iface_stats_win32(_n);
+            break;
+#endif
+#ifdef PROC_DISKSTATS
+        case DISKLINUX_IN:
+            get_disk_stats_proc(_n);
+            break;
+#endif
+   }
+}
+
+
 #endif
 

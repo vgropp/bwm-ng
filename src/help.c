@@ -21,6 +21,7 @@
  *                                                                            *
  *****************************************************************************/
 
+#include "global_vars.h"
 #include "help.h"
 
 inline void print_help_line(char *short_c,char * long_c,char *descr) {

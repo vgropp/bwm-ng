@@ -21,8 +21,7 @@
  *                                                                            *
  *****************************************************************************/
 
-#ifdef __TYPES_H
-#else
+#ifndef __TYPES_H
 #define __TYPES_H
 
 struct inout_long {

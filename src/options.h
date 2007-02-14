@@ -1,7 +1,7 @@
 /******************************************************************************
  *  bwm-ng options header                                                     *
  *                                                                            *
- *  Copyright (C) 2004 Volker Gropp (vgropp@pefra.de)                         *
+ *  Copyright (C) 2004-2007 Volker Gropp (bwmng@gropp.org)                    *
  *                                                                            *
  *  for more info read README.                                                *
  *                                                                            *
@@ -22,9 +22,8 @@
  *****************************************************************************/
 
 
-#ifdef __OPTIONS_H
-#else
-#define __OPTIONS_H 1
+#ifndef __OPTIONS_H
+#define __OPTIONS_H
 
 #include "defines.h"
 #include "types.h"
@@ -39,92 +38,9 @@
 #endif
 #endif
 
+#include "help.h"
+#include "bwm-ng.h"
 
-
-int if_count=0;
-#ifdef PROC_NET_DEV
-char PROC_FILE[PATH_MAX];
-#endif
-#ifdef PROC_DISKSTATS
-char PROC_DISKSTATS_FILE[PATH_MAX];
-#endif
-#ifdef NETSTAT
-char NETSTAT_FILE[PATH_MAX];
-#endif
-unsigned int delay=500;
-#if EXTENDED_STATS
-unsigned int avg_length=0;
-#endif
-char output_unit=BYTES_OUT;
-char output_type=RATE_OUT;
-char dynamic;
-
-char show_all_if=0;
-#ifdef HAVE_CURSES
-int output_method=CURSES_OUT;
-WINDOW *mywin=NULL;
-SCREEN *myscr=NULL;
-unsigned short cols;
-unsigned short rows;
-unsigned int max_rt=32;
-unsigned int scale=0;
-unsigned int show_only_if=0;
-#else
-int output_method=PLAIN_OUT;
-#endif
-char *iface_list=NULL;
-#ifdef CSV
-char csv_char=';';
-#endif
-#if CSV || HTML
-FILE *out_file=NULL;
-char *out_file_path=NULL;
-#endif
-int output_count=-1;
-char daemonize=0;
-char sumhidden=0;
-
-#ifdef PROC_NET_DEV
-int input_method=PROC_IN;
-#else
-#ifdef GETIFADDRS
-int input_method=GETIFADDRS_IN;
-#else
-#ifdef LIBSTATGRAB
-int input_method=LIBSTAT_IN;
-#else
-#ifdef SYSCTL
-int input_method=SYSCTL_IN;
-#else
-#if HAVE_LIBKSTAT
-int input_method=KSTAT_IN;
-#else
-#ifdef NETSTAT
-int input_method=NETSTAT_IN;
-#else
-#ifdef WIN32
-int input_method=WIN32_IN;
-#else
-#error "NO INPUT DEFINED!"
-int input_method=0;
-#endif
-#endif
-#endif 
-#endif
-#endif
-#endif
-#endif
-
-#ifdef HTML
-int html_refresh=5;
-int html_header=0;
-#endif
-
-extern inline void cmdln_printhelp() FUNCATTR_NORETURN;
-#ifdef __STDC__
-extern void deinit(int code, char *error_msg, ...) FUNCATTR_NORETURN;
-#else
-extern void deinit(int code, ...) FUNCATTR_NORETURN;
-#endif
+void get_cmdln_options(int argc, char *argv[]);
 
 #endif

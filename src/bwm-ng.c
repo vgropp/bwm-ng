@@ -21,57 +21,8 @@
  *                                                                            *
  *****************************************************************************/
 
+#include "global_vars.h"
 #include "bwm-ng.h"
-
-/* chooses the correct get_iface_stats() to use */
-inline void get_iface_stats(char _n) {
-	switch (input_method) { 
-#ifdef NETSTAT		
-	    case NETSTAT_IN: 
-			get_iface_stats_netstat(_n); 
-	        break; 
-#endif			
-#ifdef LIBSTATGRAB 
-		case LIBSTAT_IN: 
-            get_iface_stats_libstat(_n); 
-            break; 
-		case LIBSTATDISK_IN:
-				get_iface_stats_libstatdisk(_n);
-				break;
-#endif 
-#ifdef PROC_NET_DEV 
-	    case PROC_IN: 
-            get_iface_stats_proc(_n); 
-            break; 
-#endif 
-#ifdef GETIFADDRS 
-	    case GETIFADDRS_IN: 
-            get_iface_stats_getifaddrs(_n); 
-            break; 
-#endif 
-#ifdef SYSCTL
-        case SYSCTL_IN:
-            get_iface_stats_sysctl(_n);
-            break;
-#endif
-#if HAVE_LIBKSTAT
-        case KSTAT_IN:
-            get_iface_stats_kstat(_n);
-            break;
-#endif
-#ifdef WIN32
-        case WIN32_IN:
-            get_iface_stats_win32(_n);
-            break;
-#endif
-#ifdef PROC_DISKSTATS				
-		  case DISKLINUX_IN:
-				get_disk_stats_proc(_n);
-				break;
-#endif				
-	}
-}
-
 
 /* clear stuff and exit */
 #ifdef __STDC__
@@ -149,11 +100,89 @@ void sigint(int sig) {
 	deinit(0, NULL);
 }
 
+inline void init() {
+	if_count=0;
+	delay=500;
+#if EXTENDED_STATS	
+	avg_length=0;
+#endif
+	output_unit=BYTES_OUT;
+	output_type=RATE_OUT;
+	show_all_if=0;
+#ifdef HAVE_CURSES	
+	output_method=CURSES_OUT;
+	mywin=NULL;
+	myscr=NULL;
+	max_rt=32;
+	scale=0;
+	show_only_if=0;
+#else
+	output_method=PLAIN_OUT;
+#endif
+	iface_list=NULL;
+#ifdef CSV
+	csv_char=';';
+#endif
+
+#if CSV || HTML
+	out_file=NULL;
+	out_file_path=NULL;
+#endif	
+	
+	output_count=-1;
+	daemonize=0;
+	sumhidden=0;
+#ifdef PROC_NET_DEV
+	input_method=PROC_IN;
+#else
+#ifdef GETIFADDRS
+	input_method=GETIFADDRS_IN;
+#else
+#ifdef LIBSTATGRAB
+	input_method=LIBSTAT_IN;
+#else
+#ifdef SYSCTL
+	input_method=SYSCTL_IN;
+#else
+#if HAVE_LIBKSTAT
+	input_method=KSTAT_IN;
+#else
+#ifdef NETSTAT
+	input_method=NETSTAT_IN;
+#else
+#ifdef WIN32
+	input_method=WIN32_IN;
+#else
+#ifdef HAVE_PROC_DISKSTATS
+	input_method=DISKLINUX_IN;
+#else
+#error "NO INPUT DEFINED!"
+	input_method=0;
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+
+#ifdef HTML
+	html_refresh=5;
+	html_header=0;
+#endif
+#ifdef IOCTL
+	skfd=-1;	
+#endif	
+	if_stats=NULL;
+}
 
 /* do the main thing */
 int main (int argc, char *argv[]) {
 	unsigned char idle_chars_p=0;
 	char ch;
+
+	init();
 
 #ifdef PROC_NET_DEV 
 	strncpy(PROC_FILE,PROC_NET_DEV,PATH_MAX);

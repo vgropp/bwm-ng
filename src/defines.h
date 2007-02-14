@@ -21,6 +21,9 @@
  *                                                                            *
  *****************************************************************************/
 
+#ifndef __HAVE_DEFINE_H
+#define __HAVE_DEFINE_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -289,4 +292,6 @@
 
 #ifndef HAVE_STRLCPY
 #define strlcpy(_a,_b,_c) strncpy((_a),(_b),(_c)); (_a)[(_c) - 1]='\0';
+#endif
+
 #endif

@@ -21,12 +21,16 @@
  *                                                                            *
  *****************************************************************************/
 
-#ifdef __BWM_NG_H
-#else
-#define __BWM_NG_H 1
+#ifndef __BWM_NG_H
+#define __BWM_NG_H
 
 #include "defines.h"
 #include "types.h"
+#include "curses_tools.h"
+#include "options.h"
+#include "output.h"
+#include "retrieve.h"
+#include "help.h"
 
 #ifdef WIN32
 #include <windows.h>
@@ -34,92 +38,10 @@
 
 #ifdef __STDC__
 #include <stdarg.h>
+void deinit(int code, char *error_msg, ...) FUNCATTR_NORETURN;
 #else
 #include <varargs.h>
-#endif
-
-extern void get_cmdln_options(int argc, char *argv[]);
-extern int print_header(int option);
-extern void handle_gui_input(char c);
-extern int init_curses();
-extern void sigwinch(int sig);
-
-/* global vars and options */
-extern int if_count;
-#ifdef PROC_NET_DEV
-extern char PROC_FILE[PATH_MAX];
-#endif
-#ifdef PROC_DISKSTATS
-extern char PROC_DISKSTATS_FILE[PATH_MAX];
-#endif
-extern unsigned int delay;
-extern char dynamic;
-extern char show_all_if;
-extern char sumhidden;
-extern int output_method;
-extern char output_unit;
-extern char output_type;
-extern int input_method;
-extern char *iface_list;
-#ifdef CSV
-extern char csv_char;
-#endif
-#if CSV || HTML
-extern FILE *out_file;
-extern char *out_file_path;
-#endif
-extern int output_count;
-extern char daemonize;
-#ifdef HTML
-extern int html_refresh;
-extern int html_header;
-#endif
-#ifdef HAVE_CURSES
-extern WINDOW *mywin;
-extern SCREEN *myscr;
-#endif
-
-#ifdef IOCTL
-/* fd for check_if_up and ioctl */
-extern int skfd;
-#endif
-
-/* global buffer to store all data of interfaces in */
-extern t_iface_stats *if_stats;
-/* total struct */
-extern t_iface_stats if_stats_total;
-
-#ifdef PROC_NET_DEV
-extern void get_iface_stats_proc (char verbose);
-#endif
-
-#ifdef LIBSTATGRAB
-extern void get_iface_stats_libstat (char verbose);
-extern void get_iface_stats_libstatdisk (char verbose);
-#endif
-
-#ifdef GETIFADDRS
-extern void get_iface_stats_getifaddrs (char verbose);
-#endif
-
-#ifdef SYSCTL
-extern void get_iface_stats_sysctl (char verbose);
-#endif
-
-#ifdef NETSTAT
-extern void get_iface_stats_netstat (char verbose);
-#endif
-
-#ifdef HAVE_LIBKSTAT
-extern void get_iface_stats_kstat (char verbose);
-#endif
-
-#ifdef WIN32
-extern void get_iface_stats_win32 (char verbose);
-#endif 
-
-#ifdef PROC_DISKSTATS
-extern void get_disk_stats_proc (char verbose);
+void deinit(int code, ...) FUNCATTR_NORETURN;
 #endif
 
 #endif

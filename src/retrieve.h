@@ -21,9 +21,8 @@
  *                                                                            *
  *****************************************************************************/
 
-#ifdef __RETRIEVE_H
-#else
-#define __RETRIEVE_H 1
+#ifndef __RETRIEVE_H
+#define __RETRIEVE_H 
 
 #include "defines.h"
 #include "types.h"
@@ -75,35 +74,9 @@
 
 #define MAX_LINE_BUFFER 1024
 
-extern int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_speed_stats *stats, char *name, int iface_number,char verbose, char iface_is_up);
-extern void finish_iface_stats (char verbose, t_iface_speed_stats stats, int hidden_if, int iface_number);
-#ifdef __STDC__
-extern void deinit(int code, char *error_msg, ...) FUNCATTR_NORETURN;
-#else
-extern void deinit(int code, ...) FUNCATTR_NORETURN;
-#endif
+#include "process.h"
+#include "bwm-ng.h"
 
-extern int if_count;
-#ifdef PROC_NET_DEV
-extern char PROC_FILE[PATH_MAX];
-#endif
-#ifdef PROC_DISKSTATS
-extern char PROC_DISKSTATS_FILE[PATH_MAX];
-#endif
-extern unsigned int delay;
-extern char dynamic;
-extern char show_all_if;
-extern char sumhidden;
-extern char output_unit;
-extern char output_type;
-extern int output_method;
-extern int input_method;
-extern char *iface_list;
-
-
-#ifdef IOCTL
-/* fd for check_if_up and ioctl */
-int skfd = -1;
-#endif
+inline void get_iface_stats(char _n);
 
 #endif

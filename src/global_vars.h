@@ -1,7 +1,7 @@
 /******************************************************************************
- *  bwm-ng output                                                             *
+ *  bwm-ng global variables                                                   *
  *                                                                            *
- *  Copyright (C) 2004 Volker Gropp (vgropp@pefra.de)                         *
+ *  Copyright (C) 2007 Volker Gropp (bwmng@gropp.org)                         *
  *                                                                            *
  *  for more info read README.                                                *
  *                                                                            *
@@ -21,18 +21,71 @@
  *                                                                            *
  *****************************************************************************/
 
-#ifndef __OUTPUT_H
-#define __OUTPUT_H 
+#ifndef __GLOBAL_VARS
+#define __GLOBAL_VARS
+#ifndef EXTERN
+#define EXTERN extern
+#endif
 
 #include "defines.h"
 #include "types.h"
 
-/* for csv output and time() */
-#include <time.h>
+EXTERN int if_count;
+#ifdef PROC_NET_DEV
+EXTERN char PROC_FILE[PATH_MAX];
+#endif
+#ifdef PROC_DISKSTATS
+EXTERN char PROC_DISKSTATS_FILE[PATH_MAX];
+#endif
+#ifdef NETSTAT
+EXTERN char NETSTAT_FILE[PATH_MAX];
+#endif
+EXTERN unsigned int delay;
+#if EXTENDED_STATS
+EXTERN unsigned int avg_length;
+#endif
+EXTERN char output_unit;
+EXTERN char output_type;
+EXTERN char dynamic;
+ 
+EXTERN char show_all_if;
+#ifdef HAVE_CURSES
+EXTERN int output_method;
+EXTERN WINDOW *mywin;
+EXTERN SCREEN *myscr;
+EXTERN unsigned short cols;
+EXTERN unsigned short rows;
+EXTERN unsigned int max_rt;
+EXTERN unsigned int scale;
+EXTERN unsigned int show_only_if;
+#else
+EXTERN int output_method;
+#endif
+EXTERN char *iface_list;
+#ifdef CSV
+EXTERN char csv_char;
+#endif
+#if CSV || HTML
+EXTERN FILE *out_file;
+EXTERN char *out_file_path;
+#endif
+EXTERN int output_count;
+EXTERN char daemonize;
+EXTERN char sumhidden;
 
-#include "options.h"
+EXTERN int input_method;
 
-int print_header(int option);
-void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float multiplier,t_iface_stats full_stats);
+#ifdef HTML
+EXTERN int html_refresh;
+EXTERN int html_header;
+#endif
+
+#ifdef IOCTL
+EXTERN int skfd;
+#endif
+
+EXTERN t_iface_stats *if_stats;
+/* total struct */
+EXTERN t_iface_stats if_stats_total;
 
 #endif

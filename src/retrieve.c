@@ -104,7 +104,7 @@ void get_iface_stats_getifaddrs (char verbose) {
 		else 
 			name=strdup("");
         if (net_ptr->ifa_data!=NULL) {
-		    net_data=(struct if_data *)net_ptr->ifa_data;
+		      net_data=(struct if_data *)net_ptr->ifa_data;
             tmp_if_stats.bytes.in=net_data->ifi_ibytes;
             tmp_if_stats.bytes.out=net_data->ifi_obytes;
             tmp_if_stats.packets.in=net_data->ifi_ipackets;
@@ -393,6 +393,10 @@ void get_iface_stats_sysctl (char verbose) {
 		iface_is_up= (show_all_if || (ifmhdr->ifm_flags & IFF_UP));
         /* we have to copy here to use saddr->sdl_nlen */
         name=(char *)malloc(saddr->sdl_nlen+1);
+	     if (!name) {
+        	  deinit(1,"mem alloc failed: %s\n",strerror(errno));
+	     }
+
 		strncpy(name,saddr->sdl_data,saddr->sdl_nlen);
         name[saddr->sdl_nlen]='\0';
         tmp_if_stats.bytes.in=ifmhdr->ifm_data.ifi_ibytes;
@@ -429,6 +433,10 @@ void get_iface_stats_kstat (char verbose) {
     kc = kstat_open();
     if (kc==NULL) deinit(1, "kstat failed: %s\n",strerror(my_errno));
     name=(char *)malloc(KSTAT_STRLEN);
+    if (!name) {
+       deinit(1,"mem alloc failed: %s\n",strerror(errno));
+    }
+	 
     /* loop for interfaces */
     for (ksp = kc->kc_chain;ksp != NULL;ksp = ksp->ks_next) {
         if (strcmp(ksp->ks_class, "net") != 0)
@@ -538,11 +546,16 @@ void get_disk_stats_proc (char verbose) {
    }
    buffer=(char *)malloc(MAX_LINE_BUFFER);
    name=(char *)malloc(MAX_LINE_BUFFER);
+	if (!name || !buffer) {
+		if (name) free(name);
+		if (buffer) free(buffer);
+		deinit(1,"mem alloc failed: %s\n",strerror(errno));
+	}
 
    while ( (fgets(buffer,MAX_LINE_BUFFER,f) != NULL) ) {
       n = sscanf(buffer,"%i %*i %s %llu%llu%llu%llu%llu%llu%llu%*i",&major,name,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.bytes.in,&tmp_long,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out,&tmp_if_stats.bytes.out);
 		/* skip loop devices, we dont see stats anyway */
-		if (major==7) continue;
+		if (major == 7) continue;
 		if (n == 6) {
 			tmp_if_stats.packets.out=tmp_if_stats.bytes.in;
 			tmp_if_stats.bytes.in=tmp_if_stats.errors.in;
@@ -555,10 +568,10 @@ void get_disk_stats_proc (char verbose) {
 				free(buffer);
 				deinit(1, "wrong format of procfile. %i: %s\n",n,buffer);
 			}
+		tmp_if_stats.bytes.in*=512;
+		tmp_if_stats.bytes.out*=512;
       /* init new interfaces and add fetched data to old or new one */
-      hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose
-					,(n==8)
-            );
+      hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose,(n==9));
       current_if_num++;
     } /* fgets done (while) */
    /* add to total stats and output current stats if verbose */

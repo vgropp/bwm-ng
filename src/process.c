@@ -101,10 +101,9 @@ t_iface_speed_stats convert2calced_values(t_iface_speed_stats new, t_iface_speed
 /* calc actual new-old values */
 t_iface_speed_stats convert2calced_disk_values(t_iface_speed_stats new, t_iface_speed_stats old) {
    t_iface_speed_stats calced_stats;
-	int mult=1;
-	if (input_method==DISKLINUX_IN) mult=512;
-	calced_stats.bytes.out=calc_new_values(new.bytes.out,old.bytes.out)*mult;
-	calced_stats.bytes.in=calc_new_values(new.bytes.in,old.bytes.in)*mult;
+	calced_stats.bytes.out=calc_new_values(new.bytes.out,old.bytes.out);
+	calced_stats.bytes.in=calc_new_values(new.bytes.in,old.bytes.in);
+	/* needed for linux stats, read and write count */
 	calced_stats.packets.out=calc_new_values(new.packets.out,old.packets.out)*(calc_new_values(new.errors.out,old.errors.out)+1);
 	calced_stats.packets.in=calc_new_values(new.packets.in,old.packets.in)*(calc_new_values(new.errors.in,old.errors.in)+1);
 	calced_stats.errors.in=0;
@@ -181,9 +180,9 @@ void save_avg(struct t_avg *avg,struct iface_speed_stats calced_stats,float mult
 }
 
 /* add current in and out bytes to totals struct */
-inline void save_sum(struct inout_long *stats,struct inout_long new_stats_values,struct inout_long old_stats_values) {
-    stats->in+=calc_new_values(new_stats_values.in,old_stats_values.in);
-    stats->out+=calc_new_values(new_stats_values.out,old_stats_values.out);
+inline void save_sum(struct inout_long *stats,struct inout_long new_stats_values) {
+    stats->in+=new_stats_values.in;
+    stats->out+=new_stats_values.out;
 }
 
 /* lookup old max values and save new if higher */
@@ -251,9 +250,9 @@ int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_spe
     save_max(&if_stats[local_if_count].max.errors,calced_stats.errors,multiplier);
     save_max(&if_stats[local_if_count].max.packets,calced_stats.packets,multiplier);
     /* save sum now aswell */
-    save_sum(&if_stats[local_if_count].sum.bytes,tmp_if_stats.bytes,if_stats[local_if_count].data.bytes);
-    save_sum(&if_stats[local_if_count].sum.packets,tmp_if_stats.packets,if_stats[local_if_count].data.packets);
-    save_sum(&if_stats[local_if_count].sum.errors,tmp_if_stats.errors,if_stats[local_if_count].data.errors);
+    save_sum(&if_stats[local_if_count].sum.bytes,calced_stats.bytes);
+    save_sum(&if_stats[local_if_count].sum.packets,calced_stats.packets);
+    save_sum(&if_stats[local_if_count].sum.errors,calced_stats.errors);
     /* fill avg struct if there is old data */
     save_avg(&if_stats[local_if_count].avg,calced_stats,multiplier); 
 #endif    
@@ -301,9 +300,9 @@ void finish_iface_stats (char verbose, t_iface_speed_stats stats, int hidden_if,
     save_max(&if_stats_total.max.bytes,calced_stats.bytes,multiplier);
     save_max(&if_stats_total.max.errors,calced_stats.errors,multiplier);
     save_max(&if_stats_total.max.packets,calced_stats.packets,multiplier);
-    save_sum(&if_stats_total.sum.bytes,stats.bytes,if_stats_total.data.bytes);
-    save_sum(&if_stats_total.sum.packets,stats.packets,if_stats_total.data.packets);
-    save_sum(&if_stats_total.sum.errors,stats.errors,if_stats_total.data.errors);
+    save_sum(&if_stats_total.sum.bytes,calced_stats.bytes);
+    save_sum(&if_stats_total.sum.packets,calced_stats.packets);
+    save_sum(&if_stats_total.sum.errors,calced_stats.errors);
     save_avg(&if_stats_total.avg,calced_stats,multiplier);
 #endif
     if (verbose) {

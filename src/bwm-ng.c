@@ -289,7 +289,10 @@ int main (int argc, char *argv[]) {
 #endif			
         /* or just wait delay ms */
 #ifdef HAVE_USLEEP
-			usleep(delay*1000);
+			if (usleep(delay*1000)==EINVAL) {
+				usleep(999999);
+				delay=999;
+			}
 #else
 		Sleep(delay);
 #endif

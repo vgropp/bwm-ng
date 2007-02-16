@@ -309,11 +309,11 @@ void finish_iface_stats (char verbose, t_iface_speed_stats stats, int hidden_if,
         /* output total ifaces stats */
 #ifdef HAVE_CURSES		
         if (output_method==CURSES_OUT)
-            mvwprintw(stdscr,5+iface_number-hidden_if,2,"---------------------------------------------------------------------------");
+            mvwprintw(stdscr,5+iface_number-hidden_if,2,"-------------------------------------------------------------------------------");
         else 
 #endif			
 			if (output_method==PLAIN_OUT || output_method==PLAIN_OUT_ONCE)
-				printf("%s---------------------------------------------------------------------------\n",output_method==PLAIN_OUT ? " " : "");
+				printf("%s-------------------------------------------------------------------------------\n",output_method==PLAIN_OUT ? " " : "");
         print_values(6+iface_number-hidden_if,2,"total",calced_stats,multiplier,if_stats_total);
     }
     /* save the data in total-struct */

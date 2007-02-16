@@ -68,7 +68,8 @@ inline void cmdln_printhelp() {
     print_help_line("-f <file>","-f, --procfile <file>","filename to read raw data from. (" PROC_NET_DEV ")");
 #endif
 #ifdef PROC_DISKSTATS
-	 print_help_line("","    --diskstatsfile <file>","filename to read diskstats from. (" PROC_DISKSTATS ")");
+	 print_help_line("","    --diskstatsfile <file>","filename to read diskstats (Linux 2.6+) from. (" PROC_DISKSTATS ")");
+	 print_help_line("","    --partitionsfile <file>","filename to read diskstats (Linux 2.4) from. (" PROC_PARTITIONS ")");
 #endif	 
 #if ALLOW_NETSTATPATH
 #ifdef NETSTAT
@@ -76,7 +77,8 @@ inline void cmdln_printhelp() {
 #endif
 #endif
     printf("\nOutput:\n");
-    print_help_line("-o <method>","-o, --output <method>","output method, one of: " OUTPUT_METHODS);
+    print_help_line("-o <method>","-o, --output <method>","output method, one of: ");
+	 print_help_line("","",OUTPUT_METHODS);
     print_help_line("-u","-u, --unit <value>","unit to show. one of bytes, bits, packets, errors");
 #if EXTENDED_STATS    
     print_help_line("-T","-T, --type <value>","type of stats. one of rate, max, sum, avg");

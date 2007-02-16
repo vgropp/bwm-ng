@@ -173,6 +173,8 @@ char *token, *value;
 #ifdef PROC_DISKSTATS
     } else if( strcasecmp( token, "DISKSTATSFILE" ) == 0 ) {
         if (value && (strlen(value)<PATH_MAX)) strcpy(PROC_DISKSTATS_FILE,value);		  
+    } else if( strcasecmp( token, "PARTITIONSFILE" ) == 0 ) {
+        if (value && (strlen(value)<PATH_MAX)) strcpy(PROC_PARTITIONS_FILE,value);		  
 #endif
 #if ALLOW_NETSTATPATH
 #ifdef NETSTAT
@@ -250,6 +252,7 @@ void get_cmdln_options(int argc, char *argv[]) {
 #endif
 #ifdef PROC_DISKSTATS
 			{"diskstatsfile",1,0,1000},
+			{"partitionsfile",1,0,1001},
 #endif		  
 #if NETSTAT && ALLOW_NETSTATPATH
         {"netstat",1,0,'n'},
@@ -343,6 +346,9 @@ void get_cmdln_options(int argc, char *argv[]) {
 			case 1000:
 				if (strlen(optarg)<PATH_MAX) 
 					strcpy(PROC_DISKSTATS_FILE,optarg);
+         case 1001:
+            if (strlen(optarg)<PATH_MAX)
+               strcpy(PROC_PARTITIONS_FILE,optarg);
 #endif							 
 			case 'D':
 				if (optarg) daemonize=atoi(optarg);

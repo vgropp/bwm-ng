@@ -108,6 +108,11 @@
 #else
 #define PROC_DISKSTATS "/proc/diskstats"
 #endif
+#ifdef PROC_PARTITIONS_PATH
+#define PROC_PARTITIONS PROC_PARTITIONS_PATH
+#else
+#define PROC_PARTITIONS "/proc/partitions"
+#endif
 #endif
 
 /* prepare input methods */

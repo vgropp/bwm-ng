@@ -128,11 +128,11 @@ int print_header(int option) {
 		    mvwprintw(stdscr,1,2,"bwm-ng v" VERSION" (probing every %2.3fs), press 'h' for help",(float)delay/1000);
             mvwprintw(stdscr,2,2,"input: %s type: %s",input2str(),output_type2str());
             wprintw(stdscr,show_all_if2str());
-	        mvwprintw(stdscr,3,2,"%c       iface                  Rx                   Tx                Total",(char)IDLE_CHARS[option]);
+	        mvwprintw(stdscr,3,2,"%c       iface                      Rx                   Tx                Total",(char)IDLE_CHARS[option]);
 	        /* go to next char for next run */
 	        option++;
 			if (option>3) option=0;
-	        mvwprintw(stdscr,4,2,"===========================================================================");
+	        mvwprintw(stdscr,4,2,"===============================================================================");
 			break;
 		case CURSES2_OUT:
 			erase();
@@ -223,9 +223,9 @@ int print_header(int option) {
 				printf("\033[3;2H");
 				printf("%c",(char)IDLE_CHARS[option]); 
 			} else printf(" ");
-			printf("       iface                  Rx                   Tx                Total\n");
+			printf("       iface                       Rx                   Tx               Total\n");
 			if (output_method==PLAIN_OUT) printf("\033[4;2H");
-	        printf("===========================================================================\n");
+	        printf("===============================================================================\n");
 			/* go to next char for next run */
 			option++;
 			if (option>3) option=0;
@@ -386,7 +386,7 @@ void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float mult
     switch (output_method) {
 #ifdef HAVE_CURSES		
         case CURSES_OUT:
-            mvwprintw(stdscr,y,x,"%12s:",if_name); /* output the name */
+            mvwprintw(stdscr,y,x,"%16s:",if_name); /* output the name */
 #if HAVE_WATTRON            
             if (stats.errors.in && output_unit!=ERRORS_OUT) wattron(stdscr, A_REVERSE);
 #endif            
@@ -471,7 +471,7 @@ void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float mult
 		case PLAIN_OUT_ONCE:
         case PLAIN_OUT:
 			if (output_method==PLAIN_OUT) printf("\033[%d;2H",y);
-            printf("%12s:",if_name); /* output the name */
+            printf("%16s:",if_name); /* output the name */
             printf("%s %s %s\n",
                 values2str(0,stats,full_stats,multiplier,buffer,49),
                 values2str(1,stats,full_stats,multiplier,buffer,49),
@@ -480,7 +480,7 @@ void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float mult
 #ifdef HTML			
 		case HTML_OUT:
             tmp_out_file=out_file==NULL ? stdout : out_file;
-			fprintf(tmp_out_file,"<tr><td class=\"bwm-ng-name\">%12s:</td><td class=\"bwm-ng-in\"><span class=\"bwm-ng-%s\">",if_name,
+			fprintf(tmp_out_file,"<tr><td class=\"bwm-ng-name\">%16s:</td><td class=\"bwm-ng-in\"><span class=\"bwm-ng-%s\">",if_name,
                     (stats.errors.in && output_unit!=ERRORS_OUT) ? "error" : "dummy");
             fprintf(tmp_out_file,"%s</span> </td><td class=\"bwm-ng-out\"><span class=\"bwm-ng-%s\">",
                     values2str(0,stats,full_stats,multiplier,buffer,49),

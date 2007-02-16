@@ -174,6 +174,17 @@ inline void init() {
 	skfd=-1;	
 #endif	
 	if_stats=NULL;
+#ifdef PROC_NET_DEV
+   strncpy(PROC_FILE,PROC_NET_DEV,PATH_MAX);
+#endif
+
+#ifdef PROC_DISKSTATS
+   strncpy(PROC_DISKSTATS_FILE,PROC_DISKSTATS,PATH_MAX);
+#endif
+#ifdef PROC_PARTITIONS
+   strncpy(PROC_PARTITIONS_FILE,PROC_PARTITIONS,PATH_MAX);
+#endif
+
 }
 
 /* do the main thing */
@@ -182,14 +193,6 @@ int main (int argc, char *argv[]) {
 	char ch;
 
 	init();
-
-#ifdef PROC_NET_DEV 
-	strncpy(PROC_FILE,PROC_NET_DEV,PATH_MAX);
-#endif
-
-#ifdef PROC_DISKSTATS
-	strncpy(PROC_DISKSTATS_FILE,PROC_DISKSTATS,PATH_MAX);
-#endif    
 
     /* handle all cmd line and configfile options */
 	get_cmdln_options(argc,argv);

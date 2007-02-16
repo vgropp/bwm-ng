@@ -532,9 +532,10 @@ void get_iface_stats_win32 (char verbose) {
 /* do the actual work, get and print stats if verbose */
 void get_disk_stats_proc (char verbose) {
    FILE *f=NULL;
-   char *buffer=NULL,*name=NULL;
+   char *buffer=NULL,*name=NULL,*short_name=NULL,*ptr;
 	ullong tmp_long;
 	int n,major;
+	static char diskstats_works = 1;
 
    int hidden_if=0,current_if_num=0;
    t_iface_speed_stats stats; /* local struct, used to calc total values */
@@ -542,19 +543,33 @@ void get_disk_stats_proc (char verbose) {
 
    memset(&stats,0,(size_t)sizeof(t_iface_speed_stats)); /* init it */
    /* dont open proc_net_dev if netstat_i is requested, else try to open and if it fails fallback */
-   if (!(f=fopen(PROC_DISKSTATS_FILE,"r"))) {
-      deinit(1, "open of procfile failed: %s\n",strerror(errno));
-   }
-   buffer=(char *)malloc(MAX_LINE_BUFFER);
+	if (diskstats_works && !(f=fopen(PROC_DISKSTATS_FILE,"r"))) {
+		diskstats_works = 0;
+	}
+	buffer=(char *)malloc(MAX_LINE_BUFFER);
    name=(char *)malloc(MAX_LINE_BUFFER);
-	if (!name || !buffer) {
-		if (name) free(name);
-		if (buffer) free(buffer);
-		deinit(1,"mem alloc failed: %s\n",strerror(errno));
+	short_name=(char *)malloc(MAX_LINE_BUFFER);
+   if (!name || !buffer || !short_name) {
+      if (name) free(name);
+      if (buffer) free(buffer);
+		if (short_name) free(short_name);
+		if (f) fclose(f);
+      deinit(1,"mem alloc failed: %s\n",strerror(errno));
+   }
+
+	if (!diskstats_works) {
+		if (!(f=fopen(PROC_PARTITIONS_FILE,"r"))) {
+			diskstats_works = 1;
+		} else {
+			fgets(buffer,MAX_LINE_BUFFER,f); /* skip first lines */
+			fgets(buffer,MAX_LINE_BUFFER,f);
+		}
 	}
 
    while ( (fgets(buffer,MAX_LINE_BUFFER,f) != NULL) ) {
-      n = sscanf(buffer,"%i %*i %s %llu%llu%llu%llu%llu%llu%llu%*i",&major,name,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.bytes.in,&tmp_long,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out,&tmp_if_stats.bytes.out);
+      n = sscanf(buffer,
+				(diskstats_works ? "%i %*i %s %llu%llu%llu%llu%llu%llu%llu%*i" : "%i %*i %*i %s %llu%llu%llu%llu%llu%llu%llu%*i"),
+				&major,name,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.bytes.in,&tmp_long,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out,&tmp_if_stats.bytes.out);
 		/* skip loop devices, we dont see stats anyway */
 		if (major == 7) continue;
 		if (n == 6) {
@@ -566,11 +581,28 @@ void get_disk_stats_proc (char verbose) {
 		} else 
 			if (n != 9) {
 				free(name);
+				free(short_name);
 				free(buffer);
 				deinit(1, "wrong format of procfile. %i: %s\n",n,buffer);
 			}
 		tmp_if_stats.bytes.in*=512;
 		tmp_if_stats.bytes.out*=512;
+		/* convert devfs name to a short abr 
+		 * some ugly code */
+		if ((ptr=strchr(name,'/'))) {
+			strncpy(short_name,name,(int)(ptr-name));
+			short_name[(int)(ptr-name)]=0;
+			while ((ptr=strchr(ptr,'/'))) {
+				ptr++;
+				strncat(short_name,&ptr[0],1);
+				while (tolower(ptr[0])>='a' && tolower(ptr[0])<='z') ptr++;
+				while (ptr[0]>='0' && ptr[0]<='9') {
+					strncat(short_name,&ptr[0],1);
+					ptr++;
+				}
+			}
+			strcpy(name,short_name);
+		}
       /* init new interfaces and add fetched data to old or new one */
       hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose,(n==9));
       current_if_num++;
@@ -580,6 +612,7 @@ void get_disk_stats_proc (char verbose) {
     /* clean buffers */
    free(buffer);
    free(name);
+	free(short_name);
    /* close input stream */
    fclose(f);
     return;

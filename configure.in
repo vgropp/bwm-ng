@@ -239,7 +239,7 @@ if [ test $withval = "yes" ]; then
 else
     if [ test $withval != "no" ]; then
         AC_CHECK_FILES([$withval],[
-			AC_DEFINE_UNQUOTED([PROC_NET_DEV_PATH],[$withval],[set path to /proc/net/dev raw-file])
+			AC_DEFINE_UNQUOTED([PROC_NET_DEV_PATH],["$withval"],[set path to /proc/net/dev raw-file])
 			AC_DEFINE_UNQUOTED([HAVE__PROC_NET_DEV],[1],[enable /proc/net/dev support])
 			INPUT_FOUND=1
         ])
@@ -251,23 +251,35 @@ AC_CHECK_FILES([/proc/net/dev],[INPUT_FOUND=1])
 
 DISK_INPUT_FOUND=0
 
-AC_ARG_WITH([diskstats],AS_HELP_STRING([--with-diskstats],[enable /proc/diskstats input (diskio) (ARG=PATH)]),[
-AC_MSG_CHECKING([for /proc/diskstats input])
+AC_ARG_WITH([diskstats],AS_HELP_STRING([--with-diskstats],[enable /proc/diskstats|/proc/partitions input (diskio) (ARG=PATH)]),[
+AC_MSG_CHECKING([for /proc/diskstats|/proc/partitions input])
 AC_MSG_RESULT($withval)
 if [ test $withval = "yes" ]; then
-    AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats support])
+    AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats|/proc/partitions support])
     INPUT_FOUND=1
 else
     if [ test $withval != "no" ]; then
         AC_CHECK_FILES([$withval],[
-         AC_DEFINE_UNQUOTED([PROC_DISKSTATS_PATH],[$withval],[set path to /proc/disktstats raw-file])
-         AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats support])
+			count=`cat "$withval" | tail -n1 | wc -w` 
+			if [ test "$count" = "7" ] || [ test "$count" = "14" ]; then
+	         AC_DEFINE_UNQUOTED([PROC_DISKSTATS_PATH],["$withval"],[set path to /proc/disktstats raw-file])
+			else
+				AC_DEFINE_UNQUOTED([PROC_PARTITIONS_PATH],["$withval"],[set path to /proc/partitions raw-file])
+			fi
+	      AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats|/proc/partitions support])
          DISK_INPUT_FOUND=1
         ])
     fi
 fi
 ],[
-AC_CHECK_FILES([/proc/diskstats],[DISK_INPUT_FOUND=1])
+AC_CHECK_FILES([/proc/diskstats],[DISK_INPUT_FOUND=1],[
+	AC_CHECK_FILES([/proc/partitions],[
+		if [ test `cat /proc/partitions | tail -n1 | wc -w` -gt 4 ]; then
+			AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats|/proc/partitions support])
+			DISK_INPUT_FOUND=1
+		fi
+	])
+])
 ])
 
 AC_ARG_WITH([libstatgrab],AS_HELP_STRING([--with-libstatgrab],[Use libstatgrab to gather statistics]),[

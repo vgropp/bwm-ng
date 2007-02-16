@@ -43,8 +43,7 @@ void deinit(int code, ...) {
 #if HAVE_CURS_SET
         curs_set(1);
 #endif
-		endwin();
-        delscreen(myscr);
+		  endwin();
 	}
 #endif	
 #ifdef IOCTL
@@ -85,6 +84,12 @@ void deinit(int code, ...) {
 #else
     va_start(ap);
     vprintf(ap);
+#endif
+#ifdef HAVE_CURSES
+   if ((output_method==CURSES_OUT || output_method==CURSES2_OUT) && myscr!=NULL) {
+		/* some ncurses version will segfault on this call, but its needed! */
+	 	delscreen(myscr);
+	}
 #endif
 	/* we are done, say goodbye */
     exit(code);

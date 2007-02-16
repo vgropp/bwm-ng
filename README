@@ -60,6 +60,16 @@ make
 to install use as root: 
 make install
 
+WIN32
+=====
+
+To compile the Windows version in Linux (debian), sadly gnu make seems to disagree with mingw-gcc:
+export CC=i586-mingw32msvc-gcc
+export LDFLAGS="-L/usr/i586-mingw32msvc/lib -liphlpapi"
+./configure --with-win32 --without-procnetdev --without-diskstats --without-curses --without-netstatlinux
+make
+cd src
+i586-mingw32msvc-gcc  -ansi -pedantic -Wno-long-long  -L/usr/i586-mingw32msvc/lib/ -o bwm-ng.exe  bwm-ng.o retrieve.o process.o output.o options.o help.o curses_tools.o -liphlpapi
 
 Specs
 =====

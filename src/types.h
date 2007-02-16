@@ -23,6 +23,7 @@
 
 #ifndef __TYPES_H
 #define __TYPES_H
+#include "../config.h"
 
 #ifdef HAVE_UNSIGNED_LONG_LONG
 #define ullong unsigned long long
@@ -81,7 +82,7 @@ struct iface_stats {
     struct iface_speed_stats sum;
     struct t_avg avg;
 #endif    
-#if HAVE_GETTIMEOFDAY
+#ifdef HAVE_GETTIMEOFDAY
     struct timeval time;
 #endif
 };

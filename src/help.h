@@ -29,7 +29,7 @@
 #include "options.h"
 
 /* print cmdline help */
-inline void cmdln_printhelp() FUNCATTR_NORETURN;
+void cmdln_printhelp(void);
 
 #ifdef HAVE_CURSES
 void print_online_help();

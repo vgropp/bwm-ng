@@ -34,6 +34,7 @@ inline void print_help_line(char *short_c,char * long_c,char *descr) {
 }
 
 /* prints a helpscreen and exists */
+inline void cmdln_printhelp(void) FUNCATTR_NORETURN;
 inline void cmdln_printhelp() {
     print_version;
     printf("USAGE: bwm-ng [OPTION] ...");

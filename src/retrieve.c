@@ -506,7 +506,7 @@ void get_iface_stats_win32 (char verbose) {
 	current_if_num=0;
 
 	for (i=0; i<if_table->dwNumEntries; i++) {
-		strncpy(name,if_table->table[i].bDescr,MAX_INTERFACE_NAME_LEN);	
+		strncpy(name,(char*)(if_table->table[i].bDescr),MAX_INTERFACE_NAME_LEN);	
 		name[MAX_INTERFACE_NAME_LEN-1]='\0';
 		tmp_if_stats.bytes.in=if_table->table[i].dwInOctets;
 		tmp_if_stats.bytes.out=if_table->table[i].dwOutOctets;

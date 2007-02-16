@@ -108,6 +108,7 @@ inline int str2in_method(char *optarg) {
 #endif
 #ifdef LIBSTATGRAB
         if (!strcasecmp(optarg,"libstat") || !strcasecmp(optarg,"statgrab") || !strcasecmp(optarg,"libstatgrab")) return LIBSTAT_IN;
+		  if (!strcasecmp(optarg,"libstatdisk")) return LIBSTATDISK_IN;
 #endif
 #ifdef GETIFADDRS
         if (!strcasecmp(optarg,"getifaddrs")) return GETIFADDRS_IN;
@@ -118,6 +119,9 @@ inline int str2in_method(char *optarg) {
 #ifdef PROC_DISKSTATS
 		  if (!strcasecmp(optarg,"disk")) return DISKLINUX_IN;
 #endif		  
+#ifdef WIN32
+		  if (!strcasecmp(optarg,"win32")) return WIN32_IN;
+#endif			  
     }
     return -1;
 }

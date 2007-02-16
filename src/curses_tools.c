@@ -116,8 +116,8 @@ void handle_gui_input(char c) {
 int init_curses() {
     struct winsize size;
 	short fg,bg;
-    myscr=newterm(NULL,stdout,stdin);
-    if (myscr!=NULL && !(output_method==CURSES2_OUT && !has_colors() && !can_change_color())) {
+	mywin=initscr();
+    if (mywin!=NULL && !(output_method==CURSES2_OUT && !has_colors() && !can_change_color())) {
         cbreak();
         noecho();
         nonl();
@@ -148,7 +148,6 @@ void sigwinch(int sig) {
      struct winsize size;
      if (ioctl(fileno(stdout), TIOCGWINSZ, &size) == 0) { 
        if (endwin()==ERR) deinit(1, "failed to deinit curses: %s\n",strerror(errno));
-       if (myscr) delscreen(myscr);
        init_curses();
      }
 }

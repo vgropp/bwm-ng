@@ -52,7 +52,6 @@ EXTERN char show_all_if;
 #ifdef HAVE_CURSES
 EXTERN int output_method;
 EXTERN WINDOW *mywin;
-EXTERN SCREEN *myscr;
 EXTERN unsigned short cols;
 EXTERN unsigned short rows;
 EXTERN unsigned int max_rt;

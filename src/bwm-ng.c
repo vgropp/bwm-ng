@@ -38,7 +38,7 @@ void deinit(int code, ...) {
     struct double_list *list_p;
 #endif    
 #ifdef HAVE_CURSES	
-	if ((output_method==CURSES_OUT || output_method==CURSES2_OUT) && myscr!=NULL) {
+	if (mywin!=NULL && (output_method==CURSES_OUT || output_method==CURSES2_OUT)) {
 		/* first close curses, so we dont leave mess behind */
 #if HAVE_CURS_SET
         curs_set(1);
@@ -85,12 +85,6 @@ void deinit(int code, ...) {
     va_start(ap);
     vprintf(ap);
 #endif
-#ifdef HAVE_CURSES
-   if ((output_method==CURSES_OUT || output_method==CURSES2_OUT) && myscr!=NULL) {
-		/* some ncurses version will segfault on this call, but its needed! */
-	 	delscreen(myscr);
-	}
-#endif
 	/* we are done, say goodbye */
     exit(code);
 }
@@ -117,7 +111,6 @@ inline void init() {
 #ifdef HAVE_CURSES	
 	output_method=CURSES_OUT;
 	mywin=NULL;
-	myscr=NULL;
 	max_rt=32;
 	scale=0;
 	show_only_if=0;
@@ -223,7 +216,9 @@ int main (int argc, char *argv[]) {
 	if (output_method==CSV_OUT && output_count>-1) {
 		get_iface_stats(0);
 #ifdef HAVE_USLEEP
-		usleep(delay*1000);
+		if (EINVAL==usleep(delay*1000)) 
+			/* there seems to be systems where 1million usecs is max */
+			usleep(999999);
 #else
 		Sleep(delay);
 #endif

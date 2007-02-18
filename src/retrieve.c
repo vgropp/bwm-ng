@@ -440,26 +440,44 @@ void get_iface_stats_kstat (char verbose) {
 	 
     /* loop for interfaces */
     for (ksp = kc->kc_chain;ksp != NULL;ksp = ksp->ks_next) {
-        if (strcmp(ksp->ks_class, "net") != 0)
+        if ((strcmp(ksp->ks_class, "net") != 0 && input_method==KSTAT_IN) || (strcmp(ksp->ks_class, "disk") != 0 && input_method==KSTATDISK_IN))
             continue; /* skip all other stats */
         strncpy(name,ksp->ks_name,KSTAT_STRLEN);
         name[KSTAT_STRLEN-1]='\0';
         kstat_read(kc, ksp, NULL);
-        i_bytes=(kstat_named_t *)kstat_data_lookup(ksp, "rbytes");
-        o_bytes=(kstat_named_t *)kstat_data_lookup(ksp, "obytes");
-        i_packets=(kstat_named_t *)kstat_data_lookup(ksp, "ipackets");
-        o_packets=(kstat_named_t *)kstat_data_lookup(ksp, "opackets");
-        i_errors=(kstat_named_t *)kstat_data_lookup(ksp, "ierrors");
-        o_errors=(kstat_named_t *)kstat_data_lookup(ksp, "oerrors");
-        if (!i_bytes || !o_bytes || !i_packets || !o_packets || !i_errors || !o_errors) 
-            continue;
+		  if (KSTAT_IN==input_method) {
+	        i_bytes=(kstat_named_t *)kstat_data_lookup(ksp, "rbytes");
+		     o_bytes=(kstat_named_t *)kstat_data_lookup(ksp, "obytes");
+			  i_packets=(kstat_named_t *)kstat_data_lookup(ksp, "ipackets");
+	        o_packets=(kstat_named_t *)kstat_data_lookup(ksp, "opackets");
+		     i_errors=(kstat_named_t *)kstat_data_lookup(ksp, "ierrors");
+			  o_errors=(kstat_named_t *)kstat_data_lookup(ksp, "oerrors");
+	        if (!i_bytes || !o_bytes || !i_packets || !o_packets || !i_errors || !o_errors) 
+		         continue;
+		  } else if (KSTATDISK_IN==input_method) {
+			  i_bytes=(kstat_named_t *)kstat_data_lookup(ksp, "nread");
+			  o_bytes=(kstat_named_t *)kstat_data_lookup(ksp, "nwritten");
+			  i_packets=(kstat_named_t *)kstat_data_lookup(ksp, "reads");
+			  o_packets=(kstat_named_t *)kstat_data_lookup(ksp, "writes");
+			  if (!i_bytes || !o_bytes || !i_packets || !o_packets)
+				  continue;
+		  } else {
+			  free(name);
+			  deinit(1,"im confused about kstat input methods!\n");
+		  }
         /* use ui32 values, the 64 bit values return strange (very big) differences */
         tmp_if_stats.bytes.in=i_bytes->value.ui32;
         tmp_if_stats.bytes.out=o_bytes->value.ui32;
         tmp_if_stats.packets.in=i_packets->value.ui32;
         tmp_if_stats.packets.out=o_packets->value.ui32;
-        tmp_if_stats.errors.in=i_errors->value.ui32;
-        tmp_if_stats.errors.out=o_errors->value.ui32;
+        if (i_errors) /* disk input wont set this */ 
+			  tmp_if_stats.errors.in=i_errors->value.ui32 
+		  else
+			  tmp_if_stats.errors.in=0;
+		  if (o_errors) /* disk input wont set this */
+	        tmp_if_stats.errors.out=o_errors->value.ui32;
+		  else
+			  tmp_if_stats.errors.out=0;
         /* init new interfaces and add fetched data to old or new one */
         hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose, 1);
         current_if_num++;
@@ -682,7 +700,8 @@ inline void get_iface_stats(char _n) {
             break;
 #endif
 #if HAVE_LIBKSTAT
-        case KSTAT_IN:
+		  case KSTATDISK_IN:
+		  case KSTAT_IN:
             get_iface_stats_kstat(_n);
             break;
 #endif

@@ -91,7 +91,7 @@ void handle_gui_input(char c) {
         case 'u':
         case 'U':
 			if (output_method==CURSES_OUT) {
-            if (output_unit<(!net_input_method(input_method) ? (input_method==DISKLINUX_IN ? 3 : 2) : 4)) 
+            if (output_unit<(!net_input_method(input_method) ? (input_method==LIBSTATDISK_IN ? 2 : 3) : 4)) 
                output_unit++;
             else 
 					output_unit=1; 

@@ -122,6 +122,10 @@ inline int str2in_method(char *optarg) {
 #ifdef WIN32
 		  if (!strcasecmp(optarg,"win32")) return WIN32_IN;
 #endif			  
+#ifdef HAVE_LIBKSTAT
+			if (!strcasecmp(optarg,"kstat")) return KSTAT_IN;
+			if (!strcasecmp(optarg,"kstatdisk")) return KSTATDISK_IN;
+#endif 
     }
     return -1;
 }

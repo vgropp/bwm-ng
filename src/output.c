@@ -84,6 +84,9 @@ inline char *input2str() {
         case KSTAT_IN:
             return "kstat";
             break;
+		  case KSTATDISK_IN:
+				return "kstatdisk";
+				break;
 #endif
 		  case DISKLINUX_IN:
 				return "disk IO";

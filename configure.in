@@ -216,10 +216,10 @@ if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
         CPPFLAGS="$CPPFLAGS -I$withval"
     fi
-    AC_CHECK_LIB([kstat],[kstat_open],[INPUT_FOUND=1],[ CPPFLAGS=$OLD_CPPFLAGS ])
+    AC_CHECK_LIB([kstat],[kstat_open],,[ CPPFLAGS=$OLD_CPPFLAGS ])
 fi
 ],[
-AC_CHECK_LIB([kstat],[kstat_open],[INPUT_FOUND=1])
+AC_CHECK_LIB([kstat],[kstat_open])
 ])
 
 
@@ -298,9 +298,9 @@ if [ test $INPUT_FOUND -ne 1 ] || [ test $DISK_INPUT_FOUND -ne 1 ]; then
 fi
 ])
 
-if [ test $INPUT_FOUND -ne 1 ] && [ test $DISK_INPUT_FOUND -ne 1 ]; then
-	AC_MSG_ERROR(["NO INPUT FOUND"]);
-fi
+#if [ test $INPUT_FOUND -ne 1 ] && [ test $DISK_INPUT_FOUND -ne 1 ]; then
+#	AC_MSG_ERROR(["NO INPUT FOUND"]);
+#fi
 
 #################################################
 # inputs check done

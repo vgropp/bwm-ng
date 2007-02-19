@@ -167,9 +167,9 @@
 #define INPUT_METHODS_KSTATDISK " kstatdisk"
 #else 
 #define KSTAT_IN 0
-#define KSTATDISK_IN
+#define KSTATDISK_IN 0
 #define INPUT_METHODS_KSTAT
-#define INPUT_METHODS_KSTATDISL
+#define INPUT_METHODS_KSTATDISK
 #endif
 
 #ifdef WIN32

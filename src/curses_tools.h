@@ -28,7 +28,11 @@
 #include "types.h"
 #include "help.h"
 #include "options.h"
+
+#ifdef HAVE_CURSES
+#ifdef HAVE_STROPTS_H
 #include <stropts.h>
+#endif
 #include <unistd.h>
 #ifdef HAVE_LINUX_TTY_H
 #include <linux/tty.h>
@@ -38,7 +42,6 @@
 #endif
 #endif
 
-#ifdef HAVE_CURSES
 /* handle key input by user in gui (curses) mode */
 void handle_gui_input(char c);
 int init_curses();

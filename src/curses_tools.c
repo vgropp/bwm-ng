@@ -24,8 +24,8 @@
 #include "global_vars.h"
 #include "curses_tools.h"
 
-
 #ifdef HAVE_CURSES
+
 /* handle key input by user in gui (curses) mode */
 void handle_gui_input(char c) {
     switch (c) {

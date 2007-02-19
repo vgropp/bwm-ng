@@ -340,6 +340,8 @@ AC_CHECK_FUNCS([ioctl])
 AC_CHECK_HEADERS([sys/socket.h linux/if.h],,,[$linux_if_h_includes])
 AC_CHECK_HEADERS([sys/tty.h])
 AC_CHECK_HEADERS([linux/tty.h])
+AC_CHECK_HEADERS([stropts.h])
+
 
 AC_ARG_ENABLE([html],AS_HELP_STRING([--enable-html],[enable html output (default: yes)]),[
 echo "enable html output: $enableval"

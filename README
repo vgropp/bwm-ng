@@ -42,7 +42,7 @@ SunOS 5.9 sparc Solaris 9
 OpenBSD 3.4, 3.6
 NetBSD 1.6.1, 2.0
 IRIX64 6.5
-WinXP (sorry couldnt resist ,-)) 
+WinXP,Windows Vista (sorry couldnt resist ,-)) 
 
 please email me of working or not working platforms. Disk IO might work only on a limited 
 number of platforms.
@@ -65,11 +65,10 @@ WIN32
 
 To compile the Windows version in Linux (debian), sadly gnu make seems to disagree with mingw-gcc:
 export CC=i586-mingw32msvc-gcc
-export LDFLAGS="-L/usr/i586-mingw32msvc/lib -liphlpapi"
+export LDFLAGS="$LDFLAGS -L/usr/i586-mingw32msvc/lib"
+export LIBS="$LIBS -liphlpapi"
 ./configure --with-win32 --without-procnetdev --without-diskstats --without-curses --without-netstatlinux
 make
-cd src
-i586-mingw32msvc-gcc  -ansi -pedantic -Wno-long-long  -L/usr/i586-mingw32msvc/lib/ -o bwm-ng.exe  bwm-ng.o retrieve.o process.o output.o options.o help.o curses_tools.o -liphlpapi
 
 Specs
 =====

@@ -133,37 +133,23 @@ inline void init() {
 /* gcc doesnt support #elifdef so we have to use this ugly piece */
 #ifdef PROC_NET_DEV
 	input_method=PROC_IN;
-#else
-#ifdef GETIFADDRS
+#elif defined(GETIFADDRS)
 	input_method=GETIFADDRS_IN;
-#else
-#ifdef LIBSTATGRAB
+#elif defined(LIBSTATGRAB)
 	input_method=LIBSTAT_IN;
-#else
-#ifdef SYSCTL
+#elif defined(SYSCTL)
 	input_method=SYSCTL_IN;
-#else
-#if HAVE_LIBKSTAT
+#elif defined(HAVE_LIBKSTAT)
 	input_method=KSTAT_IN;
-#else
-#ifdef NETSTAT
+#elif defined(NETSTAT)
 	input_method=NETSTAT_IN;
-#else
-#ifdef WIN32
+#elif defined(WIN32)
 	input_method=WIN32_IN;
-#else
-#ifdef HAVE_PROC_DISKSTATS
+#elif defined(HAVE_PROC_DISKSTATS)
 	input_method=DISKLINUX_IN;
 #else
 #error "NO INPUT DEFINED!"
 	input_method=0;
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
 #endif
 
 #ifdef HTML

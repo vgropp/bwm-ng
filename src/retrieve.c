@@ -436,46 +436,48 @@ void get_iface_stats_kstat (char verbose) {
     if (kc==NULL) deinit(1, "kstat failed: %s\n",strerror(my_errno));
     name=(char *)malloc(KSTAT_STRLEN);
     if (!name) {
+		kstat_close(kc);
        deinit(1,"mem alloc failed: %s\n",strerror(errno));
     }
 	 
     /* loop for interfaces */
     for (ksp = kc->kc_chain;ksp != NULL;ksp = ksp->ks_next) {
-        if ((strcmp(ksp->ks_class, "net") != 0 && input_method==KSTAT_IN) || (strcmp(ksp->ks_class, "disk") != 0 && input_method==KSTATDISK_IN && ksp->ks_type != KSTAT_TYPE_IO))
+			if ((strcmp(ksp->ks_class, "net") != 0 && input_method==KSTAT_IN) || (strcmp(ksp->ks_class, "disk") != 0 && input_method==KSTATDISK_IN && ksp->ks_type != KSTAT_TYPE_IO))
             continue; /* skip all other stats */
-        strncpy(name,ksp->ks_name,KSTAT_STRLEN);
-        name[KSTAT_STRLEN-1]='\0';
-		  if (KSTAT_IN==input_method) {
-		kstat_read(kc, ksp, NULL);
-	        i_bytes=(kstat_named_t *)kstat_data_lookup(ksp, "rbytes");
-		     o_bytes=(kstat_named_t *)kstat_data_lookup(ksp, "obytes");
-			  i_packets=(kstat_named_t *)kstat_data_lookup(ksp, "ipackets");
-	        o_packets=(kstat_named_t *)kstat_data_lookup(ksp, "opackets");
-		     i_errors=(kstat_named_t *)kstat_data_lookup(ksp, "ierrors");
-			  o_errors=(kstat_named_t *)kstat_data_lookup(ksp, "oerrors");
-	        if (!i_bytes || !o_bytes || !i_packets || !o_packets || !i_errors || !o_errors) 
-		         continue;
-	/* use ui32 values, the 64 bit values return strange (very big) differences */
-        tmp_if_stats.bytes.in=i_bytes->value.ui32;
-        tmp_if_stats.bytes.out=o_bytes->value.ui32;
-        tmp_if_stats.packets.in=i_packets->value.ui32;
-        tmp_if_stats.packets.out=o_packets->value.ui32;
-	tmp_if_stats.errors.in=i_errors->value.ui32;
-	tmp_if_stats.errors.out=o_errors->value.ui32;
-		  } else if (KSTATDISK_IN==input_method) {
-			kstat_read(kc, ksp, &kio);  	
-			tmp_if_stats.bytes.in=kio.nread;
-			tmp_if_stats.bytes.out=kio.nwritten;
-			tmp_if_stats.packets.in=kio.reads;
-			tmp_if_stats.packets.out=kio.writes;
-			tmp_if_stats.errors.in=tmp_if_stats.errors.out=0;
-		  } else {
-			  free(name);
-			  deinit(1,"im confused about kstat input methods!\n");
-		  }
-        /* init new interfaces and add fetched data to old or new one */
-        hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose, 1);
-        current_if_num++;
+			strncpy(name,ksp->ks_name,KSTAT_STRLEN);
+			name[KSTAT_STRLEN-1]='\0';
+			if (KSTAT_IN==input_method) {
+				kstat_read(kc, ksp, NULL);
+				i_bytes=(kstat_named_t *)kstat_data_lookup(ksp, "rbytes");
+				o_bytes=(kstat_named_t *)kstat_data_lookup(ksp, "obytes");
+				i_packets=(kstat_named_t *)kstat_data_lookup(ksp, "ipackets");
+				o_packets=(kstat_named_t *)kstat_data_lookup(ksp, "opackets");
+				i_errors=(kstat_named_t *)kstat_data_lookup(ksp, "ierrors");
+				o_errors=(kstat_named_t *)kstat_data_lookup(ksp, "oerrors");
+				if (!i_bytes || !o_bytes || !i_packets || !o_packets || !i_errors || !o_errors) 
+					continue;
+				/* use ui32 values, the 64 bit values return strange (very big) differences */
+				tmp_if_stats.bytes.in=i_bytes->value.ui32;
+				tmp_if_stats.bytes.out=o_bytes->value.ui32;
+				tmp_if_stats.packets.in=i_packets->value.ui32;
+				tmp_if_stats.packets.out=o_packets->value.ui32;
+				tmp_if_stats.errors.in=i_errors->value.ui32;
+				tmp_if_stats.errors.out=o_errors->value.ui32;
+			} else if (KSTATDISK_IN==input_method) {
+				kstat_read(kc, ksp, &kio);  	
+				tmp_if_stats.bytes.in=kio.nread;
+				tmp_if_stats.bytes.out=kio.nwritten;
+				tmp_if_stats.packets.in=kio.reads;
+				tmp_if_stats.packets.out=kio.writes;
+				tmp_if_stats.errors.in=tmp_if_stats.errors.out=0;
+			} else {
+				free(name);
+				kstat_close(kc);
+				deinit(1,"im confused about kstat input methods!\n");
+			}
+			/* init new interfaces and add fetched data to old or new one */
+			hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose, 1);
+			current_if_num++;
     }
     /* add to total stats and output current stats if verbose */
     finish_iface_stats (verbose, stats, hidden_if,current_if_num);

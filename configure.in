@@ -188,7 +188,10 @@ if [ test $withval != "no" ]; then
     AC_CHECK_FUNCS([sysctl],[
         AC_CHECK_HEADERS([sys/socket.h])
         AC_CHECK_HEADERS([net/if.h], [
-            AC_CHECK_MEMBERS([struct if_msghdr.ifm_data],[INPUT_FOUND=1],[ CPPFLAGS=$OLD_CPPFLAGS ],[
+            AC_CHECK_MEMBERS([struct if_msghdr.ifm_data],[
+					INPUT_FOUND=1
+					AC_DEFINE_UNQUOTED([HAVE_STRUCT_IF_MSGHDR_IFM_DATA],[1],[sysctl input fully available])
+				],[ CPPFLAGS=$OLD_CPPFLAGS ],[
                 $net_if_h_includes
                 #include <net/if.h>
             ])
@@ -200,7 +203,10 @@ fi
 AC_CHECK_FUNCS([sysctl],[
     AC_CHECK_HEADERS([sys/socket.h])
     AC_CHECK_HEADERS([net/if.h], [
-    	AC_CHECK_MEMBERS([struct if_msghdr.ifm_data],[INPUT_FOUND=1],,[
+    	AC_CHECK_MEMBERS([struct if_msghdr.ifm_data],[
+					INPUT_FOUND=1
+					AC_DEFINE_UNQUOTED([HAVE_STRUCT_IF_MSGHDR_IFM_DATA],[1],[sysctl input fully available])
+			],,[
     		$net_if_h_includes
     		#include <net/if.h>
     	])
@@ -216,10 +222,20 @@ if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
         CPPFLAGS="$CPPFLAGS -I$withval"
     fi
-    AC_CHECK_LIB([kstat],[kstat_open],,[ CPPFLAGS=$OLD_CPPFLAGS ])
+    AC_CHECK_LIB([kstat],[kstat_open],[
+      AC_DEFINE_UNQUOTED([HAVE_LIBKSTAT],[1],[Define to 1 if you have the 'kstat' library (-lkstat).])
+      LDFLAGS="$LDFLAGS -lkstat"
+		DISK_INPUT_FOUND=1						
+		INPUT_FOUND=1
+	],[ CPPFLAGS=$OLD_CPPFLAGS ])
 fi
 ],[
-AC_CHECK_LIB([kstat],[kstat_open])
+AC_CHECK_LIB([kstat],[kstat_open],[
+   AC_DEFINE_UNQUOTED([HAVE_LIBKSTAT],[1],[Define to 1 if you have the 'kstat' library (-lkstat).])
+	LDFLAGS="$LDFLAGS -lkstat"
+	INPUT_FOUND=1
+	DISK_INPUT_FOUND=1
+])
 ])
 
 
@@ -256,7 +272,7 @@ AC_MSG_CHECKING([for /proc/diskstats|/proc/partitions input])
 AC_MSG_RESULT($withval)
 if [ test $withval = "yes" ]; then
     AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats|/proc/partitions support])
-    INPUT_FOUND=1
+    DISK_INPUT_FOUND=1
 else
     if [ test $withval != "no" ]; then
         AC_CHECK_FILES([$withval],[
@@ -290,17 +306,25 @@ if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
         CPPFLAGS="$CPPFLAGS -I$withval"
     fi
-	 AC_CHECK_LIB([statgrab],[sg_get_network_io_stats,sg_get_disk_io_stats],[INPUT_FOUND=1],[ CPPFLAGS=$OLD_CPPFLAGS ])
+	 AC_CHECK_LIB([statgrab],[sg_get_network_io_stats,sg_get_disk_io_stats],[
+			INPUT_FOUND=1
+	    	AC_DEFINE_UNQUOTED([HAVE_LIBSTATGRAB],[1],[Define to 1 if you have the 'statgrab' library (-lstatgrab).])
+   	 	LDFLAGS="$LDFLAGS -lstatgrab"
+		],[ CPPFLAGS=$OLD_CPPFLAGS ])
 fi
 ],[
 if [ test $INPUT_FOUND -ne 1 ] || [ test $DISK_INPUT_FOUND -ne 1 ]; then
-	AC_CHECK_LIB([statgrab],[sg_get_network_io_stats,sg_get_disk_io_stats],[INPUT_FOUND=1])
+	AC_CHECK_LIB([statgrab],[sg_get_network_io_stats,sg_get_disk_io_stats],[
+		INPUT_FOUND=1
+		AC_DEFINE_UNQUOTED([HAVE_LIBSTATGRAB],[1],[Define to 1 if you have the 'statgrab' library (-lstatgrab).])
+		LDFLAGS="$LDFLAGS -lstatgrab"
+	])
 fi
 ])
 
-#if [ test $INPUT_FOUND -ne 1 ] && [ test $DISK_INPUT_FOUND -ne 1 ]; then
-#	AC_MSG_ERROR(["NO INPUT FOUND"]);
-#fi
+if [ test $INPUT_FOUND -ne 1 ] && [ test $DISK_INPUT_FOUND -ne 1 ]; then
+	AC_MSG_ERROR(["NO INPUT FOUND"]);
+fi
 
 #################################################
 # inputs check done

@@ -28,6 +28,15 @@
 #include "types.h"
 #include "help.h"
 #include "options.h"
+#include <stropts.h>
+#include <unistd.h>
+#ifdef HAVE_LINUX_TTY_H
+#include <linux/tty.h>
+#else
+#ifdef HAVE_SYS_TTY_H
+#include <sys/tty.h>
+#endif
+#endif
 
 #ifdef HAVE_CURSES
 /* handle key input by user in gui (curses) mode */

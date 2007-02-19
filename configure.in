@@ -224,7 +224,7 @@ if [ test $withval != "no" ]; then
     fi
     AC_CHECK_LIB([kstat],[kstat_open],[
       AC_DEFINE_UNQUOTED([HAVE_LIBKSTAT],[1],[Define to 1 if you have the 'kstat' library (-lkstat).])
-      LDFLAGS="$LDFLAGS -lkstat"
+      LIBS="$LIBS -lkstat"
 		DISK_INPUT_FOUND=1						
 		INPUT_FOUND=1
 	],[ CPPFLAGS=$OLD_CPPFLAGS ])
@@ -232,7 +232,7 @@ fi
 ],[
 AC_CHECK_LIB([kstat],[kstat_open],[
    AC_DEFINE_UNQUOTED([HAVE_LIBKSTAT],[1],[Define to 1 if you have the 'kstat' library (-lkstat).])
-	LDFLAGS="$LDFLAGS -lkstat"
+	LIBS="$LIBS -lkstat"
 	INPUT_FOUND=1
 	DISK_INPUT_FOUND=1
 ])
@@ -309,7 +309,7 @@ if [ test $withval != "no" ]; then
 	 AC_CHECK_LIB([statgrab],[sg_get_network_io_stats,sg_get_disk_io_stats],[
 			INPUT_FOUND=1
 	    	AC_DEFINE_UNQUOTED([HAVE_LIBSTATGRAB],[1],[Define to 1 if you have the 'statgrab' library (-lstatgrab).])
-   	 	LDFLAGS="$LDFLAGS -lstatgrab"
+   	 	LIBS="$LIBS -lstatgrab"
 		],[ CPPFLAGS=$OLD_CPPFLAGS ])
 fi
 ],[
@@ -317,7 +317,7 @@ if [ test $INPUT_FOUND -ne 1 ] || [ test $DISK_INPUT_FOUND -ne 1 ]; then
 	AC_CHECK_LIB([statgrab],[sg_get_network_io_stats,sg_get_disk_io_stats],[
 		INPUT_FOUND=1
 		AC_DEFINE_UNQUOTED([HAVE_LIBSTATGRAB],[1],[Define to 1 if you have the 'statgrab' library (-lstatgrab).])
-		LDFLAGS="$LDFLAGS -lstatgrab"
+		LIBS="$LIBS -lstatgrab"
 	])
 fi
 ])

@@ -622,17 +622,13 @@ void get_disk_stats_proc (char verbose) {
 						if (!strncmp("disk_io:",buffer,8)) {
 							ptr=buffer+9;
 							while (ptr[0]!=0) {
-								if (ptr[0]==' ') ptr++;
 								n = sscanf(ptr,"(%i,%i): (%*i,%llu,%llu,%llu,%llu)",&maj_s,&min_s,&tmp_if_stats.packets.in,&tmp_if_stats.bytes.in,&tmp_if_stats.packets.out,&tmp_if_stats.bytes.out);
 								if (maj_s==major && min_s==minor) {
 									fclose(f_s);
 									f_s=NULL;
 									break;
 								}
-								ptr=strchr(ptr,')');
-								if (!ptr)
-									break;
-								ptr=strchr(ptr,')');
+								ptr=strchr(ptr,' ');
 								if (!ptr)
 									break;
 								ptr++;

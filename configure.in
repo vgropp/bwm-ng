@@ -289,10 +289,8 @@ fi
 ],[
 AC_CHECK_FILES([/proc/diskstats],[DISK_INPUT_FOUND=1],[
 	AC_CHECK_FILES([/proc/partitions],[
-		if [ test `cat /proc/partitions | tail -n1 | wc -w` -gt 4 ]; then
-			AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats|/proc/partitions support])
-			DISK_INPUT_FOUND=1
-		fi
+		AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats|/proc/partitions support])
+		DISK_INPUT_FOUND=1
 	])
 ])
 ])

@@ -546,11 +546,12 @@ void get_iface_stats_win32 (char verbose) {
 #define LOOP_MAJOR 7
 /* do the actual work, get and print stats if verbose */
 void get_disk_stats_proc (char verbose) {
-   FILE *f=NULL;
+   FILE *f=NULL,*f_s=NULL;
    char *buffer=NULL,*name=NULL,*short_name=NULL,*ptr;
 	ullong tmp_long;
-	int n,major;
+	int n,major,minor,maj_s,min_s;
 	static char diskstats_works = 1;
+	static char proc_stat[PATH_MAX] = "";
 
    int hidden_if=0,current_if_num=0;
    t_iface_speed_stats stats; /* local struct, used to calc total values */
@@ -583,22 +584,73 @@ void get_disk_stats_proc (char verbose) {
 
    while ( (fgets(buffer,MAX_LINE_BUFFER,f) != NULL) ) {
       n = sscanf(buffer,
-				(diskstats_works ? "%i %*i %s %llu%llu%llu%llu%llu%llu%llu%*i" : "%i %*i %*i %s %llu%llu%llu%llu%llu%llu%llu%*i"),
-				&major,name,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.bytes.in,&tmp_long,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out,&tmp_if_stats.bytes.out);
+				(diskstats_works ? "%i %i %s %llu%llu%llu%llu%llu%llu%llu%*i" : "%i %i %*i %s %llu%llu%llu%llu%llu%llu%llu%*i"),
+				&major,&minor,name,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.bytes.in,&tmp_long,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out,&tmp_if_stats.bytes.out);
 		/* skip loop devices, we dont see stats anyway */
 		if (major == 7) continue;
-		if (n == 6) {
+		if (n == 7) {
 			tmp_if_stats.packets.out=tmp_if_stats.bytes.in;
 			tmp_if_stats.bytes.in=tmp_if_stats.errors.in;
 			tmp_if_stats.bytes.out=tmp_long;
 			tmp_if_stats.errors.in=0;
 			tmp_if_stats.errors.out=0;
 		} else 
-			if (n != 9) {
-				free(name);
-				free(short_name);
-				free(buffer);
-				deinit(1, "wrong format of procfile. %i: %s\n",n,buffer);
+			if (n != 10) {
+				if (diskstats_works == 0 && n == 3) { /* we are reading /proc/partitions */
+					/* old 2.4 partitions format, look in /proc/stat for block devince data */
+					if (proc_stat[0] == 0) { 
+						/* build /proc/stat path */
+						strcpy(proc_stat,PROC_PARTITIONS_FILE);
+						ptr=strrchr(proc_stat,'/');
+						if (ptr) {
+							ptr++;
+							strcpy(ptr,"stat");
+						} else {
+							free(name);
+							free(short_name);
+							free(buffer);
+							deinit(1, "strange proc/partitions name\n");
+						}
+					}
+					if (!(f_s=fopen(proc_stat,"r"))) {
+	               free(name);
+                  free(short_name);
+                  free(buffer);
+                  deinit(1, "couldnt open %s: %s\n",proc_stat,strerror(errno));
+               }
+					while ( (fgets(buffer,MAX_LINE_BUFFER,f_s) != NULL)) {
+						if (!strncmp("disk_io:",buffer,8)) {
+							ptr=buffer+9;
+							while (ptr[0]!=0) {
+								if (ptr[0]==' ') ptr++;
+								n = sscanf(ptr,"(%i,%i): (%*i,%llu,%llu,%llu,%llu)",&maj_s,&min_s,&tmp_if_stats.packets.in,&tmp_if_stats.bytes.in,&tmp_if_stats.packets.out,&tmp_if_stats.bytes.out);
+								if (maj_s==major && min_s==minor) {
+									fclose(f_s);
+									f_s=NULL;
+									break;
+								}
+								ptr=strchr(ptr,')');
+								if (!ptr)
+									break;
+								ptr=strchr(ptr,')');
+								if (!ptr)
+									break;
+								ptr++;
+							}
+							if (!f_s) break;
+						}
+					}
+					if (f_s) {
+						fclose(f_s);
+						/* couldnt find the entry, prolly a partition */
+						continue;
+					}
+				} else {
+					free(name);
+					free(short_name);
+					free(buffer);
+					deinit(1, "wrong format of procfile. %i: %s\n",n,buffer);
+				}
 			}
 		tmp_if_stats.bytes.in*=512;
 		tmp_if_stats.bytes.out*=512;
@@ -619,7 +671,7 @@ void get_disk_stats_proc (char verbose) {
 			strcpy(name,short_name);
 		}
       /* init new interfaces and add fetched data to old or new one */
-      hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose,(n==9));
+      hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose,(n==10 || proc_stat[0] != 0));
       current_if_num++;
     } /* fgets done (while) */
    /* add to total stats and output current stats if verbose */

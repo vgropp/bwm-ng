@@ -98,16 +98,13 @@ inline char *input2str() {
 inline char *show_all_if2str() {
     switch (show_all_if) {
         case 1:
-				if (net_input_method(input_method))
-					return " (all)";
-				else
-					return " (block devices and partitions)";
+				return " (all)";
             break;
         case 2:
 				if (net_input_method(input_method))
 	            return " (all and down)";
 				else
-					return " (block devices and partitions)";
+					return " (all)";
             break;
     }
     return "";

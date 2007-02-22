@@ -42,7 +42,7 @@ SunOS 5.9 sparc Solaris 9
 OpenBSD 3.4, 3.6
 NetBSD 1.6.1, 2.0
 IRIX64 6.5
-WinXP,Windows Vista (sorry couldnt resist ,-)) 
+Win2000, WinXP, Windows Vista
 
 please email me of working or not working platforms. Disk IO might work only on a limited 
 number of platforms.

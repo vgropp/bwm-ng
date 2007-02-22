@@ -212,6 +212,19 @@ AC_CHECK_FUNCS([sysctl],[
     		#include <net/if.h>
     	])
     ],,[$net_if_h_includes])
+	 AC_CHECK_HEADERS([sys/disk.h],[
+	AC_CHECK_TYPES([struct diskstats],[
+						DISK_INPUT_FOUND=1
+						AC_DEFINE_UNQUOTED([HAVE_STRUCT_DISKSTATS],[1],[sysctl diskinput available])
+						AC_CHECK_MEMBERS([struct diskstats.ds_rbytes],,,[#include <sys/disk.h>])
+						AC_CHECK_MEMBERS([struct diskstats.ds_name],,,[#include <sys/disk.h>])
+						 ],,[#include <sys/disk.h>])
+	AC_CHECK_TYPES([struct disk_sysctl],[
+						 DISK_INPUT_FOUND=1
+						 AC_DEFINE_UNQUOTED([HAVE_STRUCT_DISK_SYSCTL],[1],[sysctl diskinput available])
+						 AC_CHECK_MEMBERS([struct disk_sysctl.dk_rbytes],,,[#include <sys/disk.h>])
+						 ],,[#include <sys/disk.h>])
+	])
 ])
 ])
 

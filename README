@@ -5,12 +5,12 @@ http://www.gropp.org/?id=projects&sub=bwm-ng
 What is this?
 =============
 
-Bandwidth Monitor NG is a small and simple console-based live bandwidth 
-monitor for Linux, BSD, Solaris, Mac OS X and others.
+Bandwidth Monitor NG is a small and simple console-based live network and disk
+io bandwidth monitor for Linux, BSD, Solaris, Mac OS X and others.
 
 Short list of features:
 - supports /proc/net/dev, netstat, getifaddr, sysctl, kstat, /proc/diskstats 
-  and libstatgrab
+  /proc/partitions and libstatgrab
 - unlimited number of interfaces/devices supported
 - interfaces/devices are added or removed dynamically from list
 - white-/blacklist of interfaces/devices

@@ -50,6 +50,9 @@
 #include <sys/sysctl.h>
 #include <net/route.h>
 #include <net/if_dl.h>
+#ifdef HAVE_SYS_DISK_H
+#include <sys/disk.h>
+#endif
 #endif
 
 

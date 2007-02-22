@@ -19,17 +19,17 @@
 .\"
 .\"
 .SH NAME
-bwm-ng \- Bandwidth Monitor NG (Next Generation), a live bandwidth monitor for network and disk io
+bwm-ng \- Bandwidth Monitor NG (Next Generation), a live bandwidth monitor for network and disk io.
 .SH SYNOPSIS
 .BI "bwm-ng "[options] " ... "[configfile] "
 .SH DESCRIPTION
 .B bwm-ng
-can be used to monitor the current Bandwidth of all or some specific 
-network interfaces or blockdevices and partitions (on Linux 2.6). It shows 
+can be used to monitor the current bandwidth of all or some specific 
+network interfaces or disks (or partitions). It shows 
 total of in and out as well as total of all interfaces/devices. Several 
 different output methods are supported (curses, curses2, plain, csv and html).
 
-\fBbwm-ng\fP is not limited in the number of interfaces and can handle
+\fBbwm-ng\fP is not limited in the number of interfaces or disks and can handle
 new ones dynamically while its running or hide those which are not up.
 
 
@@ -40,44 +40,60 @@ Each method can only be used if
 .B bwm-ng 
 was compiled with support for it.
 
-Currently supported are:
+Currently supported 
+.B network input methods:
 .RS
 .TP .4i
-.BR "proc" :
+.B "proc" :
 This is the default for \fILinux\fP based systems. It parses the special 
 procfs file \fB/proc/net/dev\fP. This should be used if in doubt in 
 \fILinux\fP.
 .TP
-.BR "getifaddrs" :
+.B "getifaddrs" :
 This is the default on \fIBSD\fP systems like \fIFreeBSD\fP, \fINetBSD\fP, 
 \fIOpenBSD\fP and recent \fIMac OS X\fP (>=10.3). This should be used if in 
 doubt on those systems. It uses the getifaddrs systemcall.
 .TP
-.BR "kstat" :
+.B "kstat" :
 This is the default for \fISolaris\fP. It uses the kstat systemcall.
 .TP
-.BR "sysctl" :
+.B "sysctl" :
 This is the default on Systems like \fIIRIX\fP and other \fIUNIX\fP. It can 
 be used on many other systems like early \fIMac OS X\fP as well. It uses the 
 sysctl systemcall.
 .TP
-.BR "netstat" :
+.B "netstat" :
 This is a Backup for systems without the above, or other problems.
 .TP
-.BR "libstatgrab" :
+.B "libstatgrab" :
 .B bwm-ng
 can use the external library libstatgrab to gather the data. please 
-refer to \fIhttp://www.i-scream.org/libstatgrab/\fP for more info about
+refer to \fIhttp://www.i-scream.org/libstatgrab\fP for more info about
 this.
-.TP
+.RE
+
+Currently supported
+.B disk input methods:
+.RS
+.TP .4i
 .BR "disk" :
 Shows the diskio on Linux 2.6+ systems using /proc/diskstats. Instead of packets
 the number of read/writes will be shown.
 .TP
+.BR "kstatdisk" :
+same as
+.B kstat
+network input but for disk io. It uses the kstat systemcall from Solaris.
+.TP
+.BR "sysctl" :
+Written for \fINetBSD\fP and \fIOpenBSD\fP, but maybe working on other Platforms 
+aswell.
+.TP
 .BR "libstatdisk" :
-same as 
+same as
 .B libstatgrab
-but for disk io.
+but for disk io (\fIhttp://www.i-scream.org/libstatgrab/\fP).
+
 .RE
 
 .SH OUTPUT METHODS

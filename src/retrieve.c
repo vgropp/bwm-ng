@@ -347,6 +347,7 @@ void get_iface_stats_netstat (char verbose) {
 #endif
 
 #ifdef SYSCTL
+#ifdef CTL_NET
 /* do the actual work, get and print stats if verbose */
 void get_iface_stats_sysctl (char verbose) {
     size_t size;
@@ -364,8 +365,8 @@ void get_iface_stats_sysctl (char verbose) {
 
     memset(&stats,0,(size_t)sizeof(t_iface_speed_stats)); /* init it */
 
-    /* dont open proc_net_dev if netstat_i is requested, else try to open and if it fails fallback */
-    if (sysctl(mib, 6, NULL, &size, NULL, 0) < 0) deinit(1, "sysctl failed: %s\n",strerror(errno));
+    if (sysctl(mib, 6, NULL, &size, NULL, 0) < 0) 
+		 deinit(1, "sysctl failed: %s\n",strerror(errno));
     if (!(bsd_if_buf = malloc(size))) deinit(1, "no memory: %s\n",strerror(errno));
     memset(bsd_if_buf,0,size);
     if (sysctl(mib, 6, bsd_if_buf, &size, NULL, 0) < 0) {
@@ -417,6 +418,147 @@ void get_iface_stats_sysctl (char verbose) {
     free(bsd_if_buf);
     return;
 }
+#endif
+
+#if SYSCTLDISK_IN
+#ifdef HAVE_STRUCT_SYSCTL
+#define MIBCOUNT 3
+#else 
+#define MIBCOUNT 2
+#endif
+	void get_iface_stats_sysctldisk (char verbose) {
+	size_t size;
+	int mib[MIBCOUNT]; 
+#if defined(HW_DISKCOUNT) && !defined(HAVE_STRUCT_DISKSTATS_DS_NAME) && defined(HAVE_STRUCT_DISKSTATS)
+	int diskcount = 0;
+	char *name_str = NULL;
+	char **name_arr = NULL;
+	char *ptr = NULL;
+#endif
+#if defined(HAVE_STRUCT_DISKSTATS)	
+#define DISK_STRUCT struct diskstats	
+#elif defined(HAVE_STRUCT_DISK_SYSCTL)
+#define DISK_STRUCT struct disk_sysctl
+#endif		
+	DISK_STRUCT *dstats = NULL;
+	int num,i;
+	char *name=NULL;
+
+	int hidden_if=0,current_if_num=0;
+	t_iface_speed_stats tmp_if_stats;
+	t_iface_speed_stats stats; /* local struct, used to calc total values */
+
+	memset(&stats,0,(size_t)sizeof(t_iface_speed_stats)); /* init it */
+
+	mib[0]=CTL_HW;
+
+/* get name list on systems without dk_name */
+#if defined(HW_DISKCOUNT) && !defined(HAVE_STRUCT_DISKSTATS_DS_NAME) && defined(HAVE_STRUCT_DISKSTATS)
+	mib[1]=HW_DISKCOUNT;
+	if (sysctl(mib, 2, &diskcount, &size, NULL, 0) < 0) 
+		deinit(1, "sysctl failed: %s\n",strerror(errno));
+
+	mib[1]=HW_DISKNAMES;
+	if (sysctl(mib, 2, NULL, &size, NULL, 0) < 0)
+		deinit(1, "sysctl failed: %s\n",strerror(errno));
+	if (!(name_str=(char *)malloc(size)))
+		deinit(1, "malloc failed for name_str: %s\n",strerror(errno));
+	if (sysctl(mib, 2, name_str, &size, NULL, 0) < 0) {
+		free(name_str);
+		deinit(1, "malloc failed for name_str: %s\n",strerror(errno));
+	}
+	/* assume comma seperated list as on OpenBSD */
+	if (!(name_arr = (char **)malloc(diskcount * sizeof(char *)))) {
+		free(name_str);
+		deinit(1, "malloc failed for name_arr: %s\n",strerror(errno));
+	}
+	ptr = name_str;
+	i = 0;
+	while (i<diskcount-1 && (next = strchr(ptr,','))) {
+		next[0]=0;
+		next++;
+		name_arr[i] = ptr;
+		ptr = next;
+		i++;
+	}
+	/* add last element aswell */
+	name_arr[i] = ptr;
+#endif
+
+/* get actual stats */	
+	mib[1] = HW_DISKSTATS;
+#ifdef HAVE_STRUCT_SYSCTL
+	mib[2] = sizeof(struct sysctl);
+#endif
+
+	if (sysctl(mib, MIBCOUNT, NULL, &size, NULL, 0) < 0) {
+#if HW_DISKCOUNT && !defined(HAVE_STRUCT_DISKSTATS_DS_NAME) && defined(HAVE_STRUCT_DISKSTATS)
+		free(name_str);
+		free(name_arr);
+#endif		
+		deinit(1, "sysctl failed: %s\n",strerror(errno));
+	}
+	
+	num = size / sizeof(DISK_STRUCT);
+	if (!(dstats = (DISK_STRUCT *)malloc(size))) {
+#if HW_DISKCOUNT && !defined(HAVE_STRUCT_DISKSTATS_DS_NAME) && defined(HAVE_STRUCT_DISKSTATS)
+      free(name_str);
+      free(name_arr);
+#endif
+      deinit(1, "malloc failed: %s\n",strerror(errno));
+	}
+
+	if (sysctl(mib, MIBCOUNT, dstats, &size, NULL, 0) < 0) {
+		free(dstats);
+#if HW_DISKCOUNT && !defined(HAVE_STRUCT_DISKSTATS_DS_NAME) && defined(HAVE_STRUCT_DISKSTATS)
+      free(name_str);
+      free(name_arr);
+#endif
+      deinit(1, "sysctl failed: %s\n",strerror(errno));
+	}
+	for (i = 0; i < num; i++) {
+
+#ifdef HAVE_STRUCT_DISKSTATS
+#ifdef HAVE_STRUCT_DISKSTATS_DS_RBYTES
+		tmp_if_stats.bytes.in = dstats[i].ds_rbytes;
+		tmp_if_stats.bytes.out = dstats[i].ds_wbytes;
+		tmp_if_stats.packets.in = dstats[i].ds_rxfer;
+		tmp_if_stats.packets.out = dstats[i].ds_wxfer;
+#else
+		tmp_if_stats.bytes.in = tmp_if_stats.bytes.out = (ullong)(dstats[i].ds_bytes / 2);
+		tmp_if_stats.packets.in = tmp_if_stats.packets.out = (ullong)(dstats[i].ds_xfer / 2);
+#endif
+#if !defined(HAVE_STRUCT_DISKSTATS_DS_NAME)		
+		name = name_arr[i];
+#else
+		name = dstats[i].ds_name;
+#endif		
+#else
+#ifdef HAVE_DK_RBYTES
+		tmp_if_stats.bytes.in = dstats[i].dk_rbytes;
+		tmp_if_stats.bytes.out = dstats[i].dk_wbytes;
+      tmp_if_stats.packets.in = dstats[i].ds_rxfer;
+      tmp_if_stats.packets.out = dstats[i].ds_wxfer;
+#else
+		tmp_if_stats.bytes.in = tmp_if_stats.bytes.out = (ullong)(dstats[i].dk_bytes / 2);
+		tmp_if_stats.packets.in = tmp_if_stats.packets.out = (ullong)(dstats[i].dk_xfer / 2);
+#endif
+		name = dstats[i].dk_name;
+#endif
+		tmp_if_stats.errors.in = tmp_if_stats.errors.out = 0;
+
+		hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose, (tmp_if_stats.bytes.in == 0 && tmp_if_stats.bytes.out == 0));
+		current_if_num++;
+	}
+	/* add to total stats and output current stats if verbose */
+	finish_iface_stats (verbose, stats, hidden_if,current_if_num);
+	free(dstats);
+#if HW_DISKCOUNT && !defined(HAVE_STRUCT_DISKSTATS_DS_NAME) && defined(HAVE_STRUCT_DISKSTATS)
+	free(name_str);
+	free(name_arr);
+#endif
+}
+#endif
 #endif
 
 
@@ -758,6 +900,11 @@ inline void get_iface_stats(char _n) {
         case SYSCTL_IN:
             get_iface_stats_sysctl(_n);
             break;
+#if SYSCTLDISK_IN
+			case SYSCTLDISK_IN:
+				get_iface_stats_sysctldisk(_n);
+				break;
+#endif
 #endif
 #if HAVE_LIBKSTAT
 		  case KSTATDISK_IN:

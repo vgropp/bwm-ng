@@ -115,6 +115,9 @@ inline int str2in_method(char *optarg) {
 #endif
 #ifdef SYSCTL
         if (!strcasecmp(optarg,"sysctl")) return SYSCTL_IN;
+#if SYSCTLDISK_IN
+		  if (!strcasecmp(optarg,"sysctldisk")) return SYSCTLDISK_IN;
+#endif		  
 #endif
 #ifdef PROC_DISKSTATS
 		  if (!strcasecmp(optarg,"disk")) return DISKLINUX_IN;

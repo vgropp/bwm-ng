@@ -48,9 +48,34 @@ fi
 
 autoconf=autoconf
 autoheader=autoheader
-aclocal=aclocal
-automake=automake
+aclocal=
+automake=
 auto_version=0
+
+
+for suffix in -1.6 -1.7 -1.8 -1.9 ""
+do
+  aclocal_version=`aclocal$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
+  automake_version=`automake$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
+  if test -n "$aclocal_version" && test -n "$automake_version" && test "$aclocal_version" = "$automake_version" && \
+	  test -n `echo "$aclocal_version" | cut -c-3 | tr -d .` 
+  then
+     auto_version=`echo "$aclocal_version" | cut -c-3 | tr -d .`
+	  if test -z "`echo -n $auto_version | sed -n s/[0-9]*//p`" && test $auto_version -ge 16
+	  then
+	     aclocal=aclocal$suffix
+	     automake=automake$suffix
+	  fi
+  fi
+done
+
+if test -z "$aclocal" || test -z "$automake"
+then
+	echo "*******************************"
+	echo "AT LEAST automake 1.6 REQUIRED!"
+	echo "*******************************"
+	exit 1
+fi
 
 rm -f config.guess config.sub depcomp install-sh missing mkinstalldirs
 rm -f config.cache acconfig.h

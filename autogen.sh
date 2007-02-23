@@ -66,11 +66,13 @@ then
 		then
 			autoconf=autoconf$suffix
 			autoheader=autoheader$suffix
-			lastsuffix=$suffix
+		   if test -n "$suffix"
+		   then
+      		echo "found version `echo $suffix | cut -c2-`"
+		      export AUTOCONF_VERSION=`echo $suffix | cut -c2-`
+		   fi
 		fi
 	done
-	echo "found version `echo $lastsuffix | cut -c2-`"
-	export AUTOCONF_VERSION=`echo $lastsuffix | cut -c2-`
 fi
 
 for suffix in -1.6 -1.7 -1.8 -1.9 ""

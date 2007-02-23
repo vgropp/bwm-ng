@@ -80,6 +80,11 @@ inline char *input2str() {
             return "getifaddrs";
             break;
 #endif
+#if DEVSTAT_IN
+		  case DEVSTAT_IN:
+				return "devstat";
+				break;
+#endif
 #ifdef PROC_NET_DEV
         case PROC_IN:
             return "/proc/net/dev";

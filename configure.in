@@ -350,6 +350,47 @@ AC_CHECK_FILES([/proc/diskstats],[DISK_INPUT_FOUND=1],[
 ])
 ])
 
+AC_ARG_WITH([devstat],AS_HELP_STRING([--with-devstat],[enable devstat input (ie FreeBSD) (ARG=PATH)]),[
+AC_MSG_CHECKING([for devstat input])
+AC_MSG_RESULT($withval)
+if [ test $withval != "no" ]; then
+	OLD_CPPFLAGS=$CPPFLAGS
+   if [ test $withval != "yes" ]; then
+        CPPFLAGS="$CPPFLAGS -I$withval"
+   fi
+	AC_CHECK_HEADERS([sys/dkstat.h],[
+		AC_CHECK_HEADERS([devstat.h],[
+			AC_CHECK_LIB([devstat],[devstat_getdevs],[
+					DISK_INPUT_FOUND=1
+					AC_DEFINE_UNQUOTED([HAVE_DEVSTAT_GETDEVS],[1],[Define to 1 if you have the 'devstat' library (-ldevstat).])
+					LIBS="$LIBS -ldevstat"
+				],[
+					AC_CHECK_LIB([devstat],[getdevs],[
+							DISK_INPUT_FOUND=1
+							AC_DEFINE_UNQUOTED([HAVE_GETDEVS],[1],[Define to 1 if you have the 'devstat' library (-ldevstat).])
+							LIBS="$LIBS -ldevstat"
+					])
+			])
+		],,[#include <sys/dkstat.h>])
+	])
+fi
+],[
+AC_CHECK_HEADERS([sys/dkstat.h],[
+	AC_CHECK_HEADERS([devstat.h],[
+		AC_CHECK_LIB([devstat],[devstat_getdevs],[
+				DISK_INPUT_FOUND=1
+				AC_DEFINE_UNQUOTED([HAVE_DEVSTAT_GETDEVS],[1],[Define to 1 if you have the 'devstat' library (-ldevstat).])
+				LIBS="$LIBS -ldevstat"
+			],[
+				AC_CHECK_LIB([devstat],[getdevs],[
+						DISK_INPUT_FOUND=1
+						AC_DEFINE_UNQUOTED([HAVE_GETDEVS],[1],[Define to 1 if you have the 'devstat' library (-ldevstat).])
+						LIBS="$LIBS -ldevstat"
+				])
+		])
+	],,[#include <sys/dkstat.h>])
+])
+])
 
 AC_ARG_WITH([libstatgrab],AS_HELP_STRING([--with-libstatgrab],[Use libstatgrab to gather statistics]),[
 AC_MSG_CHECKING([for libstatgrab input])

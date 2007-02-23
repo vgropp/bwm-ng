@@ -80,6 +80,11 @@
 #include <iphlpapi.h>
 #endif
 
+#if DEVSTAT_IN
+#include <sys/dkstat.h>
+#include <devstat.h>
+#endif
+
 
 #define MAX_LINE_BUFFER 1024
 

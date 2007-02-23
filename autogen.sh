@@ -55,7 +55,7 @@ auto_version=0
 if test -n $AUTOCONF_VERSION 
 then
 	echo "test for autoconf version"
-	for suffix in -2.51 -2.52 -2.53 -2.54 -2.55 -2.56 -2.57 -2.58 -2.59 -2.60 -2.61 -2.62 ""
+	for suffix in "" -2.62 -2.61 -2.60 -2.59 -2.58 -2.57 -2.56 -2.55 -2.54 -2.53 -2.52 -2.51 
 	do
 		autoconf_version=`autoconf$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
 		autoheader_version=`autoheader$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
@@ -71,11 +71,12 @@ then
       		echo "found version `echo $suffix | cut -c2-`"
 		      export AUTOCONF_VERSION=`echo $suffix | cut -c2-`
 		   fi
+			break
 		fi
 	done
 fi
 
-for suffix in -1.6 -1.7 -1.8 -1.9 ""
+for suffix in "" -1.9 -1.8 -1.7 -1.6
 do
   aclocal_version=`aclocal$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
   automake_version=`automake$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
@@ -87,6 +88,7 @@ do
 	  then
 	     aclocal=aclocal$suffix
 	     automake=automake$suffix
+		  break
 	  fi
   fi
 done

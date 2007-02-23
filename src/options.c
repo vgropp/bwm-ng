@@ -113,6 +113,9 @@ inline int str2in_method(char *optarg) {
 #ifdef GETIFADDRS
         if (!strcasecmp(optarg,"getifaddrs")) return GETIFADDRS_IN;
 #endif
+#if DEVSTAT_IN
+		  if (!strcasecmp(optarg,"devstat")) return DEVSTAT_IN;
+#endif
 #ifdef SYSCTL
         if (!strcasecmp(optarg,"sysctl")) return SYSCTL_IN;
 #endif

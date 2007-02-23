@@ -52,6 +52,26 @@ aclocal=
 automake=
 auto_version=0
 
+if test -n $AUTOCONF_VERSION 
+then
+	echo "test for autoconf version"
+	for suffix in -2.51 -2.52 -2.53 -2.54 -2.55 -2.56 -2.57 -2.58 -2.59 -2.60 -2.61 -2.62 ""
+	do
+		autoconf_version=`autoconf$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
+		autoheader_version=`autoheader$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
+		version=`echo "$autoconf_version" | cut -c-3 | tr -d .`
+		if test -n "$autoconf_version" && test -n "$autoheader_version" && test "$autoconf_version" = "$autoheader_version" && \
+			test -n "$version" && \
+			test -z "`echo -n $version | sed -n s/[0-9]*//p`"
+		then
+			autoconf=autoconf$suffix
+			autoheader=autoheader$suffix
+			lastsuffix=$suffix
+		fi
+	done
+	echo "found version `echo $lastsuffix | cut -c2-`"
+	export AUTOCONF_VERSION=`echo $lastsuffix | cut -c2-`
+fi
 
 for suffix in -1.6 -1.7 -1.8 -1.9 ""
 do

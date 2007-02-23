@@ -94,6 +94,7 @@ inline void cmdln_printhelp() {
     print_help_line("-H","-H, --htmlheader","show <html> and <meta> frame for html output");
 #endif
     print_help_line("-c <num>","-c, --count <num>","number of query/output for plain & csv");
+	 print_help_line("-N","-N, --ansiout","disable ansi codes for plain output");
     print_help_line("","","(ie 1 for one single output)");
     printf("\n");
     exit(EXIT_SUCCESS);

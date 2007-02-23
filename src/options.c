@@ -194,6 +194,8 @@ char *token, *value;
 #endif
     } else if( strcasecmp( token, "INPUT" ) == 0 ) {
         if (value) input_method=str2in_method(value);
+	 } else if( strcasecmp( token, "ANSIOUT" ) == 0 ) {
+		 if (value) ansi_output=value[0]=='0' ? 1 : 0;
     } else if( strcasecmp( token, "DYNAMIC" ) == 0 ) {
         if (value) dynamic=value[0]=='0' ? 1 : 0;
     } else if( strcasecmp( token, "UNIT" ) == 0 ) {
@@ -273,6 +275,7 @@ void get_cmdln_options(int argc, char *argv[]) {
         {"version",0,0,'V'},
         {"allif",1,0,'a'},
         {"unit",1,0,'u'},
+		  {"ansiout",1,0,'N'},
 #if EXTENDED_STATS        
         {"type",1,0,'T'},
         {"avglength",1,0,'A'},
@@ -414,6 +417,8 @@ void get_cmdln_options(int argc, char *argv[]) {
                     output_method=str2out_method(optarg);
                 }
                 break;
+				case 'N':
+					 ansi_output=!ansi_output;
             case 'a':
                 if (optarg) show_all_if=atoi(optarg);
                 break;

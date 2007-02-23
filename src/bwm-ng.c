@@ -152,6 +152,8 @@ inline void init() {
 	input_method=0;
 #endif
 
+	ansi_output=1;
+
 #ifdef HTML
 	html_refresh=5;
 	html_header=0;

@@ -158,8 +158,12 @@ selects the file to parse in \fBproc input method\fP. This is usually
 \fI/proc/net/dev\fP.
 .TP
 .BI "    --diskstatsfile "filename"
-selects the file to pars in \fBdisk input method\fP. This is usually 
+selects the file to parse in \fBdisk input method\fP. This is usually 
 \fI/proc/diskstats\fP.
+.TP
+.BI "    --partitionsfile "filename"
+selects the file to parse in \fBdisk input method\fP on older Kernel.
+This is usually \fI/proc/partitions\fP.
 .TP
 .BI "-n, --netstat " "path"
 specifies the binary to execute for \fBnetstat input method\fP. Because
@@ -208,6 +212,9 @@ if this option is used, \fBbwm-ng\fP will print the correct \fIHTML\fP
 header (<html></html>) including Meta fields before and after data. 
 This is only useful in \fIHTML\fP mode. \fIvalue\fP can be 0 (off) 
 or 1 (on), if the value is not given '1' is used.
+.TP
+.BI "-N, --ansiout "
+disable ANSI Codes for Plain output.
 
 .SS OTHER
 These options specify the general behavior of \fBbwm-ng\fP.

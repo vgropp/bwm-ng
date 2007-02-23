@@ -72,6 +72,7 @@ EXTERN char *out_file_path;
 EXTERN int output_count;
 EXTERN char daemonize;
 EXTERN char sumhidden;
+EXTERN char ansi_output;
 
 EXTERN int input_method;
 

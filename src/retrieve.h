@@ -39,7 +39,7 @@
 #include <ifaddrs.h>
 #endif
 
-#ifdef SYSCTL
+#if defined(SYSCTL) || defined(HAVE_SYS_DISK_H)
 #ifndef GETIFADDRS
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -48,8 +48,10 @@
 
 #include <sys/param.h> /* netbsd fix */
 #include <sys/sysctl.h>
+#ifdef SYSCTL
 #include <net/route.h>
 #include <net/if_dl.h>
+#endif
 #ifdef HAVE_SYS_DISK_H
 #include <sys/disk.h>
 #endif

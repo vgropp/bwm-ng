@@ -56,12 +56,12 @@ inline char *input2str() {
         case SYSCTL_IN:
             return "sysctl";
             break;
+#endif
 #if SYSCTLDISK_IN
 			case SYSCTLDISK_IN:
 				return "sysctldisk";
 				break;
 #endif				
-#endif
 #ifdef NETSTAT
         case NETSTAT_IN:
             return "netstat -i";

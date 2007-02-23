@@ -154,6 +154,12 @@
 
 #ifdef SYSCTL
 #define SYSCTL_IN 16
+#define INPUT_METHODS_SYSCTL " sysctl"
+#else
+#define SYSCTL_IN 0
+#define INPUT_METHODS_SYSCTL
+#endif
+
 #if defined(HAVE_STRUCT_DISKSTATS) || defined(HAVE_STRUCT_DISK_SYSCTL)
 #define SYSCTLDISK_IN 1024
 #define INPUT_METHODS_SYSCTLDISK " sysctldisk"
@@ -161,13 +167,7 @@
 #define SYSCTLDISK_IN 0
 #define INPUT_METHODS_SYSCTLDISK
 #endif
-#define INPUT_METHODS_SYSCTL " sysctl"
-#else
-#define SYSCTL_IN 0
-#define SYSCTLDISK_IN 0
-#define INPUT_METHODS_SYSCTLDISK
-#define INPUT_METHODS_SYSCTL
-#endif
+
 
 #if HAVE_LIBKSTAT
 #define KSTAT_IN 32

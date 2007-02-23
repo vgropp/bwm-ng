@@ -347,7 +347,6 @@ void get_iface_stats_netstat (char verbose) {
 #endif
 
 #ifdef SYSCTL
-#ifdef CTL_NET
 /* do the actual work, get and print stats if verbose */
 void get_iface_stats_sysctl (char verbose) {
     size_t size;
@@ -558,7 +557,6 @@ void get_iface_stats_sysctl (char verbose) {
 	free(name_arr);
 #endif
 }
-#endif
 #endif
 
 
@@ -900,11 +898,11 @@ inline void get_iface_stats(char _n) {
         case SYSCTL_IN:
             get_iface_stats_sysctl(_n);
             break;
+#endif				
 #if SYSCTLDISK_IN
 			case SYSCTLDISK_IN:
 				get_iface_stats_sysctldisk(_n);
 				break;
-#endif
 #endif
 #if HAVE_LIBKSTAT
 		  case KSTATDISK_IN:

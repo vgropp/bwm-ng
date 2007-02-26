@@ -76,7 +76,7 @@ then
 	done
 fi
 
-for suffix in "" -1.9 -1.8 -1.7 -1.6
+for suffix in "" -1.9 -1.8 -1.7 
 do
   aclocal_version=`aclocal$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
   automake_version=`automake$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
@@ -96,7 +96,7 @@ done
 if test -z "$aclocal" || test -z "$automake"
 then
 	echo "*******************************"
-	echo "AT LEAST automake 1.6 REQUIRED!"
+	echo "AT LEAST automake 1.7 REQUIRED!"
 	echo "*******************************"
 	exit 1
 fi

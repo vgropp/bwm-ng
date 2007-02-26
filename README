@@ -10,7 +10,7 @@ io bandwidth monitor for Linux, BSD, Solaris, Mac OS X and others.
 
 Short list of features:
 - supports /proc/net/dev, netstat, getifaddr, sysctl, kstat, /proc/diskstats 
-  /proc/partitions, devstat and libstatgrab
+  /proc/partitions, IOKit, devstat and libstatgrab
 - unlimited number of interfaces/devices supported
 - interfaces/devices are added or removed dynamically from list
 - white-/blacklist of interfaces/devices

@@ -392,6 +392,61 @@ AC_CHECK_HEADERS([sys/dkstat.h],[
 ])
 ])
 
+AC_ARG_WITH([ioservice],AS_HELP_STRING([--with-ioservice],[Use darwin IOService  to gather statistics]),[
+AC_MSG_CHECKING([for ioservice input])
+AC_MSG_RESULT($withval)
+if [ test $withval != "no" ]; then
+	OLD_CPPFLAGS=$CPPFLAGS
+	if [ test $withval != "yes" ]; then
+		CPPFLAGS="$CPPFLAGS -I$withval"
+	fi
+	OLDLIBS=$LIBS
+	LIBS="$LIBS -framework IOKit -framework CoreFoundation"
+	HAVE_IOSERVICE=0
+   AC_CHECK_FUNCS([IOServiceGetMatchingServices],[
+      AC_CHECK_FUNCS([IOMasterPort],[
+         AC_CHECK_FUNCS([IORegistryEntryCreateCFProperties],[
+            DISK_INPUT_FOUND=1
+            AC_DEFINE_UNQUOTED([HAVE_IOSERVICE],[1],[Define to 1 if you have Darwin IOService support])
+				HAVE_IOSERVICE=1
+         ])
+      ])
+   ],,[
+       #include <CoreFoundation/CoreFoundation.h>
+       #include <IOKit/IOKitLib.h>
+       #include <IOKit/storage/IOBlockStorageDriver.h>
+   ])
+	if [ test $HAVE_IOSERVICE -eq 0 ]; then
+		LIBS=$OLDLIBS
+		CPPFLAGS=$OLD_CPPFLAGS
+	fi
+fi
+],[
+dnl evil hack to check for -framework gcc option, i love apple!!!!111
+AC_MSG_CHECKING([whether cc and linker accepts -framework IOKit -framework CoreFoundation])
+echo 'int main(){}' > conftest.c
+if test -z "`${CC-cc} -o conftest conftest.c -framework IOKit -framework CoreFoundation 2>&1`"; then
+	AC_MSG_RESULT(yes)
+	OLDLIBS=$LIBS
+	LIBS="$LIBS -framework IOKit -framework CoreFoundation"
+	AC_CHECK_FUNCS([IOServiceGetMatchingServices],[
+		AC_CHECK_FUNCS([IOMasterPort],[
+			AC_CHECK_FUNCS([IORegistryEntryCreateCFProperties],[
+				DISK_INPUT_FOUND=1
+				AC_DEFINE_UNQUOTED([HAVE_IOSERVICE],[1],[Define to 1 if you have Darwin IOService support])
+				HAVE_IOSERVICE=1
+			])
+		])
+	])
+	if [ test $HAVE_IOSERVICE -eq 0 ]; then
+		LIBS=$OLDLIBS
+	fi
+else
+	AC_MSG_RESULT(no)
+fi
+rm -f conftest*
+])
+
 AC_ARG_WITH([libstatgrab],AS_HELP_STRING([--with-libstatgrab],[Use libstatgrab to gather statistics]),[
 AC_MSG_CHECKING([for libstatgrab input])
 AC_MSG_RESULT($withval)

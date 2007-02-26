@@ -132,6 +132,9 @@ inline int str2in_method(char *optarg) {
 			if (!strcasecmp(optarg,"kstat")) return KSTAT_IN;
 			if (!strcasecmp(optarg,"kstatdisk")) return KSTATDISK_IN;
 #endif 
+#if IOSERVICE_IN
+			if (!strcasecmp(optarg,"ioservice")) return IOSERVICE_IN;
+#endif
     }
     return -1;
 }

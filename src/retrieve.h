@@ -85,6 +85,12 @@
 #include <devstat.h>
 #endif
 
+#if IOSERVICE_IN
+#include <CoreFoundation/CoreFoundation.h>
+#include <IOKit/IOKitLib.h>
+#include <IOKit/storage/IOBlockStorageDriver.h>
+#endif
+
 
 #define MAX_LINE_BUFFER 1024
 

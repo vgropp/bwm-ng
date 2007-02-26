@@ -98,9 +98,16 @@ inline char *input2str() {
 				return "kstatdisk";
 				break;
 #endif
+#if IOSERVICE_IN
+		  case IOSERVICE_IN:
+				return "ioservice disk IO";
+				break;
+#endif
+#ifdef PROC_DISKSTATS
 		  case DISKLINUX_IN:
 				return "disk IO";
 				break;
+#endif
     }
     return "";
 }

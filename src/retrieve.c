@@ -920,6 +920,75 @@ void get_iface_stats_devstat (char verbose) {
 }
 #endif
 
+
+#if IOSERVICE_IN 
+void get_disk_stats_ioservice (char verbose) {
+   int current_if_num=0,hidden_if=0;
+	io_iterator_t dlist  = 0;
+	mach_port_t port = 0;
+	io_registry_entry_t disk = 0; 
+	io_registry_entry_t name_plane = 0;
+	CFDictionaryRef props = 0;
+	CFDictionaryRef dstats = 0;
+	CFNumberRef value = NULL;
+	io_name_t name;
+
+   t_iface_speed_stats stats; /* local struct, used to calc total values */
+   t_iface_speed_stats tmp_if_stats;
+   memset(&stats,0,(size_t)sizeof(t_iface_speed_stats)); /* init it */
+	
+	if (IOMasterPort(MACH_PORT_NULL, &port)) 
+		deinit(1,"failure while initializing disk port\n");
+	
+	if (IOServiceGetMatchingServices(port,IOServiceMatching("IOBlockStorageDriver"),&dlist))
+		deinit(1,"failure while getting disk list\n");
+	
+	while ( (disk = IOIteratorNext(dlist)) ) {
+		IORegistryEntryCreateCFProperties (disk,(CFMutableDictionaryRef *) &props,kCFAllocatorDefault,kNilOptions);
+		if (props) {
+			dstats = CFDictionaryGetValue(props, CFSTR(kIOBlockStorageDriverStatisticsKey));
+			if (dstats) {
+				value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsBytesReadKey));
+				if (value)
+					CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.bytes.in);
+				value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsBytesWrittenKey));
+				if (value)
+					CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.bytes.out);
+				value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsReadsKey));
+				if (value)
+					CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.packets.in);
+				value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsWritesKey));
+				if (value)
+					CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.packets.out);
+				value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsReadErrorsKey));
+				if (value)
+					CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.errors.in);
+				value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsWriteErrorsKey));
+				if (value)
+					CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.errors.out);
+				if (IORegistryEntryGetChildEntry(disk, kIOServicePlane, &name_plane ) || IORegistryEntryGetName(name_plane, name )) {
+					strncpy((char *)name,(char *)"unknown",sizeof(name)-1);
+					name[sizeof(name)-1]=0;
+				} else {
+					if (name_plane) {
+						IOObjectRelease(name_plane);
+						name_plane = 0;
+					}
+				}
+				hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose,(tmp_if_stats.bytes.in != 0 || tmp_if_stats.bytes.out != 0));
+				current_if_num++;
+			}
+			CFRelease(props); 
+			props = 0;
+		}
+		IOObjectRelease(disk);
+		disk = 0;
+	}
+	finish_iface_stats (verbose, stats, hidden_if,current_if_num);
+	IOIteratorReset(dlist);
+}
+#endif
+
 /* chooses the correct get_iface_stats() to use */
 inline void get_iface_stats(char _n) {
    switch (input_method) {
@@ -976,6 +1045,11 @@ inline void get_iface_stats(char _n) {
         case DISKLINUX_IN:
             get_disk_stats_proc(_n);
             break;
+#endif
+#if IOSERVICE_IN
+		  case IOSERVICE_IN:
+				get_disk_stats_ioservice(_n);
+				break;
 #endif
    }
 }

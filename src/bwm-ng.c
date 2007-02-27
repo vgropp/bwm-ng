@@ -173,6 +173,10 @@ inline void init() {
    strncpy(PROC_PARTITIONS_FILE,PROC_PARTITIONS,PATH_MAX);
 #endif
 
+#if IOSERVICE_IN
+	long_darwin_disk_names = 0;
+#endif
+
 }
 
 /* do the main thing */

@@ -85,6 +85,10 @@ EXTERN int html_header;
 EXTERN int skfd;
 #endif
 
+#if IOSERVICE_IN
+EXTERN char long_darwin_disk_names;
+#endif
+
 EXTERN t_iface_stats *if_stats;
 /* total struct */
 EXTERN t_iface_stats if_stats_total;

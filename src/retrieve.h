@@ -89,6 +89,11 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/storage/IOBlockStorageDriver.h>
+#include <IOKit/storage/IOMedia.h>
+#ifndef LONG_DARWIN_DEV_NAMES
+#include <IOKit/IOBSD.h>
+#include <paths.h>
+#endif
 #endif
 
 

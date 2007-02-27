@@ -235,6 +235,10 @@ char *token, *value;
         if (value) daemonize=value[0]=='0' ? 0 : 1;
     } else if( strcasecmp( token, "SUMHIDDEN" ) == 0 ) {
         if (value) sumhidden=value[0]=='0' ? 0 : 1;
+#if IOSERVICE_IN
+	 } else if( strcasecmp( token, "LONGDISKNAMES" ) == 0) {
+		 if (value) long_darwin_disk_names=value[0]=='0' ? 0 : 1;
+#endif
 #ifdef HTML
     } else if( strcasecmp( token, "HTMLREFRESH" ) == 0 ) {
         if (value && atol(value)>0) { html_refresh=atol(value); }
@@ -272,13 +276,16 @@ void get_cmdln_options(int argc, char *argv[]) {
 #if NETSTAT && ALLOW_NETSTATPATH
         {"netstat",1,0,'n'},
 #endif
+#if IOSERVICE_IN
+		  {"longdisknames",0,0,1002},
+#endif
         {"input",1,0,'i'},
         {"dynamic",1,0,'d'},
         {"help", 0, 0, 'h'},
         {"version",0,0,'V'},
         {"allif",1,0,'a'},
         {"unit",1,0,'u'},
-		  {"ansiout",1,0,'N'},
+		  {"ansiout",0,0,'N'},
 #if EXTENDED_STATS        
         {"type",1,0,'T'},
         {"avglength",1,0,'A'},
@@ -362,10 +369,17 @@ void get_cmdln_options(int argc, char *argv[]) {
 			case 1000:
 				if (strlen(optarg)<PATH_MAX) 
 					strcpy(PROC_DISKSTATS_FILE,optarg);
+				break;
          case 1001:
             if (strlen(optarg)<PATH_MAX)
                strcpy(PROC_PARTITIONS_FILE,optarg);
-#endif							 
+				break;
+#endif				
+#if IOSERVICE_IN
+			case 1002:
+				long_darwin_disk_names=!long_darwin_disk_names;
+				break;
+#endif
 			case 'D':
 				if (optarg) daemonize=atoi(optarg);
 				break;

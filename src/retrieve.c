@@ -927,11 +927,15 @@ void get_disk_stats_ioservice (char verbose) {
 	io_iterator_t dlist  = 0;
 	mach_port_t port = 0;
 	io_registry_entry_t disk = 0; 
-	io_registry_entry_t name_plane = 0;
 	CFDictionaryRef props = 0;
+	CFDictionaryRef props2 = 0;
 	CFDictionaryRef dstats = 0;
 	CFNumberRef value = NULL;
-	io_name_t name;
+	CFMutableDictionaryRef match;
+	io_registry_entry_t parent;
+	io_name_t name; 
+	char deviceFilePath[MAXPATHLEN]; //MAXPATHLEN is defined in sys/param.h
+	CFStringRef name_str;
 
    t_iface_speed_stats stats; /* local struct, used to calc total values */
    t_iface_speed_stats tmp_if_stats;
@@ -939,45 +943,62 @@ void get_disk_stats_ioservice (char verbose) {
 	
 	if (IOMasterPort(MACH_PORT_NULL, &port)) 
 		deinit(1,"failure while initializing disk port\n");
-	
-	if (IOServiceGetMatchingServices(port,IOServiceMatching("IOBlockStorageDriver"),&dlist))
+	match = IOServiceMatching("IOMedia");
+	CFDictionaryAddValue(match, CFSTR(kIOMediaWholeKey), kCFBooleanTrue);	
+	if (IOServiceGetMatchingServices(port, match, &dlist)!=KERN_SUCCESS)
 		deinit(1,"failure while getting disk list\n");
-	
 	while ( (disk = IOIteratorNext(dlist)) ) {
 		IORegistryEntryCreateCFProperties (disk,(CFMutableDictionaryRef *) &props,kCFAllocatorDefault,kNilOptions);
 		if (props) {
-			dstats = CFDictionaryGetValue(props, CFSTR(kIOBlockStorageDriverStatisticsKey));
-			if (dstats) {
-				value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsBytesReadKey));
-				if (value)
-					CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.bytes.in);
-				value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsBytesWrittenKey));
-				if (value)
-					CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.bytes.out);
-				value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsReadsKey));
-				if (value)
-					CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.packets.in);
-				value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsWritesKey));
-				if (value)
-					CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.packets.out);
-				value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsReadErrorsKey));
-				if (value)
-					CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.errors.in);
-				value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsWriteErrorsKey));
-				if (value)
-					CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.errors.out);
-				if (IORegistryEntryGetChildEntry(disk, kIOServicePlane, &name_plane ) || IORegistryEntryGetName(name_plane, name )) {
-					strncpy((char *)name,(char *)"unknown",sizeof(name)-1);
-					name[sizeof(name)-1]=0;
+			if (!long_darwin_disk_names) {
+				name_str = (CFStringRef)CFDictionaryGetValue(props, CFSTR(kIOBSDNameKey));
+				if (name_str) {
+					CFStringGetCString(name_str, deviceFilePath, MAXPATHLEN-1, CFStringGetSystemEncoding());
 				} else {
-					if (name_plane) {
-						IOObjectRelease(name_plane);
-						name_plane = 0;
-					}
+					snprintf((char *)deviceFilePath,MAXPATHLEN-1,"unknown%i",current_if_num);
+               deviceFilePath[MAXPATHLEN-1]=0;
 				}
-				hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose,(tmp_if_stats.bytes.in != 0 || tmp_if_stats.bytes.out != 0));
-				current_if_num++;
+			} else {
+				if (IORegistryEntryGetName(disk, name )!=KERN_SUCCESS) {
+					snprintf((char *)name,sizeof(name)-1,"unknown%i",current_if_num);
+					name[sizeof(name)-1]=0;
+				}
 			}
+			if (IORegistryEntryGetParentEntry(disk, kIOServicePlane, &parent)!=KERN_SUCCESS) {
+				CFRelease(props);
+				IOObjectRelease(disk);
+				IOIteratorReset(dlist);
+				deinit(1,"disk has no parent\n");
+			}
+			IORegistryEntryCreateCFProperties(parent, (CFMutableDictionaryRef *)&props2,kCFAllocatorDefault, kNilOptions);
+			if (props2) {
+				dstats = CFDictionaryGetValue(props2, CFSTR(kIOBlockStorageDriverStatisticsKey));
+				if (dstats) {
+					value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsBytesReadKey));
+					if (value)
+						CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.bytes.in);
+					value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsBytesWrittenKey));
+					if (value)
+						CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.bytes.out);
+					value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsReadsKey));
+					if (value)
+						CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.packets.in);
+					value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsWritesKey));
+					if (value)
+						CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.packets.out);
+					value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsReadErrorsKey));
+					if (value)
+						CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.errors.in);
+					value = CFDictionaryGetValue (dstats,CFSTR(kIOBlockStorageDriverStatisticsWriteErrorsKey));
+					if (value)
+						CFNumberGetValue(value, kCFNumberSInt64Type, &tmp_if_stats.errors.out);
+					hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, long_darwin_disk_names ?	(char *)name :	deviceFilePath
+							, current_if_num, verbose,(tmp_if_stats.bytes.in != 0 || tmp_if_stats.bytes.out != 0));
+					current_if_num++;
+				}
+				CFRelease(props2);
+			}
+			IOObjectRelease(parent);
 			CFRelease(props); 
 			props = 0;
 		}
@@ -985,7 +1006,7 @@ void get_disk_stats_ioservice (char verbose) {
 		disk = 0;
 	}
 	finish_iface_stats (verbose, stats, hidden_if,current_if_num);
-	IOIteratorReset(dlist);
+	IOObjectRelease(dlist);
 }
 #endif
 

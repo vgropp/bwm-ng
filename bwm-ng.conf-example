@@ -3,6 +3,7 @@ UNIT=bits
 PROCFILE=/proc/net/dev
 DISKSTATSFILE=/proc/diskstats
 PARTITIONSFILE=/proc/partitions
+LONGDISKNAMES=0
 ANSIOUT=0
 OUTPUT=plain
 TIMEOUT=666

@@ -1,7 +1,7 @@
 /******************************************************************************
- *  bwm-ng                                                                    *
+ *  bwm-ng parsing and retrive stuff                                          *
  *                                                                            *
- *  Copyright (C) 2004 Volker Gropp (vgropp@pefra.de)                         *
+ *  Copyright (C) 2004-2007 Volker Gropp (bwmng@gropp.org)                    *
  *                                                                            *
  *  for more info read README.                                                *
  *                                                                            *
@@ -21,27 +21,46 @@
  *                                                                            *
  *****************************************************************************/
 
-#ifndef __BWM_NG_H
-#define __BWM_NG_H
+#ifndef __RETRIEVE_H
+#define __RETRIEVE_H 
 
-#include "defines.h"
-#include "types.h"
-#include "curses_tools.h"
-#include "options.h"
-#include "output.h"
-#include "input/retrieve.h"
-#include "help.h"
+#include "../global_vars.h"
+#include "../defines.h"
+#include "../types.h"
+#include "../process.h"
+#include "../bwm-ng.h"
 
-#ifdef WIN32
-#include <windows.h>
-#endif
 
-#ifdef __STDC__
-#include <stdarg.h>
-void deinit(int code, char *error_msg, ...);
+#ifdef IOCTL
+/* following only for check_if_up and ioctl */
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#ifdef HAVE_LINUX_IF_H
+#include <linux/if.h>
 #else
-#include <varargs.h>
-void deinit(int code, ...);
+#include <net/if.h>
 #endif
+
+char check_if_up(char *ifname);
+
+#endif
+
+
+#define MAX_LINE_BUFFER 1024
+
+
+#include "devstat.h"
+#include "ioservice.h"
+#include "getifaddrs.h"
+#include "libkstat.h"
+#include "libstatgrab.h"
+#include "netstat.h"
+#include "proc_diskstats.h"
+#include "proc_net_dev.h"
+#include "sysctl.h"
+#include "win32.h"
+
+inline void get_iface_stats(char _n);
 
 #endif

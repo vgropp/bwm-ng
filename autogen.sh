@@ -33,7 +33,7 @@ fi
 PROJECT=bwm-ng
 
 echo trying autoreconf to setup build enviroment
-autoreconf -v -i -s -W gnu -W obsolete -W portability
+autoreconf -v -i -s -W gnu -W obsolete -W portability -W syntax -W unsupported
 if [ $? -eq 0 ]; then
 	echo all should be done
 	echo please run ./configure and make

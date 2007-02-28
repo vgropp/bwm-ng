@@ -24,6 +24,7 @@ if test -z "${CFLAGS}"; then
 fi
 ])
 
+AC_OBJEXT
 AC_CHECK_TYPES(unsigned long long)
 
 # Checks for libraries.
@@ -120,6 +121,8 @@ AC_CHECK_HEADERS([getopt.h],[
 
 INPUT_FOUND=0
 DISK_INPUT_FOUND=0
+INPUT_SYSTEM=""
+SYSCTL_ADDED=0
 
 #check for getifaddrs
 net_if_h_includes="
@@ -152,6 +155,7 @@ if [ test $withval != "no" ]; then
                 AC_CHECK_MEMBERS([struct if_data.ifi_ibytes],[
                     AC_DEFINE_UNQUOTED([HAVE_WORKING_GETIFADDRS],[1],[getifaddrs works as espected])
 						  INPUT_FOUND=1
+						  INPUT_SYSTEM="$INPUT_SYSTEM getifaddrs.$OBJEXT"
                 ],[ CPPFLAGS=$OLD_CPPFLAGS ],[
                     $net_if_h_includes
                     #include <net/if.h>
@@ -191,6 +195,8 @@ if [ test $withval != "no" ]; then
         AC_CHECK_HEADERS([net/if.h], [
             AC_CHECK_MEMBERS([struct if_msghdr.ifm_data],[
 					INPUT_FOUND=1
+					INPUT_SYSTEM="$INPUT_SYSTEM sysctl.$OBJEXT"
+					SYSCTL_ADDED=1
 					AC_DEFINE_UNQUOTED([HAVE_STRUCT_IF_MSGHDR_IFM_DATA],[1],[sysctl input fully available])
 				],[ CPPFLAGS=$OLD_CPPFLAGS ],[
                 $net_if_h_includes
@@ -206,6 +212,8 @@ AC_CHECK_FUNCS([sysctl],[
     AC_CHECK_HEADERS([net/if.h], [
     	AC_CHECK_MEMBERS([struct if_msghdr.ifm_data],[
 					INPUT_FOUND=1
+					INPUT_SYSTEM="$INPUT_SYSTEM getifaddrs.$OBJEXT"
+					SYSCTL_ADDED=1
 					AC_DEFINE_UNQUOTED([HAVE_STRUCT_IF_MSGHDR_IFM_DATA],[1],[sysctl input fully available])
 			],,[
     		$net_if_h_includes
@@ -229,12 +237,18 @@ if [ test $withval != "no" ]; then
 		SYSCTL_DISK=0
 		AC_CHECK_TYPES([struct diskstats],[
 							DISK_INPUT_FOUND=1
+							if [ test $SYSCTL_ADDED -eq 0 ]; then
+								INPUT_SYSTEM="$INPUT_SYSTEM sysctl.$OBJEXT"
+							fi
 							AC_DEFINE_UNQUOTED([HAVE_STRUCT_DISKSTATS],[1],[sysctl diskinput available])
 							AC_CHECK_MEMBERS([struct diskstats.ds_rbytes],,,[#include <sys/disk.h>])
 							AC_CHECK_MEMBERS([struct diskstats.ds_name],,,[#include <sys/disk.h>])
 							 ],[
 								AC_CHECK_TYPES([struct disk_sysctl],[
 									 DISK_INPUT_FOUND=1
+									 if [ test $SYSCTL_ADDED -eq 0 ]; then
+										 INPUT_SYSTEM="$INPUT_SYSTEM sysctl.$OBJEXT"
+									 fi
 									 AC_DEFINE_UNQUOTED([HAVE_STRUCT_DISK_SYSCTL],[1],[sysctl diskinput available])
 									 AC_CHECK_MEMBERS([struct disk_sysctl.dk_rbytes],,,[#include <sys/disk.h>])
 									 ],[ CPPFLAGS=$OLD_CPPFLAGS ],[#include <sys/disk.h>])
@@ -248,12 +262,18 @@ AC_CHECK_FUNCS([sysctl],[
 	 AC_CHECK_HEADERS([sys/disk.h],[
 	AC_CHECK_TYPES([struct diskstats],[
 						DISK_INPUT_FOUND=1
+						if [ test $SYSCTL_ADDED -eq 0 ]; then
+							INPUT_SYSTEM="$INPUT_SYSTEM sysctl.$OBJEXT"
+						fi
 						AC_DEFINE_UNQUOTED([HAVE_STRUCT_DISKSTATS],[1],[sysctl diskinput available])
 						AC_CHECK_MEMBERS([struct diskstats.ds_rbytes],,,[#include <sys/disk.h>])
 						AC_CHECK_MEMBERS([struct diskstats.ds_name],,,[#include <sys/disk.h>])
 						 ],[
 							AC_CHECK_TYPES([struct disk_sysctl],[
 								 DISK_INPUT_FOUND=1
+								 if [ test $SYSCTL_ADDED -eq 0 ]; then
+									 INPUT_SYSTEM="$INPUT_SYSTEM sysctl.$OBJEXT"
+								 fi
 								 AC_DEFINE_UNQUOTED([HAVE_STRUCT_DISK_SYSCTL],[1],[sysctl diskinput available])
 								 AC_CHECK_MEMBERS([struct disk_sysctl.dk_rbytes],,,[#include <sys/disk.h>])
 							],,[#include <sys/disk.h>])
@@ -273,7 +293,8 @@ if [ test $withval != "no" ]; then
     AC_CHECK_LIB([kstat],[kstat_open],[
       AC_DEFINE_UNQUOTED([HAVE_LIBKSTAT],[1],[Define to 1 if you have the 'kstat' library (-lkstat).])
       LIBS="$LIBS -lkstat"
-		DISK_INPUT_FOUND=1						
+		DISK_INPUT_FOUND=1	
+		INPUT_SYSTEM="$INPUT_SYSTEM libkstat.$OBJEXT"
 		INPUT_FOUND=1
 	],[ CPPFLAGS=$OLD_CPPFLAGS ])
 fi
@@ -281,6 +302,7 @@ fi
 AC_CHECK_LIB([kstat],[kstat_open],[
    AC_DEFINE_UNQUOTED([HAVE_LIBKSTAT],[1],[Define to 1 if you have the 'kstat' library (-lkstat).])
 	LIBS="$LIBS -lkstat"
+	INPUT_SYSTEM="$INPUT_SYSTEM libkstat.$OBJEXT"
 	INPUT_FOUND=1
 	DISK_INPUT_FOUND=1
 ])
@@ -290,6 +312,7 @@ AC_CHECK_LIB([kstat],[kstat_open],[
 AC_ARG_WITH([win32],AS_HELP_STRING([--with-win32],[enable win32 input]),[
 echo "enable win32 support"
 AC_DEFINE_UNQUOTED([WIN32],[1],[enable win32 support])
+INPUT_SYSTEM="$INPUT_SYSTEM win32.$OBJEXT"
 INPUT_FOUND=1
 ])
 
@@ -299,18 +322,23 @@ AC_MSG_CHECKING([for /proc/net/dev input])
 AC_MSG_RESULT($withval)
 if [ test $withval = "yes" ]; then
     AC_DEFINE_UNQUOTED([HAVE__PROC_NET_DEV],[1],[enable /proc/net/dev support])
+	 INPUT_SYSTEM="$INPUT_SYSTEM proc_net_dev.$OBJEXT"
 	 INPUT_FOUND=1
 else
     if [ test $withval != "no" ]; then
         AC_CHECK_FILES([$withval],[
 			AC_DEFINE_UNQUOTED([PROC_NET_DEV_PATH],["$withval"],[set path to /proc/net/dev raw-file])
 			AC_DEFINE_UNQUOTED([HAVE__PROC_NET_DEV],[1],[enable /proc/net/dev support])
+			INPUT_SYSTEM="$INPUT_SYSTEM proc_net_dev.$OBJEXT"
 			INPUT_FOUND=1
         ])
     fi
 fi
 ],[
-AC_CHECK_FILES([/proc/net/dev],[INPUT_FOUND=1])
+AC_CHECK_FILES([/proc/net/dev],[
+	INPUT_FOUND=1
+	INPUT_SYSTEM="$INPUT_SYSTEM proc_net_dev.$OBJEXT"
+])
 ])
 
 AC_ARG_WITH([diskstats],AS_HELP_STRING([--with-diskstats],[enable /proc/diskstats input (diskio) (ARG=PATH)]),[
@@ -319,11 +347,13 @@ AC_MSG_RESULT($withval)
 if [ test $withval = "yes" ]; then
     AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats|/proc/partitions support])
     DISK_INPUT_FOUND=1
+	 INPUT_SYSTEM="$INPUT_SYSTEM proc_diskstats.$OBJEXT"
 else
     if [ test $withval != "no" ]; then
 			AC_DEFINE_UNQUOTED([PROC_DISKSTATS_PATH],["$withval"],[set path to /proc/disktstats raw-file])
 	      AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats|/proc/partitions support])
          DISK_INPUT_FOUND=1
+			INPUT_SYSTEM="$INPUT_SYSTEM proc_diskstats.$OBJEXT"
     fi
 fi
 ]) # check for diskstats on ac_arg_with partitions down below
@@ -334,18 +364,24 @@ AC_MSG_RESULT($withval)
 if [ test $withval = "yes" ]; then
     AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats|/proc/partitions support])
     DISK_INPUT_FOUND=1
+	 INPUT_SYSTEM="$INPUT_SYSTEM proc_diskstats.$OBJEXT"
 else
     if [ test $withval != "no" ]; then
 		AC_DEFINE_UNQUOTED([PROC_PARTITIONS_PATH],["$withval"],[set path to /proc/partitions raw-file])
       AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats|/proc/partitions support])
       DISK_INPUT_FOUND=1
+		INPUT_SYSTEM="$INPUT_SYSTEM proc_diskstats.$OBJEXT"
     fi
 fi
 ],[
-AC_CHECK_FILES([/proc/diskstats],[DISK_INPUT_FOUND=1],[
+AC_CHECK_FILES([/proc/diskstats],[
+					 DISK_INPUT_FOUND=1
+					 INPUT_SYSTEM="$INPUT_SYSTEM proc_diskstats.$OBJEXT"
+					 ],[
    AC_CHECK_FILES([/proc/partitions],[
       AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats|/proc/partitions support])
       DISK_INPUT_FOUND=1
+		INPUT_SYSTEM="$INPUT_SYSTEM proc_diskstats.$OBJEXT"
    ])
 ])
 ])
@@ -364,11 +400,13 @@ if [ test $withval != "no" ]; then
 					DISK_INPUT_FOUND=1
 					AC_DEFINE_UNQUOTED([HAVE_DEVSTAT_GETDEVS],[1],[Define to 1 if you have the 'devstat' library (-ldevstat).])
 					LIBS="$LIBS -ldevstat"
+					INPUT_SYSTEM="$INPUT_SYSTEM devstat.$OBJEXT"
 				],[
 					AC_CHECK_LIB([devstat],[getdevs],[
 							DISK_INPUT_FOUND=1
 							AC_DEFINE_UNQUOTED([HAVE_GETDEVS],[1],[Define to 1 if you have the 'devstat' library (-ldevstat).])
 							LIBS="$LIBS -ldevstat"
+							INPUT_SYSTEM="$INPUT_SYSTEM devstat.$OBJEXT"
 					])
 			])
 		],,[#include <sys/dkstat.h>])
@@ -381,11 +419,13 @@ AC_CHECK_HEADERS([sys/dkstat.h],[
 				DISK_INPUT_FOUND=1
 				AC_DEFINE_UNQUOTED([HAVE_DEVSTAT_GETDEVS],[1],[Define to 1 if you have the 'devstat' library (-ldevstat).])
 				LIBS="$LIBS -ldevstat"
+				INPUT_SYSTEM="$INPUT_SYSTEM devstat.$OBJEXT"
 			],[
 				AC_CHECK_LIB([devstat],[getdevs],[
 						DISK_INPUT_FOUND=1
 						AC_DEFINE_UNQUOTED([HAVE_GETDEVS],[1],[Define to 1 if you have the 'devstat' library (-ldevstat).])
 						LIBS="$LIBS -ldevstat"
+						INPUT_SYSTEM="$INPUT_SYSTEM devstat.$OBJEXT"
 				])
 		])
 	],,[#include <sys/dkstat.h>])
@@ -409,6 +449,7 @@ if [ test $withval != "no" ]; then
             DISK_INPUT_FOUND=1
             AC_DEFINE_UNQUOTED([HAVE_IOSERVICE],[1],[Define to 1 if you have Darwin IOService support])
 				HAVE_IOSERVICE=1
+				INPUT_SYSTEM="$INPUT_SYSTEM ioservice.$OBJEXT"
          ])
       ])
    ],,[
@@ -435,6 +476,7 @@ if test -z "`${CC-cc} -o conftest conftest.c -framework IOKit -framework CoreFou
 				DISK_INPUT_FOUND=1
 				AC_DEFINE_UNQUOTED([HAVE_IOSERVICE],[1],[Define to 1 if you have Darwin IOService support])
 				HAVE_IOSERVICE=1
+				INPUT_SYSTEM="$INPUT_SYSTEM ioservice.$OBJEXT"
 			])
 		])
 	])
@@ -459,6 +501,7 @@ if [ test $withval != "no" ]; then
 			INPUT_FOUND=1
 	    	AC_DEFINE_UNQUOTED([HAVE_LIBSTATGRAB],[1],[Define to 1 if you have the 'statgrab' library (-lstatgrab).])
    	 	LIBS="$LIBS -lstatgrab"
+			INPUT_SYSTEM="$INPUT_SYSTEM libstatgrab.$OBJEXT"
 		],[ CPPFLAGS=$OLD_CPPFLAGS ])
 fi
 ],[
@@ -467,6 +510,7 @@ if [ test $INPUT_FOUND -ne 1 ] || [ test $DISK_INPUT_FOUND -ne 1 ]; then
 		INPUT_FOUND=1
 		AC_DEFINE_UNQUOTED([HAVE_LIBSTATGRAB],[1],[Define to 1 if you have the 'statgrab' library (-lstatgrab).])
 		LIBS="$LIBS -lstatgrab"
+		INPUT_SYSTEM="$INPUT_SYSTEM libstatgrab.$OBJEXT"
 	])
 fi
 ])
@@ -583,11 +627,14 @@ if [ test $withval != "no" ]; then
     fi
     if [ test $NETSTAT_BYTE != "1" ]; then
         AC_DEFINE_UNQUOTED([NETSTAT_BSD],[1],[use bsd like netstat])
+		  INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
     else
         AC_DEFINE_UNQUOTED([NETSTAT_BSD_BYTES],[1],[use bsd like netstat including bytes info])
+		  INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
     fi
     if [ test $NETSTAT_LINK != "0" ]; then
         AC_DEFINE_UNQUOTED([NETSTAT_BSD_LINK],[1],[use bsd like netstat with link switch])
+		  INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
     fi
 else 
     NETSTAT_DEFINED="1"
@@ -604,6 +651,7 @@ if [ test $withval != "no" ]; then
         echo "GNU net-tools like version forced"
     fi
     AC_DEFINE_UNQUOTED([NETSTAT_LINUX],[1],[use GNU net-tools netstat])
+	 INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
     NETSTAT_DEFINED="1"
 else
     NETSTAT_DEFINED="1"
@@ -622,6 +670,7 @@ if [ test $withval != "no" ]; then
     fi
     AC_DEFINE_UNQUOTED([NETSTAT_SOLARIS],[1],[use Solaris netstat theme])
     NETSTAT_DEFINED="1"
+	 INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
 else
     NETSTAT_DEFINED="1"
     echo "disable netstat: solaris like version"
@@ -638,6 +687,7 @@ if [ test $withval != "no" ]; then
     fi
     AC_DEFINE_UNQUOTED([NETSTAT_NETBSD],[1],[use NetBSD/OpenBSD like netstat])
     NETSTAT_DEFINED="1"
+	 INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
 else
     NETSTAT_DEFINED="1"
     echo "disable netstat: NetBSD/OpenBSD like version"
@@ -656,6 +706,7 @@ if [ test "${EGREP}" ]; then
         if [ test "${net_test}" ]; then
             AC_MSG_RESULT([GNU net-tools like version found])
 			AC_DEFINE_UNQUOTED([NETSTAT_LINUX],[1],[use GNU net-tools netstat])
+			INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
         else
             net_test=`${NETSTAT_CMD} -iW 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Opkts +Oerrs +Coll"`
             if [ test "${net_test}" ]; then
@@ -663,15 +714,18 @@ if [ test "${EGREP}" ]; then
 				if [ test "${net_test2}" ]; then
 					AC_MSG_RESULT([BSD like version with byte info found])
 					AC_DEFINE_UNQUOTED([NETSTAT_BSD_BYTES],[1],[bsd like version with byte info])
+					INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
 				else
 	                AC_MSG_RESULT([BSD like version found])
 					AC_DEFINE_UNQUOTED([NETSTAT_BSD],[1],[BSD like netstat])
+					INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
 				fi
 				AC_MSG_CHECKING([for netstat -f link])
 				net_test3=`${NETSTAT_CMD} -iW -f link 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Opkts +Oerrs +Coll"`
 				if [ test "${net_test3}" ]; then
 					AC_MSG_RESULT([yes])
 					AC_DEFINE_UNQUOTED([NETSTAT_BSD_LINK],[1],[enable link info for netstat])
+					INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
 				else
 					AC_MSG_RESULT([no])
 				fi
@@ -680,11 +734,13 @@ if [ test "${EGREP}" ]; then
                 if [ test "${net_test}" ]; then
                     AC_MSG_RESULT([solaris version found])
                     AC_DEFINE_UNQUOTED([NETSTAT_SOLARIS],[1],[use Solaris netstat])
+						  INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
                 else 
                     net_test=`${NETSTAT_CMD} -ibd 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ibytes +Obytes +Drop"`
                     if [ test "${net_test}" ]; then
                         AC_MSG_RESULT([Net/OpenBSD version found])
                         AC_DEFINE_UNQUOTED([NETSTAT_NETBSD],[1],[Use Net/OpenBSD netstat])
+								INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
                     else
         				AC_MSG_RESULT([unknown netstat version - disabled])
 echo "*********************************************
@@ -741,6 +797,8 @@ fi
 
 AC_CHECK_CC_OPT(Wno-long-double)
 AC_CHECK_CC_OPT(Wno-long-long)
+
+AC_SUBST([INPUT_SYSTEM])
 
 AC_CONFIG_FILES([
     Makefile

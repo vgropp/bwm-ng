@@ -1,7 +1,7 @@
 /******************************************************************************
  *  bwm-ng parsing and retrive stuff                                          *
  *                                                                            *
- *  Copyright (C) 2004 Volker Gropp (vgropp@pefra.de)                         *
+ *  Copyright (C) 2004-2007 Volker Gropp (bwmng@gropp.org)                    *
  *                                                                            *
  *  for more info read README.                                                *
  *                                                                            *
@@ -21,87 +21,16 @@
  *                                                                            *
  *****************************************************************************/
 
-#ifndef __RETRIEVE_H
-#define __RETRIEVE_H 
+#ifndef __PROC_DISKSTATS_H
+#define __PROC_DISKSTATS_H 
 
-#include "defines.h"
-#include "types.h"
+#include "retrieve.h"
 
+#ifdef PROC_DISKSTATS
+#define LOOP_MAJOR 7
 
-#ifdef HAVE_LIBKSTAT
-#include <kstat.h>
-#endif
+void get_disk_stats_proc (char verbose);
+#endif 
 
-#ifdef GETIFADDRS
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <net/if.h>
-#include <ifaddrs.h>
-#endif
-
-#if defined(SYSCTL) || defined(HAVE_SYS_DISK_H)
-#ifndef GETIFADDRS
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <net/if.h>
-#endif
-
-#include <sys/param.h> /* netbsd fix */
-#include <sys/sysctl.h>
-#ifdef SYSCTL
-#include <net/route.h>
-#include <net/if_dl.h>
-#endif
-#ifdef HAVE_SYS_DISK_H
-#include <sys/disk.h>
-#endif
-#endif
-
-
-#ifdef IOCTL
-/* following only for check_if_up and ioctl */
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#ifdef HAVE_LINUX_IF_H
-#include <linux/if.h>
-#else
-#include <net/if.h>
-#endif
-#endif
-
-
-#ifdef LIBSTATGRAB
-#include <statgrab.h>
-#endif
-
-#ifdef WIN32
-#include <windows.h>
-#include <iphlpapi.h>
-#endif
-
-#if DEVSTAT_IN
-#include <sys/dkstat.h>
-#include <devstat.h>
-#endif
-
-#if IOSERVICE_IN
-#include <CoreFoundation/CoreFoundation.h>
-#include <IOKit/IOKitLib.h>
-#include <IOKit/storage/IOBlockStorageDriver.h>
-#include <IOKit/storage/IOMedia.h>
-#ifndef LONG_DARWIN_DEV_NAMES
-#include <IOKit/IOBSD.h>
-#include <paths.h>
-#endif
-#endif
-
-
-#define MAX_LINE_BUFFER 1024
-
-#include "process.h"
-#include "bwm-ng.h"
-
-inline void get_iface_stats(char _n);
 
 #endif

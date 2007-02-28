@@ -1,7 +1,7 @@
 /******************************************************************************
- *  bwm-ng                                                                    *
+ *  bwm-ng parsing and retrive stuff                                          *
  *                                                                            *
- *  Copyright (C) 2004 Volker Gropp (vgropp@pefra.de)                         *
+ *  Copyright (C) 2004-2007 Volker Gropp (bwmng@gropp.org)                    *
  *                                                                            *
  *  for more info read README.                                                *
  *                                                                            *
@@ -21,27 +21,39 @@
  *                                                                            *
  *****************************************************************************/
 
-#ifndef __BWM_NG_H
-#define __BWM_NG_H
+#ifndef __SYSCTL_H
+#define __SYSCTL_H 
 
-#include "defines.h"
-#include "types.h"
-#include "curses_tools.h"
-#include "options.h"
-#include "output.h"
-#include "input/retrieve.h"
-#include "help.h"
+#include "retrieve.h"
 
-#ifdef WIN32
-#include <windows.h>
+#if defined(SYSCTL) || defined(HAVE_SYS_DISK_H)
+#ifndef GETIFADDRS
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <net/if.h>
 #endif
 
-#ifdef __STDC__
-#include <stdarg.h>
-void deinit(int code, char *error_msg, ...);
-#else
-#include <varargs.h>
-void deinit(int code, ...);
+#include <sys/param.h> /* netbsd fix */
+#include <sys/sysctl.h>
+
+#ifdef SYSCTL
+#include <net/route.h>
+#include <net/if_dl.h>
+
+void get_iface_stats_sysctl (char verbose);
+
 #endif
+
+#ifdef HAVE_SYS_DISK_H
+#include <sys/disk.h>
+#endif
+
+#if SYSCTLDISK_IN
+void get_iface_stats_sysctldisk (char verbose);
+#endif
+
+
+#endif
+
 
 #endif

@@ -1,7 +1,7 @@
 /******************************************************************************
- *  bwm-ng                                                                    *
+ *  bwm-ng parsing and retrive stuff                                          *
  *                                                                            *
- *  Copyright (C) 2004 Volker Gropp (vgropp@pefra.de)                         *
+ *  Copyright (C) 2004-2007 Volker Gropp (bwmng@gropp.org)                    *
  *                                                                            *
  *  for more info read README.                                                *
  *                                                                            *
@@ -21,27 +21,23 @@
  *                                                                            *
  *****************************************************************************/
 
-#ifndef __BWM_NG_H
-#define __BWM_NG_H
+#ifndef __IOSERVICE_H
+#define __IOSERVICE_H 
 
-#include "defines.h"
-#include "types.h"
-#include "curses_tools.h"
-#include "options.h"
-#include "output.h"
-#include "input/retrieve.h"
-#include "help.h"
+#include "retrieve.h"
 
-#ifdef WIN32
-#include <windows.h>
+#if IOSERVICE_IN
+#include <CoreFoundation/CoreFoundation.h>
+#include <IOKit/IOKitLib.h>
+#include <IOKit/storage/IOBlockStorageDriver.h>
+#include <IOKit/storage/IOMedia.h>
+#ifndef LONG_DARWIN_DEV_NAMES
+#include <IOKit/IOBSD.h>
+#include <paths.h>
 #endif
 
-#ifdef __STDC__
-#include <stdarg.h>
-void deinit(int code, char *error_msg, ...);
-#else
-#include <varargs.h>
-void deinit(int code, ...);
+void get_disk_stats_ioservice (char verbose);
 #endif
+
 
 #endif

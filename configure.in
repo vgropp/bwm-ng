@@ -212,7 +212,7 @@ AC_CHECK_FUNCS([sysctl],[
     AC_CHECK_HEADERS([net/if.h], [
     	AC_CHECK_MEMBERS([struct if_msghdr.ifm_data],[
 					INPUT_FOUND=1
-					INPUT_SYSTEM="$INPUT_SYSTEM getifaddrs.$OBJEXT"
+					INPUT_SYSTEM="$INPUT_SYSTEM sysctl.$OBJEXT"
 					SYSCTL_ADDED=1
 					AC_DEFINE_UNQUOTED([HAVE_STRUCT_IF_MSGHDR_IFM_DATA],[1],[sysctl input fully available])
 			],,[
@@ -312,6 +312,7 @@ AC_CHECK_LIB([kstat],[kstat_open],[
 AC_ARG_WITH([win32],AS_HELP_STRING([--with-win32],[enable win32 input]),[
 echo "enable win32 support"
 AC_DEFINE_UNQUOTED([WIN32],[1],[enable win32 support])
+LIBS="$LIBS -liphlpapi"
 INPUT_SYSTEM="$INPUT_SYSTEM win32.$OBJEXT"
 INPUT_FOUND=1
 ])
@@ -335,10 +336,12 @@ else
     fi
 fi
 ],[
-AC_CHECK_FILES([/proc/net/dev],[
-	INPUT_FOUND=1
-	INPUT_SYSTEM="$INPUT_SYSTEM proc_net_dev.$OBJEXT"
-])
+if test "$cross_compiling" != yes; then
+	AC_CHECK_FILES([/proc/net/dev],[
+		INPUT_FOUND=1
+		INPUT_SYSTEM="$INPUT_SYSTEM proc_net_dev.$OBJEXT"
+	])
+fi
 ])
 
 AC_ARG_WITH([diskstats],AS_HELP_STRING([--with-diskstats],[enable /proc/diskstats input (diskio) (ARG=PATH)]),[
@@ -374,16 +377,18 @@ else
     fi
 fi
 ],[
-AC_CHECK_FILES([/proc/diskstats],[
-					 DISK_INPUT_FOUND=1
-					 INPUT_SYSTEM="$INPUT_SYSTEM proc_diskstats.$OBJEXT"
-					 ],[
-   AC_CHECK_FILES([/proc/partitions],[
-      AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats|/proc/partitions support])
-      DISK_INPUT_FOUND=1
-		INPUT_SYSTEM="$INPUT_SYSTEM proc_diskstats.$OBJEXT"
-   ])
-])
+if test "$cross_compiling" != yes; then	
+	AC_CHECK_FILES([/proc/diskstats],[
+						 DISK_INPUT_FOUND=1
+						 INPUT_SYSTEM="$INPUT_SYSTEM proc_diskstats.$OBJEXT"
+						 ],[
+	   AC_CHECK_FILES([/proc/partitions],[
+		   AC_DEFINE_UNQUOTED([HAVE__PROC_DISKSTATS],[1],[enable /proc/diskstats|/proc/partitions support])
+			DISK_INPUT_FOUND=1
+			INPUT_SYSTEM="$INPUT_SYSTEM proc_diskstats.$OBJEXT"
+		])
+	])
+fi
 ])
 
 AC_ARG_WITH([devstat],AS_HELP_STRING([--with-devstat],[enable devstat input (ie FreeBSD) (ARG=PATH)]),[
@@ -590,6 +595,8 @@ AC_CHECK_HEADERS([pwd.h],[
     ])
 ])
 
+NETSTAT_ADDED=0
+
 AC_ARG_ENABLE([netstatpath],AS_HELP_STRING([--enable-netstatpath],[enable path to netstat as runtime option (default: no), WARNING THIS IS A SECURITY FLAW!]),[
 echo "enable path to netstat as option: $enableval"
 if [ test $enableval = "yes" ]; then
@@ -603,7 +610,7 @@ NETSTAT_BYTE="0"
 AC_ARG_ENABLE([netstatbyte],AS_HELP_STRING([--enable-netstatbyte],[enable netstat with byte info (default: no)]),[
 echo "enable netstat with byte info: $enableval"
 if [ test $enableval = "yes" ]; then
-    NETSTAT_BYTE="1"
+   NETSTAT_BYTE="1"
 fi
 ])
 
@@ -627,14 +634,26 @@ if [ test $withval != "no" ]; then
     fi
     if [ test $NETSTAT_BYTE != "1" ]; then
         AC_DEFINE_UNQUOTED([NETSTAT_BSD],[1],[use bsd like netstat])
-		  INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+		NETSTAT_DEFINED="1"
+		 if [ test $NETSTAT_ADDED -eq 0 ]; then
+			 INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+			 NETSTAT_ADDED=1
+		 fi
     else
         AC_DEFINE_UNQUOTED([NETSTAT_BSD_BYTES],[1],[use bsd like netstat including bytes info])
-		  INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+		NETSTAT_DEFINED="1"
+		  if [ test $NETSTAT_ADDED -eq 0 ]; then
+			 INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+			 NETSTAT_ADDED=1
+		  fi 
     fi
     if [ test $NETSTAT_LINK != "0" ]; then
         AC_DEFINE_UNQUOTED([NETSTAT_BSD_LINK],[1],[use bsd like netstat with link switch])
-		  INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+			NETSTAT_DEFINED="1"
+		 if [ test $NETSTAT_ADDED -eq 0 ]; then
+			 INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+			 NETSTAT_ADDED=1
+		 fi
     fi
 else 
     NETSTAT_DEFINED="1"
@@ -651,7 +670,10 @@ if [ test $withval != "no" ]; then
         echo "GNU net-tools like version forced"
     fi
     AC_DEFINE_UNQUOTED([NETSTAT_LINUX],[1],[use GNU net-tools netstat])
-	 INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+    if [ test $NETSTAT_ADDED -eq 0 ]; then
+       INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+       NETSTAT_ADDED=1
+ 	 fi
     NETSTAT_DEFINED="1"
 else
     NETSTAT_DEFINED="1"
@@ -670,7 +692,11 @@ if [ test $withval != "no" ]; then
     fi
     AC_DEFINE_UNQUOTED([NETSTAT_SOLARIS],[1],[use Solaris netstat theme])
     NETSTAT_DEFINED="1"
-	 INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+	 if [ test $NETSTAT_ADDED -eq 0 ]; then
+		 INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+		 NETSTAT_ADDED=1
+	 fi
+
 else
     NETSTAT_DEFINED="1"
     echo "disable netstat: solaris like version"
@@ -687,7 +713,11 @@ if [ test $withval != "no" ]; then
     fi
     AC_DEFINE_UNQUOTED([NETSTAT_NETBSD],[1],[use NetBSD/OpenBSD like netstat])
     NETSTAT_DEFINED="1"
-	 INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+	 if [ test $NETSTAT_ADDED -eq 0 ]; then
+		 INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+		 NETSTAT_ADDED=1
+	 fi
+
 else
     NETSTAT_DEFINED="1"
     echo "disable netstat: NetBSD/OpenBSD like version"
@@ -704,9 +734,12 @@ if [ test "${EGREP}" ]; then
         AC_MSG_CHECKING([for netstat version])
         net_test=`${NETSTAT_CMD} -ia 2>/dev/null | ${EGREP} "Iface +MTU +Met +RX-OK +RX-ERR +RX-DRP +RX-OVR +TX-OK +TX-ERR +TX-DRP +TX-OVR +Flg"`
         if [ test "${net_test}" ]; then
-            AC_MSG_RESULT([GNU net-tools like version found])
-			AC_DEFINE_UNQUOTED([NETSTAT_LINUX],[1],[use GNU net-tools netstat])
-			INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+        		AC_MSG_RESULT([GNU net-tools like version found])
+				AC_DEFINE_UNQUOTED([NETSTAT_LINUX],[1],[use GNU net-tools netstat])
+			 	if [ test $NETSTAT_ADDED -eq 0 ]; then
+					 INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+					 NETSTAT_ADDED=1
+			 	fi
         else
             net_test=`${NETSTAT_CMD} -iW 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Opkts +Oerrs +Coll"`
             if [ test "${net_test}" ]; then
@@ -714,18 +747,27 @@ if [ test "${EGREP}" ]; then
 				if [ test "${net_test2}" ]; then
 					AC_MSG_RESULT([BSD like version with byte info found])
 					AC_DEFINE_UNQUOTED([NETSTAT_BSD_BYTES],[1],[bsd like version with byte info])
-					INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+				   if [ test $NETSTAT_ADDED -eq 0 ]; then
+				  	 	INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+					 	NETSTAT_ADDED=1
+				 	fi
 				else
-	                AC_MSG_RESULT([BSD like version found])
-					AC_DEFINE_UNQUOTED([NETSTAT_BSD],[1],[BSD like netstat])
-					INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+	             AC_MSG_RESULT([BSD like version found])
+					 AC_DEFINE_UNQUOTED([NETSTAT_BSD],[1],[BSD like netstat])
+					 if [ test $NETSTAT_ADDED -eq 0 ]; then
+						 INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+						 NETSTAT_ADDED=1
+					 fi
 				fi
 				AC_MSG_CHECKING([for netstat -f link])
 				net_test3=`${NETSTAT_CMD} -iW -f link 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ipkts +Ierrs +Opkts +Oerrs +Coll"`
 				if [ test "${net_test3}" ]; then
 					AC_MSG_RESULT([yes])
 					AC_DEFINE_UNQUOTED([NETSTAT_BSD_LINK],[1],[enable link info for netstat])
-					INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+					 if [ test $NETSTAT_ADDED -eq 0 ]; then
+						 INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+						 NETSTAT_ADDED=1
+					 fi
 				else
 					AC_MSG_RESULT([no])
 				fi
@@ -734,13 +776,19 @@ if [ test "${EGREP}" ]; then
                 if [ test "${net_test}" ]; then
                     AC_MSG_RESULT([solaris version found])
                     AC_DEFINE_UNQUOTED([NETSTAT_SOLARIS],[1],[use Solaris netstat])
-						  INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+						 if [ test $NETSTAT_ADDED -eq 0 ]; then
+							 INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+							 NETSTAT_ADDED=1
+						 fi
                 else 
                     net_test=`${NETSTAT_CMD} -ibd 2>/dev/null | ${EGREP} "Name +Mtu +Network +Address +Ibytes +Obytes +Drop"`
                     if [ test "${net_test}" ]; then
                         AC_MSG_RESULT([Net/OpenBSD version found])
                         AC_DEFINE_UNQUOTED([NETSTAT_NETBSD],[1],[Use Net/OpenBSD netstat])
-								INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+								 if [ test $NETSTAT_ADDED -eq 0 ]; then
+									 INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+									 NETSTAT_ADDED=1
+								 fi
                     else
         				AC_MSG_RESULT([unknown netstat version - disabled])
 echo "*********************************************
@@ -765,9 +813,11 @@ if [ test $withval != "no" ]; then
     if [ test $withval != "yes" ]; then
         STRIP="${withval} \${TARGET}"
     else
-        AC_CHECK_FILES([/usr/ccs/bin/strip],[
-            AC_CHECK_PROGS([STRIP],[strip],,,[/usr/ccs/bin])
-        ])
+		 if test "$cross_compiling" != yes; then
+	        AC_CHECK_FILES([/usr/ccs/bin/strip],[
+		         AC_CHECK_PROGS([STRIP],[strip],,,[/usr/ccs/bin])
+			  ])
+		 fi
         if [ test "${STRIP}" ]; then
             STRIP="${STRIP} \${TARGET}"
         else
@@ -779,9 +829,11 @@ if [ test $withval != "no" ]; then
     fi
 fi
 ],[
-AC_CHECK_FILES([/usr/ccs/bin/strip],[
-    AC_CHECK_PROGS([STRIP],[strip],,,[/usr/ccs/bin])
-])
+if test "$cross_compiling" != yes; then
+	AC_CHECK_FILES([/usr/ccs/bin/strip],[
+		 AC_CHECK_PROGS([STRIP],[strip],,,[/usr/ccs/bin])
+	])
+fi
 if [ test "${STRIP}" ]; then
     STRIP="/usr/ccs/bin/${STRIP} \${TARGET}"
 else

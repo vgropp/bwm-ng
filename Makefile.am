@@ -1,3 +1,5 @@
+## Process this file with automake to produce Makefile.in
+
 AUTOMAKE_OPTIONS = gnu
 
 SUBDIRS = src
@@ -7,3 +9,5 @@ man_MANS = bwm-ng.1
 
 # we want these in the dist tarball
 EXTRA_DIST = bwm-ng.1 bwm-ng.conf-example bwm-ng.css autogen.sh
+
+dist_doc_DATA = README THANKS AUTHORS ChangeLog

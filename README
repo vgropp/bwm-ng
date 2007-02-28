@@ -63,11 +63,8 @@ make install
 WIN32
 =====
 
-To compile the Windows version in Linux (debian), sadly gnu make seems to disagree with mingw-gcc:
-export CC=i586-mingw32msvc-gcc
-export LDFLAGS="$LDFLAGS -L/usr/i586-mingw32msvc/lib"
-export LIBS="$LIBS -liphlpapi"
-./configure --with-win32 --without-procnetdev --without-diskstats --without-curses --without-netstatlinux
+To compile the Windows version in Linux (debian): 
+./configure --with-win32 --without-procnetdev --without-diskstats --without-curses --without-netstatlinux --build i686-pc-linux-gnu --host i586-mingw32msvc
 make
 
 Specs

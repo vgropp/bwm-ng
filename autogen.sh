@@ -31,17 +31,11 @@ elif test -n "${BASH_VERSION+set}" && (set -o posix) >/dev/null 2>&1; then
 fi
 
 PROJECT=bwm-ng
-
-echo trying autoreconf to setup build enviroment
-autoreconf -v -i -s -W gnu -W obsolete -W portability -W syntax -W unsupported
-if [ $? -eq 0 ]; then
-	echo all should be done
-	echo please run ./configure and make
-	echo for help run ./configure --help
-	exit 0
-fi
-
-echo looks like there is no autoreconf, trying to setup all now
+autoconf=autoconf
+autoheader=autoheader
+aclocal=
+automake=
+auto_version=0
 
 
 srcdir=`dirname "$0"`
@@ -58,52 +52,58 @@ then
   echo "to pass any to it, please specify them on the $0 command line."
 fi
 
-autoconf=autoconf
-autoheader=autoheader
-aclocal=
-automake=
-auto_version=0
-
-if test -n $AUTOCONF_VERSION 
+if test -n $AUTOCONF_VERSION
 then
-	echo "test for autoconf version"
-	for suffix in "" -2.62 -2.61 -2.60 -2.59 -2.58 -2.57 -2.56 -2.55 -2.54 -2.53 -2.52 -2.51 
-	do
-		autoconf_version=`autoconf$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
-		autoheader_version=`autoheader$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
-		version=`echo "$autoconf_version" | cut -c-3 | tr -d .`
-		if test -n "$autoconf_version" && test -n "$autoheader_version" && test "$autoconf_version" = "$autoheader_version" && \
-			test -n "$version" && \
-			test -z "`echo -n $version | sed -n s/[0-9]*//p`"
-		then
-			autoconf=autoconf$suffix
-			autoheader=autoheader$suffix
-		   if test -n "$suffix"
-		   then
-      		echo "found version `echo $suffix | cut -c2-`"
-		      export AUTOCONF_VERSION=`echo $suffix | cut -c2-`
-		   fi
-			break
-		fi
-	done
+   echo "test for autoconf version"
+   for suffix in "" -2.62 -2.61 -2.60 -2.59 -2.58 -2.57 -2.56 -2.55 -2.54 -2.53 -2.52 -2.51
+   do
+      autoconf_version=`autoconf$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
+      autoheader_version=`autoheader$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
+      version=`echo "$autoconf_version" | cut -c-3 | tr -d .`
+      if test -n "$autoconf_version" && test -n "$autoheader_version" && test "$autoconf_version" = "$autoheader_version" && \
+         test -n "$version" && \
+         test -z "`echo -n $version | sed -n s/[0-9]*//p`"
+      then
+         autoconf=autoconf$suffix
+         autoheader=autoheader$suffix
+         if test -n "$suffix"
+         then
+            echo "found version `echo $suffix | cut -c2-`"
+            export AUTOCONF_VERSION=`echo $suffix | cut -c2-`
+         fi
+         break
+      fi
+   done
 fi
 
-for suffix in "" -1.9 -1.8 -1.7 
-do
-  aclocal_version=`aclocal$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
-  automake_version=`automake$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
-  if test -n "$aclocal_version" && test -n "$automake_version" && test "$aclocal_version" = "$automake_version" && \
-	  test -n `echo "$aclocal_version" | cut -c-3 | tr -d .` 
-  then
-     auto_version=`echo "$aclocal_version" | cut -c-3 | tr -d .`
-	  if test -z "`echo -n $auto_version | sed -n s/[0-9]*//p`" && test $auto_version -ge 16
+if test -n $AUTOMAKE_VERSION
+then
+	echo "test for automake version"
+	for suffix in "" -1.9 -1.8 -1.7 
+	do
+	  aclocal_version=`aclocal$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
+	  automake_version=`automake$suffix --version </dev/null 2>/dev/null | head -n1 | cut -d " " -f 4`
+	  if test -n "$aclocal_version" && test -n "$automake_version" && test "$aclocal_version" = "$automake_version" && \
+		  test -n `echo "$aclocal_version" | cut -c-3 | tr -d .` 
 	  then
-	     aclocal=aclocal$suffix
-	     automake=automake$suffix
-		  break
+		  auto_version=`echo "$aclocal_version" | cut -c-3 | tr -d .`
+		  if test -z "`echo -n $auto_version | sed -n s/[0-9]*//p`" && test $auto_version -ge 16
+		  then
+			  aclocal=aclocal$suffix
+			  automake=automake$suffix
+			  if test -n "$suffix"
+			  then
+				  echo "found version `echo $suffix | cut -c2-`"
+				  export AUTOMAKE_VERSION=`echo $suffix | cut -c2-`
+			  fi
+			  break
+		  fi
 	  fi
-  fi
-done
+	done
+else
+	aclocal=aclocal
+	automake=automake
+fi
 
 if test -z "$aclocal" || test -z "$automake"
 then
@@ -113,17 +113,34 @@ then
 	exit 1
 fi
 
+set_option=':'
+test -n "${BASH_VERSION+set}" && set_option='set'
+
+$set_option -x
+
+echo trying autoreconf to setup build enviroment
+autoreconf -v -i -s -W gnu -W obsolete -W portability -W syntax -W unsupported
+if [ $? -eq 0 ]; then
+   echo running configure now
+	if test -z "$AUTOGEN_SUBDIR_MODE"
+	then
+	  "$srcdir/configure" ${1+"$@"} || exit 1
+	  $set_option +x
+	  echo
+	  echo "Now type 'make' to compile $PROJECT."
+	fi	
+   exit 0
+fi
+
+echo looks like there is no autoreconf, trying to setup all now
+
+
 rm -f config.guess config.sub depcomp install-sh missing mkinstalldirs
 rm -f config.cache acconfig.h
 rm -rf autom4te.cache
 
 WARNINGS=all
 export WARNINGS
-
-set_option=':'
-test -n "${BASH_VERSION+set}" && set_option='set'
-
-$set_option -x
 
 "$aclocal" $ACLOCAL_FLAGS   || exit 1
 "$autoheader"           || exit 1

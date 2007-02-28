@@ -266,7 +266,7 @@ int process_if_data (int hidden_if, t_iface_speed_stats tmp_if_stats,t_iface_spe
     /* save current stats for the next run */
     if_stats[local_if_count].data=tmp_if_stats;
     /* add stats to new total */
-    if (show_iface(iface_list,name,iface_is_up) && (net_input_method(input_method) || iface_is_up)) {
+    if (show_iface(iface_list,name,iface_is_up)) {
         stats->bytes.out+=tmp_if_stats.bytes.out;
         stats->bytes.in+=tmp_if_stats.bytes.in;
         stats->packets.out+=tmp_if_stats.packets.out;

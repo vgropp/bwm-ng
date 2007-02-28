@@ -119,6 +119,7 @@ void get_iface_stats_sysctldisk (char verbose) {
 	DISK_STRUCT *dstats = NULL;
 	int num,i;
 	char *name=NULL;
+	char free_name=0;
 
 	int hidden_if=0,current_if_num=0;
 	t_iface_speed_stats tmp_if_stats;
@@ -210,11 +211,11 @@ void get_iface_stats_sysctldisk (char verbose) {
 		name = dstats[i].ds_name;
 #endif		
 #else
-#ifdef HAVE_DK_RBYTES
+#ifdef HAVE_STRUCT_DISK_SYSCTL_DK_RBYTES
 		tmp_if_stats.bytes.in = dstats[i].dk_rbytes;
 		tmp_if_stats.bytes.out = dstats[i].dk_wbytes;
-      tmp_if_stats.packets.in = dstats[i].ds_rxfer;
-      tmp_if_stats.packets.out = dstats[i].ds_wxfer;
+      tmp_if_stats.packets.in = dstats[i].dk_rxfer;
+      tmp_if_stats.packets.out = dstats[i].dk_wxfer;
 #else
 		tmp_if_stats.bytes.in = tmp_if_stats.bytes.out = (ullong)(dstats[i].dk_bytes / 2);
 		tmp_if_stats.packets.in = tmp_if_stats.packets.out = (ullong)(dstats[i].dk_xfer / 2);
@@ -223,7 +224,16 @@ void get_iface_stats_sysctldisk (char verbose) {
 #endif
 		tmp_if_stats.errors.in = tmp_if_stats.errors.out = 0;
 
+		if (!name || name[0]==0) {
+			name=malloc(11);
+      	snprintf((char *)name,10,"unknown%i",current_if_num);
+         name[10]=0;
+			free_name=1;
+		}
+
 		hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose, (tmp_if_stats.bytes.in != 0 || tmp_if_stats.bytes.out != 0));
+
+		if (free_name) free(name);
 		current_if_num++;
 	}
 	/* add to total stats and output current stats if verbose */

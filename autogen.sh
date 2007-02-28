@@ -32,6 +32,18 @@ fi
 
 PROJECT=bwm-ng
 
+echo trying autoreconf to setup build enviroment
+autoreconf -v -i -s -W gnu -W obsolete -W portability
+if [ $? -eq 0 ]; then
+	echo all should be done
+	echo please run ./configure and make
+	echo for help run ./configure --help
+	exit 0
+fi
+
+echo looks like there is no autoreconf, trying to setup all now
+
+
 srcdir=`dirname "$0"`
 test -n "$srcdir" || srcdir=.
 

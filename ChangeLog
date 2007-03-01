@@ -1,3 +1,195 @@
+2007-03-01 07:01 (0.6) Volker Gropp <bwmng(at)gropp.org>
+
+	* Makefile.am, README, autogen.sh, bwm-ng.1, configure.in,
+	  src/input/libkstat.c, src/input/netstat.c: cleanups for 0.6
+	  release
+
+2007-02-28 13:37  Volker Gropp <bwmng(at)gropp.org>
+
+	* Makefile.am, src/input/sysctl.c, src/process.c: fix strange
+	  netbsd behavior
+
+2007-02-28 12:33  Volker Gropp <bwmng(at)gropp.org>
+
+	* Makefile.am, README, acinclude.m4, autogen.sh, configure.in,
+	  src/Makefile.am: fix automake issues
+
+2007-02-28 03:03  Volker Gropp <bwmng(at)gropp.org>
+
+	* autogen.sh, configure.in, src/Makefile.am, src/bwm-ng.h,
+	  src/input, src/input/devstat.c, src/input/devstat.h,
+	  src/input/getifaddrs.c, src/input/getifaddrs.h,
+	  src/input/ioservice.c, src/input/ioservice.h,
+	  src/input/libkstat.c, src/input/libkstat.h,
+	  src/input/libstatgrab.c, src/input/libstatgrab.h,
+	  src/input/netstat.c, src/input/netstat.h,
+	  src/input/proc_diskstats.c, src/input/proc_diskstats.h,
+	  src/input/proc_net_dev.c, src/input/proc_net_dev.h,
+	  src/input/retrieve.c, src/input/retrieve.h, src/input/sysctl.c,
+	  src/input/sysctl.h, src/input/win32.c, src/input/win32.h,
+	  src/retrieve.c, src/retrieve.h: split src/retrieve.[ch] into
+	  src/input/*.[ch]
+
+2007-02-28 01:02  Volker Gropp <bwmng(at)gropp.org>
+
+	* autogen.sh: using autoreconf if applicable
+
+2007-02-27 20:35  Volker Gropp <bwmng(at)gropp.org>
+
+	* bwm-ng.1, bwm-ng.conf-example, src/bwm-ng.c, src/global_vars.h,
+	  src/options.c, src/retrieve.c, src/retrieve.h: default to bsd
+	  names on ioservice input, optional long disknames
+
+2007-02-26 20:42  Volker Gropp <bwmng(at)gropp.org>
+
+	* README, autogen.sh, bwm-ng.1, configure.in, src/defines.h,
+	  src/options.c, src/output.c, src/retrieve.c, src/retrieve.h: add
+	  IOKit disk input on Darwin
+
+2007-02-23 18:30  Volker Gropp <bwmng(at)gropp.org>
+
+	* bwm-ng.1, bwm-ng.conf-example, src/bwm-ng.c, src/defines.h,
+	  src/global_vars.h, src/help.c, src/options.c, src/output.c,
+	  src/process.c: add option to disable ANSI Codes on plain output
+
+2007-02-23 12:52  Volker Gropp <bwmng(at)gropp.org>
+
+	* README, autogen.sh, bwm-ng.1, configure.in, src/defines.h,
+	  src/options.c, src/output.c, src/retrieve.c, src/retrieve.h: add
+	  devstat (FreeBSD) disk input
+
+2007-02-23 10:07  Volker Gropp <bwmng(at)gropp.org>
+
+	* src/defines.h, src/options.c, src/output.c, src/retrieve.c,
+	  src/retrieve.h: remove SYSCTLDISK_IN depends on SYSCTL define
+
+2007-02-23 09:07  Volker Gropp <bwmng(at)gropp.org>
+
+	* autogen.sh, configure.in: fix removed file check when given
+	  --with-diskstats
+
+2007-02-23 08:45  Volker Gropp <bwmng(at)gropp.org>
+
+	* autogen.sh, configure.in: fix autogen on openbsd without
+	  AUTOCONF_VERSION set. check for sysctldisk input without
+	  sysctl(net)
+
+2007-02-22 22:20  Volker Gropp <bwmng(at)gropp.org>
+
+	* README, bwm-ng.1, configure.in, src/defines.h, src/options.c,
+	  src/output.c, src/retrieve.c, src/retrieve.h: added
+	  netbsd/openbsd sysctl disk io input
+
+2007-02-22 12:59  Volker Gropp <bwmng(at)gropp.org>
+
+	* autogen.sh: readd aclocal and automake scan to autogen.sh, runs
+	  better on openbsd this way
+
+2007-02-22 11:32  Volker Gropp <bwmng(at)gropp.org>
+
+	* README, src/output.c, src/retrieve.c: some cleanup in
+	  proc/partitions code
+
+2007-02-20 11:47  Volker Gropp <bwmng(at)gropp.org>
+
+	* src/retrieve.c: simplify parsing of /proc/stat disk_io:
+
+2007-02-20 00:34  Volker Gropp <bwmng(at)gropp.org>
+
+	* configure.in, src/retrieve.c: add early linux kernel 2.4 disk io
+	  support (/proc/stat)
+
+2007-02-19 23:35  Volker Gropp <bwmng(at)gropp.org>
+
+	* README, configure.in, src/bwm-ng.c, src/curses_tools.c,
+	  src/curses_tools.h, src/retrieve.c: clean dirty ifdefs a little
+
+2007-02-19 13:34  Volker Gropp <bwmng(at)gropp.org>
+
+	* configure.in, src/curses_tools.h: fix solaris compiling issues
+
+2007-02-19 13:11  Volker Gropp <bwmng(at)gropp.org>
+
+	* configure.in: add libs to correct var
+
+2007-02-19 13:07  Volker Gropp <bwmng(at)gropp.org>
+
+	* configure.in: fix missing defines and add of linker flags (buggy
+	  autotools?)
+
+2007-02-19 12:48  Volker Gropp <bwmng(at)gropp.org>
+
+	* autogen.sh: simplify autogen.sh, we dont check for autotools
+	  version anymore, if it fails, it fails. its more portable now
+
+2007-02-19 12:26  Volker Gropp <bwmng(at)gropp.org>
+
+	* configure.in, src/retrieve.c: fix kstat configure and disk input
+
+2007-02-19 11:19  Volker Gropp <bwmng(at)gropp.org>
+
+	* src/defines.h: fix libkstat typos
+
+2007-02-18 12:29  Volker Gropp <bwmng(at)gropp.org>
+
+	* src/curses_tools.c, src/defines.h, src/options.c, src/output.c,
+	  src/retrieve.c: add kstatdisk (solaris disk input)
+
+2007-02-16 21:53  Volker Gropp <bwmng(at)gropp.org>
+
+	* src/bwm-ng.c: fix handle failure of usleep
+
+2007-02-16 17:19  Volker Gropp <bwmng(at)gropp.org>
+
+	* configure.in, src/bwm-ng.c, src/defines.h, src/global_vars.h,
+	  src/help.c, src/options.c, src/output.c, src/process.c,
+	  src/retrieve.c: add proc/partitions disk input support (linux
+	  2.4) and fix devfs device names
+
+2007-02-16 06:56  Volker Gropp <bwmng(at)gropp.org>
+
+	* src/bwm-ng.c, src/curses_tools.c, src/global_vars.h: dont use
+	  SCREEN anymore in curses, fix usleep error handling
+
+2007-02-16 05:19  Volker Gropp <bwmng(at)gropp.org>
+
+	* src/bwm-ng.c: some ncurses version will segfault, usw delscreen
+	  as last call
+
+2007-02-16 00:30  Volker Gropp <bwmng(at)gropp.org>
+
+	* README, src/Makefile.am, src/bwm-ng.h, src/help.c, src/help.h,
+	  src/options.c, src/retrieve.c, src/types.h: fix win compile and
+	  win32 missing input
+
+2007-02-14 17:55  Volker Gropp <bwmng(at)gropp.org>
+
+	* configure.in, src/bwm-ng.c, src/defines.h, src/options.c,
+	  src/output.c, src/process.c, src/retrieve.c, src/retrieve.h,
+	  src/types.h: make bwm-ng compile with gcc -ansi -pedantic in
+	  linux
+
+2007-02-14 15:10  Volker Gropp <bwmng(at)gropp.org>
+
+	* bwm-ng.1, src/bwm-ng.c, src/bwm-ng.h, src/curses_tools.c,
+	  src/curses_tools.h, src/defines.h, src/global_vars.h, src/help.c,
+	  src/help.h, src/options.c, src/options.h, src/output.c,
+	  src/output.h, src/process.c, src/process.h, src/retrieve.c,
+	  src/retrieve.h, src/types.h: reorganize header files and global
+	  vars
+
+2007-02-14 10:54  Volker Gropp <bwmng(at)gropp.org>
+
+	* README, src/output.c, src/process.c, src/retrieve.c: fix output
+	  of max,sum,avg in csv and curses2 output. fix libstatdisk input.
+	  more checks for failed malloc in inputs
+
+2007-02-13 14:56  Volker Gropp <bwmng(at)gropp.org>
+
+	* ChangeLog, README, configure.in, src/defines.h, src/process.c,
+	  src/retrieve.c: fix libstatgrab disk-bytes, hide loop devices on
+	  linux disk input
+
 2007-02-13 12:49  Volker Gropp <bwmng(at)gropp.org>
 
 	* README, bwm-ng.1, bwm-ng.conf-example, configure.in,

@@ -1,1 +1,7 @@
-no news at the moment
+Changes in 0.6:
+
+- curses2 output, a nice bar chart
+- disk input for bsd/macosx/linux/solaris
+- win32 network bandwidth support
+- moved to autotools
+- alot fixes

@@ -79,7 +79,7 @@ void get_iface_stats_kstat (char verbose) {
 				deinit(1,"im confused about kstat input methods!\n");
 			}
 			/* init new interfaces and add fetched data to old or new one */
-			hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose, 1);
+			hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, name, current_if_num, verbose, (tmp_if_stats.bytes.in != 0 || tmp_if_stats.bytes.out != 0));
 			current_if_num++;
     }
     /* add to total stats and output current stats if verbose */

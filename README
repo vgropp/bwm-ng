@@ -33,16 +33,18 @@ For info about libstatgrab please refer to http://www.i-scream.org/libstatgrab/
 Supported Platforms
 ===================
 
-sucessfully tested on:
-Linux 2.4, Linux 2.6
-FreeBSD 4.8, 5.3
-MacOS X 10.1 and above
-Solaris 10 64bit x86
+network routines sucessfully tested on:
+Linux 2.4*, Linux 2.6*
+FreeBSD 4.8, 5.3, 6.2*
+MacOS X 10.1 and above*
+Solaris 10 x86*
 SunOS 5.9 sparc Solaris 9
-OpenBSD 3.4, 3.6
-NetBSD 1.6.1, 2.0
+OpenBSD 3.4, 3.6, 4.0*
+NetBSD 1.6.1, 2.0, 3.0*
 IRIX64 6.5
 Win2000, WinXP, Windows Vista
+
+*disk monitoring working aswell
 
 please email me of working or not working platforms. Disk IO might work only on a limited 
 number of platforms.
@@ -127,6 +129,7 @@ Todo:
   - checking options to be valid
   - mysql output (ipac-ng compatible)
   - setting which stats to output for csv/sql
+  - distributed gathering of stats (client/server)
   - whatever you can think of
 
 

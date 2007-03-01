@@ -52,7 +52,7 @@ then
   echo "to pass any to it, please specify them on the $0 command line."
 fi
 
-if test -n $AUTOCONF_VERSION
+if test -n "$AUTOCONF_VERSION"
 then
    echo "test for autoconf version"
    for suffix in "" -2.62 -2.61 -2.60 -2.59 -2.58 -2.57 -2.56 -2.55 -2.54 -2.53 -2.52 -2.51
@@ -76,7 +76,7 @@ then
    done
 fi
 
-if test -n $AUTOMAKE_VERSION
+if test -n "$AUTOMAKE_VERSION"
 then
 	echo "test for automake version"
 	for suffix in "" -1.9 -1.8 -1.7 
@@ -119,8 +119,9 @@ test -n "${BASH_VERSION+set}" && set_option='set'
 $set_option -x
 
 echo trying autoreconf to setup build enviroment
-autoreconf -v -i -s -W gnu -W obsolete -W portability -W syntax -W unsupported
-if [ $? -eq 0 ]; then
+autoreconf -v -i -s -W all 
+if test $? -eq 0 
+then
    echo running configure now
 	if test -z "$AUTOGEN_SUBDIR_MODE"
 	then

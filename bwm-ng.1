@@ -128,8 +128,20 @@ But for one single single output using
 this is the mode that fits the best.
 .TP
 .BR "csv" :
-\fICSV\fP is designed to use with scripts for easy parsing. For a list
-of those elements please take a look at README - Specs section.
+\fICSV\fP is designed to use with scripts for easy parsing. 
+.sp
+.BR "Type rate" :
+.br
+.nf
+unix timestamp;iface_name;bytes_out/s;bytes_in/s;bytes_total/s;bytes_in;bytes_out;packets_out/s;packets_in/s;packets_total/s;packets_in;packets_out;errors_out/s;errors_in/s;errors_in;errors_out\\n
+.fi
+.sp
+.BR "Type svg, sum, max" :
+.br
+.nf
+unix timestamp;iface_name;bytes_out;bytes_in;bytes_total;packets_out;packets_in;packets_total;errors_out;errors_in\\n
+.fi
+.sp
 To skip the first output with only zeros use 
 .nf 
 bwm-ng -o csv -c 0

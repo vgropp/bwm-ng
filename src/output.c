@@ -557,7 +557,7 @@ void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float mult
                /* show packets/s and errors/s */
                fprintf(tmp_out_file,"%.2Lf%c%.2Lf%c%.2Lf",stats_csv_d.packets.out,csv_char,stats_csv_d.packets.in,csv_char,stats_csv_d.packets.total);
                fprintf(tmp_out_file,"%c%.2Lf%c%.2Lf\n",csv_char,stats_csv_d.errors.out,csv_char,stats_csv_d.errors.in);
-						
+					fflush(tmp_out_file);	
 				}
             break;
 #endif			

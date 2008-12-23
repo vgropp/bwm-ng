@@ -490,10 +490,9 @@ void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float mult
         case PLAIN_OUT:
 			if (output_method==PLAIN_OUT && ansi_output) printf("\033[%d;2H",y);
             printf("%15s:",if_name); /* output the name */
-            printf("%s %s %s\n",
-                values2str(0,stats,full_stats,multiplier,buffer,49),
-                values2str(1,stats,full_stats,multiplier,buffer,49),
-                values2str(2,stats,full_stats,multiplier,buffer,49));
+            printf("%s ", values2str(0,stats,full_stats,multiplier,buffer,49));
+				printf("%s ",values2str(1,stats,full_stats,multiplier,buffer,49));
+				printf("%s\n",values2str(2,stats,full_stats,multiplier,buffer,49));
             break;
 #ifdef HTML			
 		case HTML_OUT:

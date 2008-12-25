@@ -38,10 +38,10 @@
 
 #ifdef __STDC__
 #include <stdarg.h>
-void deinit(int code, char *error_msg, ...);
+void deinit(int code, const char *error_msg, ...) FUNCATTR_NORETURN;
 #else
 #include <varargs.h>
-void deinit(int code, ...);
+void deinit(int code, ...) FUNCATTR_NORETURN;
 #endif
 
 #endif

@@ -24,12 +24,14 @@
 #include "global_vars.h"
 #include "bwm-ng.h"
 
+/* handle interrupt signal */
+void sigint(int sig) FUNCATTR_NORETURN;
+inline void init(void);
+
 /* clear stuff and exit */
 #ifdef __STDC__
-void deinit(int code, char *error_msg, ...) FUNCATTR_NORETURN;
-void deinit(int code, char *error_msg, ...) {
+void deinit(int code, const char *error_msg, ...) {
 #else
-void deinit(int code, ...) FUNCATTR_NORETURN;
 void deinit(int code, ...) {
 #endif
     va_list    ap;
@@ -90,16 +92,13 @@ void deinit(int code, ...) {
 }
 
 
-/* handle interrupt signal */
-void sigint(int sig) FUNCATTR_NORETURN;
-
 /* sigint handler */
 void sigint(int sig) {
 	/* we got a sigint, call deinit and exit */
 	deinit(0, NULL);
 }
 
-inline void init() {
+inline void init(void) {
 	if_count=0;
 	delay=500;
 #if EXTENDED_STATS	

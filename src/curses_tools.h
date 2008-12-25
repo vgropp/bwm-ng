@@ -44,7 +44,7 @@
 
 /* handle key input by user in gui (curses) mode */
 void handle_gui_input(char c);
-int init_curses();
+int init_curses(void);
 void sigwinch(int sig);
 #endif
 

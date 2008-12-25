@@ -33,6 +33,6 @@
 #include "options.h"
 
 int print_header(int option);
-void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float multiplier,t_iface_stats full_stats);
+void print_values(unsigned int y,unsigned int x,const char *if_name,t_iface_speed_stats stats,float multiplier,t_iface_stats full_stats);
 
 #endif

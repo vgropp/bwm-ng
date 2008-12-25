@@ -24,8 +24,17 @@
 #include "global_vars.h"
 #include "output.h"
 
+inline const char *output_type2str(void);
+inline const char *input2str(void);
+inline const char *show_all_if2str(void);
+inline ullong direction2value(char mode,struct inout_long stats);
+#if EXTENDED_STATS
+inline double direction_max2value(char mode,struct inouttotal_double stats,int items);
+#endif
+inline char *dyn_byte_value2str(double value,char *str,int buf_size);
+char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,float multiplier,char *str,int buf_size);
 
-inline char *output_type2str() {
+inline const char *output_type2str(void) {
 #if EXTENDED_STATS
     static char str[25];
 #endif
@@ -50,7 +59,7 @@ inline char *output_type2str() {
 }
 
 
-inline char *input2str() {
+inline const char *input2str(void) {
     switch (input_method) {
 #ifdef SYSCTL
         case SYSCTL_IN:
@@ -112,7 +121,7 @@ inline char *input2str() {
     return "";
 }
 
-inline char *show_all_if2str() {
+inline const char *show_all_if2str(void) {
     switch (show_all_if) {
         case 1:
 				return " (all)";
@@ -158,7 +167,7 @@ int print_header(int option) {
 			else {
 				width=(cols-3-16-4)/3;
 				mvwprintw(stdscr,1,2,"+---{ bwm-ng v" VERSION" }");
-				for (col=17+sizeof(VERSION);col<32+cols-48;col++) 
+				for (col=17+sizeof(VERSION);cols >= 0 && col<(unsigned int)(32+cols-48);col++) 
 					mvwprintw(stdscr,1,col,"-");
 				mvwprintw(stdscr,1,32+cols-48,"+- -- - -- -->");
 				mvwprintw(stdscr,2,2,"|"), mvwprintw(stdscr,2,32+cols-48,"|------.");
@@ -190,7 +199,7 @@ int print_header(int option) {
 
 
 				mvwprintw(stdscr,37,2,"+"); mvwprintw(stdscr,37,32+cols-48,"+");
-				for (col=3;col<32+cols-48;col++) 
+				for (col=3;cols >= 0 && col<(unsigned int)(32+cols-48);col++) 
 					mvwprintw(stdscr,37,col,"-");
 
 				mvwprintw(stdscr,38,2,"`+--> %c probing every: %2.3fs",(char)IDLE_CHARS[option],(float)delay/1000);
@@ -319,7 +328,7 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
         output_unit==PACKETS_OUT) {
         switch (output_type) {
             case RATE_OUT:
-                value=(double)direction2value(mode,stats.packets)*multiplier;
+                value=(double)(direction2value(mode,stats.packets)*multiplier);
                 break;
 #if EXTENDED_STATS                
             case SUM_OUT:
@@ -340,7 +349,7 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
             case BYTES_OUT:
                 switch (output_type) {
                     case RATE_OUT:
-                        value=(double)direction2value(mode,stats.bytes)*multiplier;
+                        value=(double)(direction2value(mode,stats.bytes)*multiplier);
                         break;
 #if EXTENDED_STATS
                     case SUM_OUT:
@@ -364,7 +373,7 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
             case ERRORS_OUT:
                 switch (output_type) {
                     case RATE_OUT:
-                        value=(double)direction2value(mode,stats.errors)*multiplier;
+                        value=(double)(direction2value(mode,stats.errors)*multiplier);
                         break;
 #if EXTENDED_STATS
                     case SUM_OUT:
@@ -387,7 +396,7 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
 }
 
 /* do the actual output */
-void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float multiplier,t_iface_stats full_stats) {
+void print_values(unsigned int y,unsigned int x,const char *if_name,t_iface_speed_stats stats,float multiplier,t_iface_stats full_stats) {
    char buffer[50];
 #if CSV || HTML
 	FILE *tmp_out_file;
@@ -398,7 +407,7 @@ void print_values(int y,int x,char *if_name,t_iface_speed_stats stats,float mult
 	unsigned int row=0;
 	unsigned int col=0;
 	unsigned int width=0;
-	int i=0, j=0;
+	unsigned int i=0, j=0;
 	char adjust=0;
 #endif
     switch (output_method) {

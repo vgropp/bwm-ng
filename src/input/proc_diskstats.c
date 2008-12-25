@@ -25,6 +25,7 @@
 
 
 #ifdef PROC_DISKSTATS
+int get_short_devfs_name(char *devicename);
 
 /* convert devfs name to a short abr - some ugly code 
  * return: 1 on success, -1 on nothing to be done, 0 on failure */

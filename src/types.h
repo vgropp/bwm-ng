@@ -68,7 +68,7 @@ struct t_avg {
     struct double_list *first;
     struct double_list *last;
     /* number of items in list */
-    int items;
+    unsigned int items;
     /* cached current avg values */
     struct double_types item_sum;
 };

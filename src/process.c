@@ -24,11 +24,29 @@
 #include "global_vars.h"
 #include "process.h"
 
+short show_iface(char *instr, char *searchstr,char iface_is_up);
+#if HAVE_GETTIMEOFDAY
+inline long tvdiff(struct timeval newer, struct timeval older);
+float get_time_delay(int iface_num);
+#endif
+inline ullong calc_new_values(ullong new, ullong old);
+t_iface_speed_stats convert2calced_values(t_iface_speed_stats new, t_iface_speed_stats old);
+t_iface_speed_stats convert2calced_disk_values(t_iface_speed_stats new, t_iface_speed_stats old);
+#if EXTENDED_STATS
+inline void sub_avg_values(struct inouttotal_double *values,struct inouttotal_double data);
+inline void add_avg_values(struct inouttotal_double *values,struct inouttotal_double data);
+inline void save_avg_values(struct inouttotal_double *values,struct inouttotal_double *data,struct inout_long calced_stats,float multiplier);
+void save_avg(struct t_avg *avg,struct iface_speed_stats calced_stats,float multiplier);
+inline void save_sum(struct inout_long *stats,struct inout_long new_stats_values);
+inline void save_max(struct inouttotal_double *stats,struct inout_long calced_stats,float multiplier);
+#endif
+
 /* returns the whether to show the iface or not
  * if is in list return 1, if list is prefaced with ! or 
  * name not found return 0 */
 short show_iface(char *instr, char *searchstr,char iface_is_up) {
-	int pos = 0,k,i=0,success_ret=1;
+	int pos = 0,k,success_ret = 1;
+	unsigned int i = 0;
     if (instr==NULL) return iface_is_up || (show_all_if==2);
     if (instr[0]=='%') {
         success_ret=!success_ret;
@@ -165,7 +183,7 @@ void save_avg(struct t_avg *avg,struct iface_speed_stats calced_stats,float mult
         /* remove only entries if at least two items added, 
          * else we might leave an empty list 
          * avg->first has to be != NULL at this point (if in 2nd line of this function) */
-        while (avg->first->next!=NULL && avg->items>avg_length/delay) {
+		  while (avg->first->next!=NULL && avg->items > avg_length/delay) {
             /* list is full, remove first entry */
             list_p=avg->first;
             avg->first=avg->first->next;

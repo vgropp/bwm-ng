@@ -26,11 +26,22 @@
 #include "options.h"
 
 #ifdef CONFIG_FILE
+static char* getToken(char** str, const char* delims);
+char *trim_whitespace(char *str);
+int read_config(const char *config_file);
+#endif
+inline int str2output_unit(char *optarg);
+#if EXTENDED_STATS
+inline int str2output_type(char *optarg);
+#endif
+inline int str2out_method(char *optarg);
+inline int str2in_method(char *optarg);
+
+#ifdef CONFIG_FILE
  /******************************************************************************
  * This is a replacement for strsep which is not portable (missing on Solaris).
  */
-static char* getToken(char** str, const char* delims)
-{
+static char* getToken(char** str, const char* delims) {
     char* token;
 
     if (*str==NULL) {
@@ -157,7 +168,7 @@ int i;
 }
 
 
-int read_config(char *config_file) {
+int read_config(const char *config_file) {
 FILE *fp;
 char *buffer;
 char *token, *value;

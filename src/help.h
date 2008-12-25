@@ -32,7 +32,7 @@
 void cmdln_printhelp(void);
 
 #ifdef HAVE_CURSES
-void print_online_help();
+void print_online_help(void);
 #endif
 
 #endif

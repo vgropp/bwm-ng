@@ -113,7 +113,7 @@ void handle_gui_input(char c) {
     }
 }	
 
-int init_curses() {
+int init_curses(void) {
     struct winsize size;
 	short fg,bg;
 	mywin=initscr();

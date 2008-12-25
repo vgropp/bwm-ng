@@ -85,8 +85,14 @@ void get_disk_stats_proc (char verbose) {
 			diskstats_works = 1;
 		} else {
 			/* skip first two lines in /proc/partitions */
-			fgets(buffer,MAX_LINE_BUFFER,f);
-			fgets(buffer,MAX_LINE_BUFFER,f);
+			if (fgets(buffer,MAX_LINE_BUFFER,f) &&
+					fgets(buffer,MAX_LINE_BUFFER,f)) {
+						/* read correctly */
+						;
+			} else {
+				/* error or EOF while reading file, either way we can't continue */
+				deinit(1, "reading %s failed, or file was too short: %s\n", PROC_PARTITIONS_FILE, strerror(errno));
+			}
 		}
 	}
 

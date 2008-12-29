@@ -43,7 +43,10 @@ void handle_gui_input(char c) {
         case 'a':
         case 'A':
             show_all_if++;
-            if (show_all_if>2) show_all_if=0;
+            if (show_all_if>2) {
+					show_all_if=0;
+					clean_down_ifaces(); 
+				}
             if (iface_list==NULL && show_all_if==1) show_all_if=2;
             /* get stats so all values are uptodate */
             get_iface_stats(0);

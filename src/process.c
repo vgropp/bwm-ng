@@ -214,6 +214,27 @@ inline void save_max(struct inouttotal_double *stats,struct inout_long calced_st
 }
 #endif
 
+void clean_down_ifaces(void) {
+#ifdef IOCTL
+	int local_if_count;
+	t_iface_stats *new_if_stats = NULL;
+	int new_if_count = 0;
+	for (local_if_count=0;local_if_count<if_count;local_if_count++) {
+      /* check if its the correct if */
+		if (check_if_up(if_stats[local_if_count].if_name)) {
+			/* copy iface stats to new list */
+			new_if_count++;
+			new_if_stats=(t_iface_stats*)realloc(new_if_stats,sizeof(t_iface_stats)*new_if_count);
+			memcpy(&new_if_stats[new_if_count-1],&if_stats[local_if_count],(size_t)sizeof(t_iface_stats));
+		}
+	}	 
+	if (if_stats != NULL) free(if_stats);
+	if_stats = new_if_stats;
+	if_count = new_if_count;
+#endif
+}
+
+
 /* will be called by get_iface_stats for each interface
  * inserts and calcs current stats.
  * will call output (print_values) aswell if needed */

@@ -847,8 +847,8 @@ else
     STRIP="@echo DEBUG mode enabled."
 fi
 
-AC_CHECK_CC_OPT(Wno-long-double)
-AC_CHECK_CC_OPT(Wno-long-long)
+#AC_CHECK_CC_OPT(Wno-long-double)
+#AC_CHECK_CC_OPT(Wno-long-long)
 
 AC_SUBST([INPUT_SYSTEM])
 

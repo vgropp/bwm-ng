@@ -306,6 +306,24 @@ inline char *dyn_byte_value2str(double value,char *str,int buf_size) {
     return str;
 }
 
+inline char *dyn_bit_value2str(double value,char *str,int buf_size) {
+    if (dynamic) {
+        if (value<1000)
+            snprintf(str,buf_size,"%15.2f  ",value);
+        else
+            if (value<1000000)
+                snprintf(str,buf_size,"%15.2f k",value/1000);
+            else
+                if (value<1000000000)
+                    snprintf(str,buf_size,"%15.2f M",value/1000000);
+                else
+                    snprintf(str,buf_size,"%15.2f G",value/1000000000);
+    } else {
+        snprintf(str,buf_size,"%15.2f k",value/1000);
+    }
+    return str;
+}
+
 char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,float multiplier,char *str,int buf_size) {
     char byte_char=' ';
     char speed[3];
@@ -362,13 +380,15 @@ char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,fl
                         value=(double)direction_max2value(mode,full_stats.avg.item_sum.bytes,full_stats.avg.items);
 #endif
                 }
+                str_buf=(char *)malloc(buf_size);
                 if (output_unit==BITS_OUT) {
                     byte_char='b';
                     value*=8;
-                } else
-                     byte_char='B';
-                str_buf=(char *)malloc(buf_size);
-                snprintf(str,buf_size,"%s%c%s",dyn_byte_value2str(value,str_buf,buf_size),byte_char,speed);
+                    snprintf(str,buf_size,"%s%c%s",dyn_bit_value2str(value,str_buf,buf_size),byte_char,speed);
+                } else {
+                    byte_char='B';
+                    snprintf(str,buf_size,"%s%c%s",dyn_byte_value2str(value,str_buf,buf_size),byte_char,speed);
+                }
                 break;
             case ERRORS_OUT:
                 switch (output_type) {

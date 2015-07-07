@@ -210,9 +210,13 @@ int main (int argc, char *argv[]) {
 	if (output_method==CSV_OUT && output_count>-1) {
 		get_iface_stats(0);
 #ifdef HAVE_USLEEP
-		if (EINVAL==usleep(delay*1000)) 
-			/* there seems to be systems where 1million usecs is max */
-			usleep(999999);
+		if (usleep(delay*1000) != 0) {
+			if (errno == EINVAL) {
+				errno = 0;
+				/* there seems to be systems where 1million usecs is max */
+				usleep(999999);
+			}
+		}
 #else
 		Sleep(delay);
 #endif

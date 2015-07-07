@@ -44,28 +44,28 @@ Currently supported
 .B network input methods:
 .RS
 .TP .4i
-.B "proc" :
+.BR "proc" :
 This is the default for \fILinux\fP based systems. It parses the special 
 procfs file \fB/proc/net/dev\fP. This should be used if in doubt in 
 \fILinux\fP.
 .TP
-.B "getifaddrs" :
+.BR "getifaddrs" :
 This is the default on \fIBSD\fP systems like \fIFreeBSD\fP, \fINetBSD\fP, 
 \fIOpenBSD\fP and recent \fIMac OS X\fP (>=10.3). This should be used if in 
 doubt on those systems. It uses the getifaddrs systemcall.
 .TP
-.B "kstat" :
+.BR "kstat" :
 This is the default for \fISolaris\fP. It uses the kstat systemcall.
 .TP
-.B "sysctl" :
+.BR "sysctl" :
 This is the default on Systems like \fIIRIX\fP and other \fIUNIX\fP. It can 
 be used on many other systems like early \fIMac OS X\fP as well. It uses the 
 sysctl systemcall.
 .TP
-.B "netstat" :
+.BR "netstat" :
 This is a Backup for systems without the above, or other problems.
 .TP
-.B "libstatgrab" :
+.BR "libstatgrab" :
 .B bwm-ng
 can use the external library libstatgrab to gather the data. please 
 refer to \fIhttp://www.i-scream.org/libstatgrab\fP for more info about
@@ -142,7 +142,7 @@ unix timestamp;iface_name;bytes_out/s;bytes_in/s;bytes_total/s;bytes_in;bytes_ou
 unix timestamp;iface_name;bytes_out;bytes_in;bytes_total;packets_out;packets_in;packets_total;errors_out;errors_in\\n
 .fi
 .sp
-To skip the first output with only zeros use 
+To skip the first output with only zeros use:
 .nf 
 bwm-ng -o csv -c 0
 .fi
@@ -172,11 +172,11 @@ selects which method to use. It can be one of the above (see
 selects the file to parse in \fBproc input method\fP. This is usually 
 \fI/proc/net/dev\fP.
 .TP
-.BI "    --diskstatsfile "filename"
+.BI "    --diskstatsfile " "filename"
 selects the file to parse in \fBdisk input method\fP. This is usually 
 \fI/proc/diskstats\fP.
 .TP
-.BI "    --partitionsfile "filename"
+.BI "    --partitionsfile " "filename"
 selects the file to parse in \fBdisk input method\fP on older Kernel.
 This is usually \fI/proc/partitions\fP.
 .TP

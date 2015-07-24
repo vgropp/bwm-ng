@@ -494,30 +494,16 @@ fi
 rm -f conftest*
 ])
 
-AC_ARG_WITH([libstatgrab],AS_HELP_STRING([--with-libstatgrab],[Use libstatgrab to gather statistics]),[
-AC_MSG_CHECKING([for libstatgrab input])
-AC_MSG_RESULT($withval)
-if [ test $withval != "no" ]; then
+AC_ARG_WITH([libstatgrab],AS_HELP_STRING([--without-libstatgrab],[Use libstatgrab to gather statistics]))
+
+AS_IF([test "x$with_libstatgrab" = "xyes"], [
     OLD_CPPFLAGS=$CPPFLAGS
-    if [ test $withval != "yes" ]; then
-        CPPFLAGS="$CPPFLAGS -I$withval"
-    fi
-	 AC_CHECK_LIB([statgrab],[sg_get_network_io_stats,sg_get_disk_io_stats],[
-			INPUT_FOUND=1
-	    	AC_DEFINE_UNQUOTED([HAVE_LIBSTATGRAB],[1],[Define to 1 if you have the 'statgrab' library (-lstatgrab).])
-   	 	LIBS="$LIBS -lstatgrab"
-			INPUT_SYSTEM="$INPUT_SYSTEM libstatgrab.$OBJEXT"
-		],[ CPPFLAGS=$OLD_CPPFLAGS ])
-fi
-],[
-if [ test $INPUT_FOUND -ne 1 ] || [ test $DISK_INPUT_FOUND -ne 1 ]; then
-	AC_CHECK_LIB([statgrab],[sg_get_network_io_stats,sg_get_disk_io_stats],[
-		INPUT_FOUND=1
-		AC_DEFINE_UNQUOTED([HAVE_LIBSTATGRAB],[1],[Define to 1 if you have the 'statgrab' library (-lstatgrab).])
-		LIBS="$LIBS -lstatgrab"
-		INPUT_SYSTEM="$INPUT_SYSTEM libstatgrab.$OBJEXT"
-	])
-fi
+    AC_CHECK_LIB([statgrab],[sg_get_network_io_stats,sg_get_disk_io_stats],[
+            INPUT_FOUND=1
+            AC_DEFINE_UNQUOTED([HAVE_LIBSTATGRAB],[1],[Define to 1 if you have the 'statgrab' library (-lstatgrab).])
+	        LIBS="$LIBS -lstatgrab"
+            INPUT_SYSTEM="$INPUT_SYSTEM libstatgrab.$OBJEXT"
+        ],[ CPPFLAGS=$OLD_CPPFLAGS ])
 ])
 
 if [ test $INPUT_FOUND -ne 1 ] && [ test $DISK_INPUT_FOUND -ne 1 ]; then

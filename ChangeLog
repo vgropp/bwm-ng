@@ -1,3 +1,27 @@
+2015-07-25 13:40 (0.6.1) Volker Gropp <bwmng(at)gropp.org>
+
+	* cleanups for 0.6.1 release
+	* fix g++5 warnings and errors
+	* fallback to auto libstatgrab check if no other input found
+	* libstatgrab no longer default configure option, remove dependency on most distributions
+	* add more buildfiles to ignore
+	* Fix to work with libstatgrab-0.90 
+	  From http://svnweb.freebsd.org/ports/head/net-mgmt/bwm-ng/files/patch-src__input__libstatgrab.c?view=markup
+	  Original patch by Tim Bishop <tdb@freebsd.org
+	* add autotools foo to gitignore
+	* usleep return value check Creator: Alexey Zakharov
+	* src/output.c:fix Wrong TX value in plain data (bug ID 1797088).
+	  fix Dynamic multiplier for bits is now set to x1000 (1kbit = 1000 bits, 1Mbit = 10^6 bits, ...), 
+	  instead of x1024, which applies only for bytes.
+	* Fixes some little typos in the man page. Creator: Ricardo
+	* add LICENSE
+	* delete unused interfaces from internal interface-list
+	* code cleanup due to gcc flags -Werror -Wdeclaration-after-statement -Wno-pointer-sign -Wcast-align -Wbad-function-cast -Wmissing-declarations -Winline -Wsign-compare -Wmissing-prototypes -Wnested-externs -Wpointer-arith -Wl,--as-needed -Wredundant-decls -Wwrite-strings -Wformat -Wformat-security -Wswitch-enum -Winit-self -Wmissing-include-dirs
+	* fixed bug with attached patch: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=506503
+	* fixed missing flush to tmp file in csv output
+	* fix same values for rx and tx on plain output
+	* add csv output specs to man page
+
 2007-03-01 07:01 (0.6) Volker Gropp <bwmng(at)gropp.org>
 
 	* Makefile.am, README, autogen.sh, bwm-ng.1, configure.in,

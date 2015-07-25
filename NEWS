@@ -1,7 +1,17 @@
-Changes in 0.6:
+Changes in 0.6.1:
 
-- curses2 output, a nice bar chart
-- disk input for bsd/macosx/linux/solaris
-- win32 network bandwidth support
-- moved to autotools
-- alot fixes
+ - fix g++5 warnings and errors
+ - libstatgrab no longer default configure option, remove dependency on most distributions
+ - fix to work with libstatgrab-0.90
+ - usleep return value check Creator: Alexey Zakharov
+ - fix Wrong TX value in plain data (bug ID 1797088).
+ - fix Dynamic multiplier for bits is now set to x1000 (1kbit = 1000 bits, 1Mbit = 10^6 bits, ...),
+   instead of x1024, which applies only for bytes.
+ - fix some little typos in the man page. Creator: Ricardo
+ - delete unused interfaces from internal interface-list
+ - code cleanup due to gcc flags 
+ - fix bug with attached patch: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=506503
+ - fix missing flush to tmp file in csv output
+ - fix same values for rx and tx on plain output
+ - add csv output specs to man page
+

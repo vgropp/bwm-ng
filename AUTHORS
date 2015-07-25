@@ -7,6 +7,10 @@ Main developers:
     Volker Gropp <vgropp(at)pefra.de>
 
 Contributors:
+	Tim Bishop <tdb@freebsd.org>
+	Alexey Zakharov
+	Ricardo
+	James Westby <jw+debian@jameswestby.net>
     Bastian Riehl <mail(at)bastian-riehl.de>
       - curses2 output
     Michael Eckhoff <mreckhof(at)gmail.com>

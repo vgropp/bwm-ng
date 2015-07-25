@@ -496,15 +496,24 @@ rm -f conftest*
 
 AC_ARG_WITH([libstatgrab],AS_HELP_STRING([--without-libstatgrab],[Use libstatgrab to gather statistics]))
 
-AS_IF([test "x$with_libstatgrab" = "xyes"], [
+CHECK_LIBSTAT=0
+if [ test "x$with_libstatgrab" != "xno" ] && [ test $INPUT_FOUND -ne 1 ]; then
+	CHECK_LIBSTAT=1
+fi
+if [ test "x$with_libstatgrab" != "xno" ] && [ test $DISK_INPUT_FOUND -ne 1 ]; then
+    CHECK_LIBSTAT=1
+fi
+
+if [test "x$with_libstatgrab" = "xyes"] || [ test $CHECK_LIBSTAT -eq 1 ]; then
     OLD_CPPFLAGS=$CPPFLAGS
     AC_CHECK_LIB([statgrab],[sg_get_network_io_stats,sg_get_disk_io_stats],[
             INPUT_FOUND=1
+            DISK_INPUT_FOUND=1
             AC_DEFINE_UNQUOTED([HAVE_LIBSTATGRAB],[1],[Define to 1 if you have the 'statgrab' library (-lstatgrab).])
-	        LIBS="$LIBS -lstatgrab"
+            LIBS="$LIBS -lstatgrab"
             INPUT_SYSTEM="$INPUT_SYSTEM libstatgrab.$OBJEXT"
         ],[ CPPFLAGS=$OLD_CPPFLAGS ])
-])
+fi
 
 if [ test $INPUT_FOUND -ne 1 ] && [ test $DISK_INPUT_FOUND -ne 1 ]; then
 	AC_MSG_ERROR(["NO INPUT FOUND"]);

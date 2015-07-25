@@ -24,7 +24,7 @@
 #include "global_vars.h"
 #include "output.h"
 
-inline const char *output_type2str(void);
+inline static const char *output_type2str(void);
 inline const char *input2str(void);
 inline const char *show_all_if2str(void);
 inline ullong direction2value(char mode,struct inout_long stats);
@@ -34,7 +34,7 @@ inline double direction_max2value(char mode,struct inouttotal_double stats,int i
 inline char *dyn_byte_value2str(double value,char *str,int buf_size);
 char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,float multiplier,char *str,int buf_size);
 
-inline const char *output_type2str(void) {
+inline static const char *output_type2str(void) {
 #if EXTENDED_STATS
     static char str[25];
 #endif

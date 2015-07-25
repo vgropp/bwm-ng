@@ -47,7 +47,7 @@ char check_if_up(char *ifname) {
 #endif
 
 /* chooses the correct get_iface_stats() to use */
-inline void get_iface_stats(char _n) {
+void get_iface_stats(char _n) {
    switch (input_method) {
 #ifdef NETSTAT
        case NETSTAT_IN:

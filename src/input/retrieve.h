@@ -61,6 +61,6 @@ char check_if_up(char *ifname);
 #include "sysctl.h"
 #include "win32.h"
 
-inline void get_iface_stats(char _n);
+void get_iface_stats(char _n);
 
 #endif

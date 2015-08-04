@@ -50,18 +50,12 @@ void handle_gui_input(char c) {
             if (iface_list==NULL && show_all_if==1) show_all_if=2;
             /* get stats so all values are uptodate */
             get_iface_stats(0);
-            /* a short sleep, else we get "nan" values due to very short 
-               delay till next get_iface_stats */
-            usleep(100);
             break;
         case 's':
         case 'S':
             sumhidden=!sumhidden;
             /* get stats so all values are uptodate */
             get_iface_stats(0);
-            /* a short sleep, else we get "nan" values due to very short
-               delay till next get_iface_stats */
-            usleep(100);
             break;
         case 'n':
         case 'N':

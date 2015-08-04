@@ -82,9 +82,12 @@ inline long tvdiff(struct timeval newer, struct timeval older) {
 /* returns the milliseconds since old stat */
 float get_time_delay(int iface_num) {
     struct timeval now;
-    float ret;
+    float ret = 0.0f;
     gettimeofday(&now,NULL);
-    ret=(float)1000/tvdiff(now,if_stats[iface_num].time);
+	long diff = tvdiff(now,if_stats[iface_num].time);
+	if (diff > 0) {
+	    ret=(float)1000/diff;
+	}
     if_stats[iface_num].time.tv_sec=now.tv_sec;
     if_stats[iface_num].time.tv_usec=now.tv_usec;    
     return ret;
@@ -322,9 +325,12 @@ void finish_iface_stats (char verbose, t_iface_speed_stats stats, int hidden_if,
     t_iface_speed_stats calced_stats;
 #if HAVE_GETTIMEOFDAY
     struct timeval now;
-    float multiplier;
+    float multiplier=0.0f;
     gettimeofday(&now,NULL);
-    multiplier=(float)1000/tvdiff(now,if_stats_total.time);
+	long diff = tvdiff(now,if_stats_total.time);
+	if (diff > 0) {
+	    multiplier=(float)1000/tvdiff(now,if_stats_total.time);
+	}
     if_stats_total.time.tv_sec=now.tv_sec;
     if_stats_total.time.tv_usec=now.tv_usec;
 #else

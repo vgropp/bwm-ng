@@ -552,6 +552,7 @@ void print_values(unsigned int y,unsigned int x,const char *if_name,t_iface_spee
    	            /* show packets/s and errors/s */
       	         fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu",(double)stats_csv->packets.out*multiplier,csv_char,(double)stats_csv->packets.in*multiplier,csv_char,(double)(stats_csv->packets.out+stats_csv->packets.in)*multiplier,csv_char,stats_csv->packets.in,csv_char,stats_csv->packets.out);
          	      fprintf(tmp_out_file,"%c%.2f%c%.2f%c%llu%c%llu\n",csv_char,stats_csv->errors.out*multiplier,csv_char,stats_csv->errors.in*multiplier,csv_char,stats_csv->errors.in,csv_char,stats_csv->errors.out);
+					fflush(tmp_out_file);	
 
 					} else {
 						stats_csv = &full_stats.sum;
@@ -563,6 +564,7 @@ void print_values(unsigned int y,unsigned int x,const char *if_name,t_iface_spee
 						/* show packets and errors */
 						fprintf(tmp_out_file,"%llu%c%llu%c%llu",stats_csv->packets.out,csv_char,stats_csv->packets.in,csv_char,(stats_csv->packets.out+stats_csv->packets.in));
 						fprintf(tmp_out_file,"%c%llu%c%llu\n",csv_char,stats_csv->errors.out,csv_char,stats_csv->errors.in);
+					fflush(tmp_out_file);	
 						}
 				} else { /* MAX_OUT or AVG_OUT */
 					if (output_type == MAX_OUT)

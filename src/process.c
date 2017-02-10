@@ -26,19 +26,19 @@
 
 short show_iface(char *instr, char *searchstr,char iface_is_up);
 #if HAVE_GETTIMEOFDAY
-inline long tvdiff(struct timeval newer, struct timeval older);
+static inline long tvdiff(struct timeval newer, struct timeval older);
 float get_time_delay(int iface_num);
 #endif
-inline ullong calc_new_values(ullong new, ullong old);
+static inline ullong calc_new_values(ullong new, ullong old);
 t_iface_speed_stats convert2calced_values(t_iface_speed_stats new, t_iface_speed_stats old);
 t_iface_speed_stats convert2calced_disk_values(t_iface_speed_stats new, t_iface_speed_stats old);
 #if EXTENDED_STATS
-inline void sub_avg_values(struct inouttotal_double *values,struct inouttotal_double data);
-inline void add_avg_values(struct inouttotal_double *values,struct inouttotal_double data);
-inline void save_avg_values(struct inouttotal_double *values,struct inouttotal_double *data,struct inout_long calced_stats,float multiplier);
+static inline void sub_avg_values(struct inouttotal_double *values,struct inouttotal_double data);
+static inline void add_avg_values(struct inouttotal_double *values,struct inouttotal_double data);
+static inline void save_avg_values(struct inouttotal_double *values,struct inouttotal_double *data,struct inout_long calced_stats,float multiplier);
 void save_avg(struct t_avg *avg,struct iface_speed_stats calced_stats,float multiplier);
-inline void save_sum(struct inout_long *stats,struct inout_long new_stats_values);
-inline void save_max(struct inouttotal_double *stats,struct inout_long calced_stats,float multiplier);
+static inline void save_sum(struct inout_long *stats,struct inout_long new_stats_values);
+static inline void save_max(struct inouttotal_double *stats,struct inout_long calced_stats,float multiplier);
 #endif
 
 /* returns the whether to show the iface or not
@@ -74,7 +74,7 @@ short show_iface(char *instr, char *searchstr,char iface_is_up) {
 
 #if HAVE_GETTIMEOFDAY
 /* Returns: the time difference in milliseconds. */
-inline long tvdiff(struct timeval newer, struct timeval older) {
+static inline long tvdiff(struct timeval newer, struct timeval older) {
   return labs((newer.tv_sec-older.tv_sec)*1000+
     (newer.tv_usec-older.tv_usec)/1000);
 }
@@ -95,7 +95,7 @@ float get_time_delay(int iface_num) {
 #endif
 
 /* basically new-old, but handles "overflow" of source aswell */
-inline ullong calc_new_values(ullong new, ullong old) {
+static inline ullong calc_new_values(ullong new, ullong old) {
     /* FIXME: WRAP_AROUND _might_ be wrong for libstatgrab, where the type is always long long */
     return (new>=old) ? (ullong)(new-old) : (ullong)((
 #ifdef HAVE_LIBKSTAT
@@ -136,13 +136,13 @@ t_iface_speed_stats convert2calced_disk_values(t_iface_speed_stats new, t_iface_
 
 #if EXTENDED_STATS
 /* sub old values from cached for avg stats */
-inline void sub_avg_values(struct inouttotal_double *values,struct inouttotal_double data) {
+static inline void sub_avg_values(struct inouttotal_double *values,struct inouttotal_double data) {
     values->in-=data.in;
     values->out-=data.out;
     values->total-=data.total;
 }
 
-inline void add_avg_values(struct inouttotal_double *values,struct inouttotal_double data) {
+static inline void add_avg_values(struct inouttotal_double *values,struct inouttotal_double data) {
     values->in+=data.in;
     values->out+=data.out;
     values->total+=data.total;
@@ -151,7 +151,7 @@ inline void add_avg_values(struct inouttotal_double *values,struct inouttotal_do
 
 /* put new-old bytes in inout_long struct into a inouttotal_double struct 
  * and add values to cached .value struct */
-inline void save_avg_values(struct inouttotal_double *values,struct inouttotal_double *data,struct inout_long calced_stats,float multiplier) {
+static inline void save_avg_values(struct inouttotal_double *values,struct inouttotal_double *data,struct inout_long calced_stats,float multiplier) {
     data->in=calced_stats.in*multiplier;
     data->out=calced_stats.out*multiplier;
     data->total=(calced_stats.in+calced_stats.out)*multiplier;
@@ -201,13 +201,13 @@ void save_avg(struct t_avg *avg,struct iface_speed_stats calced_stats,float mult
 }
 
 /* add current in and out bytes to totals struct */
-inline void save_sum(struct inout_long *stats,struct inout_long new_stats_values) {
+static inline void save_sum(struct inout_long *stats,struct inout_long new_stats_values) {
     stats->in+=new_stats_values.in;
     stats->out+=new_stats_values.out;
 }
 
 /* lookup old max values and save new if higher */
-inline void save_max(struct inouttotal_double *stats,struct inout_long calced_stats,float multiplier) {
+static inline void save_max(struct inouttotal_double *stats,struct inout_long calced_stats,float multiplier) {
     if (multiplier*calced_stats.in > stats->in)
         stats->in=multiplier*calced_stats.in;
     if (multiplier*calced_stats.out>stats->out)

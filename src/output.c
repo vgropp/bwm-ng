@@ -25,13 +25,13 @@
 #include "output.h"
 
 inline static const char *output_type2str(void);
-inline const char *input2str(void);
-inline const char *show_all_if2str(void);
-inline ullong direction2value(char mode,struct inout_long stats);
+static inline const char *input2str(void);
+static inline const char *show_all_if2str(void);
+static inline ullong direction2value(char mode,struct inout_long stats);
 #if EXTENDED_STATS
-inline double direction_max2value(char mode,struct inouttotal_double stats,int items);
+static inline double direction_max2value(char mode,struct inouttotal_double stats,int items);
 #endif
-inline char *dyn_byte_value2str(double value,char *str,int buf_size);
+static inline char *dyn_byte_value2str(double value,char *str,int buf_size);
 char *values2str(char mode,t_iface_speed_stats stats,t_iface_stats full_stats,float multiplier,char *str,int buf_size);
 
 inline static const char *output_type2str(void) {
@@ -59,7 +59,7 @@ inline static const char *output_type2str(void) {
 }
 
 
-inline const char *input2str(void) {
+static inline const char *input2str(void) {
     switch (input_method) {
 #ifdef SYSCTL
         case SYSCTL_IN:
@@ -121,7 +121,7 @@ inline const char *input2str(void) {
     return "";
 }
 
-inline const char *show_all_if2str(void) {
+static inline const char *show_all_if2str(void) {
     switch (show_all_if) {
         case 1:
 				return " (all)";
@@ -262,7 +262,7 @@ int print_header(int option) {
 }
 
 
-inline ullong direction2value(char mode,struct inout_long stats) {
+static inline ullong direction2value(char mode,struct inout_long stats) {
     switch (mode) {
         case 0:
             return stats.in;
@@ -275,7 +275,7 @@ inline ullong direction2value(char mode,struct inout_long stats) {
 }
 
 #if EXTENDED_STATS
-inline double direction_max2value(char mode,struct inouttotal_double stats,int items) {
+static inline double direction_max2value(char mode,struct inouttotal_double stats,int items) {
     switch (mode) {
         case 0:
             return (double)(stats.in/items);
@@ -288,7 +288,7 @@ inline double direction_max2value(char mode,struct inouttotal_double stats,int i
 }
 #endif
 
-inline char *dyn_byte_value2str(double value,char *str,int buf_size) {
+static inline char *dyn_byte_value2str(double value,char *str,int buf_size) {
     if (dynamic) {
         if (value<1024)
             snprintf(str,buf_size,"%15.2f  ",value);
@@ -306,7 +306,7 @@ inline char *dyn_byte_value2str(double value,char *str,int buf_size) {
     return str;
 }
 
-inline char *dyn_bit_value2str(double value,char *str,int buf_size) {
+static inline char *dyn_bit_value2str(double value,char *str,int buf_size) {
     if (dynamic) {
         if (value<1000)
             snprintf(str,buf_size,"%15.2f  ",value);

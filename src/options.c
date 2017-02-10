@@ -30,12 +30,12 @@ static char* getToken(char** str, const char* delims);
 char *trim_whitespace(char *str);
 int read_config(const char *config_file);
 #endif
-inline int str2output_unit(char *optarg);
+static inline int str2output_unit(char *optarg);
 #if EXTENDED_STATS
-inline int str2output_type(char *optarg);
+static inline int str2output_type(char *optarg);
 #endif
-inline int str2out_method(char *optarg);
-inline int str2in_method(char *optarg);
+static inline int str2out_method(char *optarg);
+static inline int str2in_method(char *optarg);
 
 #ifdef CONFIG_FILE
  /******************************************************************************
@@ -65,7 +65,7 @@ static char* getToken(char** str, const char* delims) {
 /******************************************************************************/
 #endif
 
-inline int str2output_unit(char *optarg) {
+static inline int str2output_unit(char *optarg) {
     if (optarg) {
         if (!strcasecmp(optarg,"bytes")) return BYTES_OUT;
         if (!strcasecmp(optarg,"bits")) return BITS_OUT;
@@ -76,7 +76,7 @@ inline int str2output_unit(char *optarg) {
 }
 
 #if EXTENDED_STATS
-inline int str2output_type(char *optarg) {
+static inline int str2output_type(char *optarg) {
     if (optarg) {
         if (!strcasecmp(optarg,"rate")) return RATE_OUT;
         if (!strcasecmp(optarg,"max")) return MAX_OUT;
@@ -87,7 +87,7 @@ inline int str2output_type(char *optarg) {
 }
 #endif  
 
-inline int str2out_method(char *optarg) {
+static inline int str2out_method(char *optarg) {
     if (optarg) {
         if (!strcasecmp(optarg,"plain")) return PLAIN_OUT;
 #ifdef HAVE_CURSES
@@ -109,7 +109,7 @@ inline int str2out_method(char *optarg) {
 }
 
 
-inline int str2in_method(char *optarg) {
+static inline int str2in_method(char *optarg) {
     if (optarg) {
 #ifdef PROC_NET_DEV
         if (!strcasecmp(optarg,"proc")) return PROC_IN;

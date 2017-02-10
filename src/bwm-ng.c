@@ -26,7 +26,7 @@
 
 /* handle interrupt signal */
 void sigint(int sig) FUNCATTR_NORETURN;
-inline void init(void);
+static inline void init(void);
 
 /* clear stuff and exit */
 #ifdef __STDC__
@@ -98,7 +98,7 @@ void sigint(int sig) {
 	deinit(0, NULL);
 }
 
-inline void init(void) {
+static inline void init(void) {
 	if_count=0;
 	delay=500;
 #if EXTENDED_STATS	

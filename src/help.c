@@ -24,9 +24,9 @@
 #include "global_vars.h"
 #include "help.h"
 
-inline void print_help_line(const char *short_c,const char * long_c,const char *descr);
+static inline void print_help_line(const char *short_c,const char * long_c,const char *descr);
 
-inline void print_help_line(const char *short_c,const char * long_c,const char *descr) {
+static inline void print_help_line(const char *short_c,const char * long_c,const char *descr) {
 #ifdef LONG_OPTIONS
     printf("  %-23s",long_c);
 #else

@@ -233,7 +233,8 @@ int print_header(int option) {
 			}
 	        fprintf(tmp_out_file,"<div class=\"bwm-ng-header\">bwm-ng bwm-ng v" VERSION " (refresh %is); input: ",html_refresh);
             fprintf(tmp_out_file,"%s", input2str());
-            fprintf(tmp_out_file,"%s", show_all_if2str()); // TODO: started
+            fprintf(tmp_out_file,"%s", show_all_if2str());
+            if (output_type==SUM_OUT) fprintf(tmp_out_file,"<br>Started: %s", start_time);
 	        fprintf(tmp_out_file,"</div><table class=\"bwm-ng-output\">");
 			fprintf(tmp_out_file,"<tr class=\"bwm-ng-head\"><td class=\"bwm-ng-name\">Interface</td><td>Rx</td><td>Tx</td><td>Total</td></tr>");
 			break;
@@ -245,9 +246,8 @@ int print_header(int option) {
 	        printf("bwm-ng v" VERSION " (delay %2.3fs); ", (float)delay/1000);
 			if (output_method==PLAIN_OUT && output_type==SUM_OUT) printf("started: %s; ", start_time);
             if (output_method==PLAIN_OUT) printf(ansi_output ? "\033[2;2H" : "\n");
-            printf("input: %s", input2str());
-            if (output_method==PLAIN_OUT) printf("; press 'ctrl-c' to end this");
-            printf("%s\n", show_all_if2str());
+            printf("input: %s%s", input2str(), show_all_if2str());
+            if (output_method==PLAIN_OUT) printf("; press 'ctrl-c' to end this\n");
 			if (output_method==PLAIN_OUT) {
 				if (ansi_output)
 					printf("\033[3;2H");

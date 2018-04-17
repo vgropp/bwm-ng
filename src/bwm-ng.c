@@ -175,7 +175,8 @@ static inline void init(void) {
 #if IOSERVICE_IN
 	long_darwin_disk_names = 0;
 #endif
-
+	time_t t = time(NULL);
+	strftime(start_time, sizeof(start_time), "%c", localtime(&t));
 }
 
 /* do the main thing */

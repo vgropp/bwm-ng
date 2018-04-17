@@ -94,3 +94,5 @@ EXTERN t_iface_stats *if_stats;
 EXTERN t_iface_stats if_stats_total;
 
 #endif
+
+EXTERN char start_time[30];

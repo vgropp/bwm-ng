@@ -209,9 +209,9 @@ char *token, *value;
     } else if( strcasecmp( token, "INPUT" ) == 0 ) {
         if (value) input_method=str2in_method(value);
 	 } else if( strcasecmp( token, "ANSIOUT" ) == 0 ) {
-		 if (value) ansi_output=value[0]=='0' ? 1 : 0;
+		 if (value) ansi_output=value[0]=='0' ? 0 : 1;
     } else if( strcasecmp( token, "DYNAMIC" ) == 0 ) {
-        if (value) dynamic=value[0]=='0' ? 1 : 0;
+        if (value) dynamic=value[0]=='0' ? 0 : 1;
     } else if( strcasecmp( token, "UNIT" ) == 0 ) {
         if (value) output_unit=str2output_unit(value);
 #if EXTENDED_STATS

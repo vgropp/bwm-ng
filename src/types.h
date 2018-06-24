@@ -23,6 +23,7 @@
 
 #ifndef __TYPES_H
 #define __TYPES_H
+#include <sys/time.h>
 #include "../config.h"
 
 #ifdef HAVE_UNSIGNED_LONG_LONG

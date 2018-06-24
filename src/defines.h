@@ -31,6 +31,7 @@
 #include <limits.h>
 #include <signal.h>
 #include <string.h>
+#include <time.h>
 
 #include "../config.h"
 

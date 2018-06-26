@@ -53,6 +53,8 @@ number of platforms.
 INSTALL
 =======
 
+Autotools are used to build this. Run the autogen.sh to generate the configure script. 
+
 For detailed decription please read INSTALL
 ./configure --help for a list of options
 

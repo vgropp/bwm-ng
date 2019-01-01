@@ -1,17 +1,13 @@
-Changes in 0.6.1:
+Changes in 0.6.2:
 
- - fix g++5 warnings and errors
- - libstatgrab no longer default configure option, remove dependency on most distributions
- - fix to work with libstatgrab-0.90
- - usleep return value check Creator: Alexey Zakharov
- - fix Wrong TX value in plain data (bug ID 1797088).
- - fix Dynamic multiplier for bits is now set to x1000 (1kbit = 1000 bits, 1Mbit = 10^6 bits, ...),
-   instead of x1024, which applies only for bytes.
- - fix some little typos in the man page. Creator: Ricardo
- - delete unused interfaces from internal interface-list
- - code cleanup due to gcc flags 
- - fix bug with attached patch: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=506503
- - fix missing flush to tmp file in csv output
- - fix same values for rx and tx on plain output
- - add csv output specs to man page
+- Merge pull request #22 from vgropp/issue-#13 to fix windows build
+- Merge pull request #20 from dreibh/master CSV file output: fix for timestamp inaccuracy and Y-2038 problem
+- Merge pull request #21 from vgropp/travisci add travisci
+- Merge pull request #17 from Himura2la/master Add the started time in "sum" mode
+- Merge pull request #18 from Himura2la/fix-dynamic Fix DYNAMIC and ANSIOUT in config
+- Merge pull request #10 from SoapGentoo/fixes Use `static inline` instead of `inline`
+- Merge pull request #9 from adventureloop/master Always fflush the pipe 
+- Merge pull request #7 from samueloph/fsf_address_clean Update FSF address
+- Merge pull request #6 from samueloph/master Fix typos
+- fix nan and inf values on fast refresh (fixes debian bug #532331)
 

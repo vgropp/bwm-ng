@@ -1,5 +1,5 @@
-bwm-ng v0.6.1
-Copyright (C) 2004-2015 Volker Gropp (bwmng@gropp.org)
+bwm-ng v0.6.2
+Copyright (C) 2004-2019 Volker Gropp (bwmng@gropp.org)
 http://www.gropp.org/?id=projects&sub=bwm-ng
 
 What is this?
@@ -34,7 +34,7 @@ Supported Platforms
 ===================
 
 network routines sucessfully tested on:
-Linux 2.4*, Linux 2.6*
+Linux 2.4 and above*
 FreeBSD 4.8, 5.3, 6.2*
 MacOS X 10.1 and above*
 Solaris 10 x86*

@@ -1,8 +1,6 @@
 /******************************************************************************
  *  bwm-ng                                                                    *
  *                                                                            *
- *  Copyright (C) 2004 Volker Gropp (vgropp@pefra.de)                         *
- *                                                                            *
  *  for more info read README.                                                *
  *                                                                            *
  *  This program is free software; you can redistribute it and/or modify      *

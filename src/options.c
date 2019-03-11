@@ -1,8 +1,6 @@
 /******************************************************************************
  *  bwm-ng handle cmdline and config file options                             *
  *                                                                            *
- *  Copyright (C) 2004-2007 Volker Gropp (bwmng@gropp.org)                    *
- *                                                                            *
  *  for more info read README.                                                *
  *                                                                            *
  *  This program is free software; you can redistribute it and/or modify      *

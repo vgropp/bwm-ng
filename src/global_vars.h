@@ -1,8 +1,6 @@
 /******************************************************************************
  *  bwm-ng global variables                                                   *
  *                                                                            *
- *  Copyright (C) 2007 Volker Gropp (bwmng@gropp.org)                         *
- *                                                                            *
  *  for more info read README.                                                *
  *                                                                            *
  *  This program is free software; you can redistribute it and/or modify      *

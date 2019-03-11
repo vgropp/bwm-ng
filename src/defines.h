@@ -1,8 +1,6 @@
 /******************************************************************************
  *  bwm-ng                                                                    *
  *                                                                            *
- *  Copyright (C) 2004 Volker Gropp (vgropp@pefra.de)                         *
- *                                                                            *
  *  for more info read README.                                                *
  *                                                                            *
  *  This program is free software; you can redistribute it and/or modify      *
@@ -319,7 +317,7 @@
 #endif
 #endif
 
-#define print_version printf("Bandwidth Monitor NG (" PACKAGE_NAME ") v" VERSION "\nCopyright (C) 2004-2007 Volker Gropp <" PACKAGE_BUGREPORT ">\n"); 
+#define print_version printf("Bandwidth Monitor NG (" PACKAGE_NAME ") v" VERSION); 
 
 #ifndef EXIT_SUCCESS
 #define EXIT_SUCCESS 0

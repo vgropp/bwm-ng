@@ -148,7 +148,7 @@ AC_DEFUN([AC_QEF_C_NORETURN],
 AC_MSG_CHECKING(whether the C compiler (${CC-cc}) accepts noreturn attribute)
 AC_CACHE_VAL(qef_cv_c_noreturn,
 [qef_cv_c_noreturn=no
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdlib.h>
 void f (void) __attribute__ ((noreturn));
 void f (void)
 {

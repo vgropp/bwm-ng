@@ -336,7 +336,7 @@ void get_cmdln_options(int argc, char *argv[]) {
         if (pwd_entry!=NULL) {
             str=(char*)malloc(strlen(pwd_entry->pw_dir)+14);
             if(!str) {
-              printf("Fatal: failed to allocate %zu bytes.\n", strlen(pwd_entry->pw_dir)+14);
+              printf("Fatal: failed to allocate %zu bytes reading user directory for config file.\n", strlen(pwd_entry->pw_dir)+14);
               exit(EXIT_FAILURE);
             }
             snprintf(str,strlen(pwd_entry->pw_dir)+14,"%s/.bwm-ng.conf",pwd_entry->pw_dir);
@@ -496,4 +496,3 @@ void get_cmdln_options(int argc, char *argv[]) {
 		output_unit=BYTES_OUT;
     return;
 }
-

@@ -27,3 +27,4 @@ src/process.o
 src/retrieve.o
 stamp-h1
 src/libstatgrab.o
+.idea

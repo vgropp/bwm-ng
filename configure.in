@@ -676,6 +676,26 @@ else
 fi
 ])
 
+AC_ARG_WITH([netstatlinuxnew],AS_HELP_STRING([--with-netstatlinuxnew],[enable linux newer versions ie 2016+ like netstat -i (ARG=PATH)]),[
+if [ test $withval != "no" ]; then
+    if [ test $withval != "yes" ]; then
+        echo "GNU net-tools like version forced: $withval"
+        AC_DEFINE_UNQUOTED([HAVE_NETSTAT_PATH],[$withval],[set path to netstat])
+    else
+        echo "GNU net-tools like version forced"
+    fi
+    AC_DEFINE_UNQUOTED([NETSTAT_LINUX_NEW],[1],[use GNU net-tools netstat new versions])
+    if [ test $NETSTAT_ADDED -eq 0 ]; then
+       INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+       NETSTAT_ADDED=1
+ 	 fi
+    NETSTAT_DEFINED="1"
+else
+    NETSTAT_DEFINED="1"
+    echo "disable netstat: GNU net-tools like new versions"
+fi
+])
+
 
 AC_ARG_WITH([netstatsolaris],AS_HELP_STRING([--with-netstatsolaris],[enable solaris like netstat -i (ARG=PATH)]),[
 if [ test $withval != "no" ]; then
@@ -727,6 +747,15 @@ if [ test "${EGREP}" ]; then
     AC_CHECK_PROGS([NETSTAT_CMD],[netstat])
     if [ test "${NETSTAT_CMD}" ]; then
         AC_MSG_CHECKING([for netstat version])
+        net_test=`${NETSTAT_CMD} -ia 2>/dev/null | ${EGREP} "Iface +MTU +RX-OK +RX-ERR +RX-DRP +RX-OVR +TX-OK +TX-ERR +TX-DRP +TX-OVR +Flg"`
+        if [ test "${net_test}" ]; then
+        		AC_MSG_RESULT([GNU net-tools like newer version found])
+				AC_DEFINE_UNQUOTED([NETSTAT_LINUX_NEW],[1],[use GNU net-tools netstat newer versions])
+			 	if [ test $NETSTAT_ADDED -eq 0 ]; then
+					 INPUT_SYSTEM="$INPUT_SYSTEM netstat.$OBJEXT"
+					 NETSTAT_ADDED=1
+			 	fi
+        else
         net_test=`${NETSTAT_CMD} -ia 2>/dev/null | ${EGREP} "Iface +MTU +Met +RX-OK +RX-ERR +RX-DRP +RX-OVR +TX-OK +TX-ERR +TX-DRP +TX-OVR +Flg"`
         if [ test "${net_test}" ]; then
         		AC_MSG_RESULT([GNU net-tools like version found])
@@ -792,6 +821,7 @@ echo "*********************************************
                     fi
                 fi
             fi
+          fi
         fi
     fi
 fi

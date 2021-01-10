@@ -76,7 +76,7 @@ void get_iface_stats_netstat (char verbose) {
 			" -b"
 #endif
 #endif
-#if NETSTAT_LINUX
+#if NETSTAT_LINUX || NETSTAT_LINUX_NEW
                   show_all_if ? NETSTAT_PATH " -ia" : NETSTAT_PATH " -i"
 #endif
 #if NETSTAT_SOLARIS
@@ -95,7 +95,7 @@ void get_iface_stats_netstat (char verbose) {
     str_buf=(char *)malloc(MAX_LINE_BUFFER);
 #endif
     buffer=(char *)malloc(MAX_LINE_BUFFER);
-#ifdef NETSTAT_LINUX
+#if NETSTAT_LINUX || NETSTAT_LINUX_NEW
     /* we skip first 2 lines if not bsd at any mode */
     if ((fgets(buffer,MAX_LINE_BUFFER,f) == NULL ) || (fgets(buffer,MAX_LINE_BUFFER,f) == NULL )) 
 		deinit(1, "read of netstat failed: %s\n",strerror(errno));
@@ -111,6 +111,9 @@ void get_iface_stats_netstat (char verbose) {
         memset(&tmp_if_stats,0,(size_t)sizeof(t_iface_speed_stats)); /* reinit it to zero */
 #ifdef NETSTAT_LINUX		
         sscanf(buffer,"%s%*i%*i%llu%llu%*i%*i%llu%llu",name,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out);
+#endif
+#ifdef NETSTAT_LINUX_NEW
+        sscanf(buffer,"%s%*i%llu%llu%*i%*i%llu%llu",name,&tmp_if_stats.packets.in,&tmp_if_stats.errors.in,&tmp_if_stats.packets.out,&tmp_if_stats.errors.out);
 #endif
 #if NETSTAT_BSD_BYTES 
         if (count_tokens(buffer)>10) /* including address */

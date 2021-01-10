@@ -1,13 +1,8 @@
-Changes in 0.6.2:
+Changes in 0.6.3:
 
-- Merge pull request #22 from vgropp/issue-#13 to fix windows build
-- Merge pull request #20 from dreibh/master CSV file output: fix for timestamp inaccuracy and Y-2038 problem
-- Merge pull request #21 from vgropp/travisci add travisci
-- Merge pull request #17 from Himura2la/master Add the started time in "sum" mode
-- Merge pull request #18 from Himura2la/fix-dynamic Fix DYNAMIC and ANSIOUT in config
-- Merge pull request #10 from SoapGentoo/fixes Use `static inline` instead of `inline`
-- Merge pull request #9 from adventureloop/master Always fflush the pipe 
-- Merge pull request #7 from samueloph/fsf_address_clean Update FSF address
-- Merge pull request #6 from samueloph/master Fix typos
-- fix nan and inf values on fast refresh (fixes debian bug #532331)
-
+   * remove outdated copyright and email
+   * Merge pull request #25 from fweimer/patch-1 AC_QEF_C_NORETURN: Include <stdlib.h> for exit
+   * Merge pull request #27 from ofalk/master Fix potential write to unallocated memory.
+   * Merge pull request #28 from vgropp/#2-fix-csv-bits feat: #2 output bits in csv
+   * Merge pull request #29 from vgropp/#2-fix-csv-bits fix(doc): #2 output bits in csv
+   * Merge pull request #32 from vgropp/new-netstat-#5 feat: add support for newer (2016+) linux netstat #5

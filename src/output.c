@@ -560,6 +560,9 @@ void print_values(unsigned int y,unsigned int x,const char *if_name,t_iface_spee
                     fprintf(tmp_out_file,"%.2f%c%.2f%c%llu%c%llu%c",stats_csv->errors.out*multiplier,csv_char,stats_csv->errors.in*multiplier,csv_char,stats_csv->errors.in,
                         csv_char,stats_csv->errors.out,csv_char);
                     /* show bits/s */
+#if !NETSTAT_BSD_BYTES && !NETSTAT_NETBSD && NETSTAT
+                    if (input_method!=NETSTAT_IN)
+#endif
                     fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu\n",(double)(stats_csv->bytes.out*multiplier*8),csv_char,(double)(stats_csv->bytes.in*multiplier*8),
                         csv_char,(double)((stats_csv->bytes.out+stats_csv->bytes.in)*multiplier*8),csv_char,stats_csv->bytes.in*8,csv_char,stats_csv->bytes.out*8);
                     fflush(tmp_out_file);

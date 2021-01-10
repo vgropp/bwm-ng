@@ -1,3 +1,12 @@
+2021-01-10 (0.6.3) Volker Gropp <bwmng(at)gropp.org>
+
+	* remove outdated copyright and email
+	* Merge pull request #25 from fweimer/patch-1 AC_QEF_C_NORETURN: Include <stdlib.h> for exit
+	* Merge pull request #27 from ofalk/master Fix potential write to unallocated memory.
+	* Merge pull request #28 from vgropp/#2-fix-csv-bits feat: #2 output bits in csv
+	* Merge pull request #29 from vgropp/#2-fix-csv-bits fix(doc): #2 output bits in csv
+	* Merge pull request #32 from vgropp/new-netstat-#5 feat: add support for newer (2016+) linux netstat #5
+
 2019-01-01 14:50 (0.6.2) Volker Gropp <bwmng(at)gropp.org>
 
 	* Merge pull request #22 from vgropp/issue-#13 to fix windows build

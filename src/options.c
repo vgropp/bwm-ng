@@ -240,8 +240,10 @@ char *token, *value;
 #endif
     } else if( strcasecmp( token, "COUNT" ) == 0 ) {
         if (value) output_count=atol(value);
+#ifdef HAVE_FORK		
     } else if( strcasecmp( token, "DAEMON" ) == 0 ) {
         if (value) daemonize=value[0]=='0' ? 0 : 1;
+#endif		
     } else if( strcasecmp( token, "SUMHIDDEN" ) == 0 ) {
         if (value) sumhidden=value[0]=='0' ? 0 : 1;
 #if IOSERVICE_IN
@@ -307,7 +309,9 @@ void get_cmdln_options(int argc, char *argv[]) {
         {"csvfile",1,0,'F'},
 #endif
         {"count",1,0,'c'},
+#ifdef HAVE_FORK		
         {"daemon",1,0,'D'},
+#endif
 #ifdef HTML
         {"htmlrefresh",1,0,'R'},
         {"htmlheader",1,0,'H'},
@@ -361,8 +365,10 @@ void get_cmdln_options(int argc, char *argv[]) {
                             show_all_if=1;
                       else if (!strcmp(argv[optind-1],"-d") || !strcasecmp(argv[optind-1],"--dynamic"))
                             dynamic=1;
+#ifdef HAVE_FORK							
                       else if (!strcmp(argv[optind-1],"-D") || !strcasecmp(argv[optind-1],"--daemon"))
                             daemonize=1;
+#endif							
 #ifdef HTML                      
                       else if (!strcmp(argv[optind-1],"-H") || !strcasecmp(argv[optind-1],"--htmlheader"))
                             html_header=1;
@@ -389,9 +395,11 @@ void get_cmdln_options(int argc, char *argv[]) {
 				long_darwin_disk_names=!long_darwin_disk_names;
 				break;
 #endif
+#ifdef HAVE_FORK
 			case 'D':
 				if (optarg) daemonize=atoi(optarg);
 				break;
+#endif				
 #ifdef HTML
 			case 'R':
 				if ((optarg) && atol(optarg)>0) { html_refresh=atol(optarg); }

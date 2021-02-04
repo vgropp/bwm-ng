@@ -59,7 +59,9 @@ inline void cmdln_printhelp() {
 #if EXTENDED_STATS    
     print_help_line("-A","-A, --avglength <sec>","sets the span of average stats (Default 30s)");
 #endif    
+#ifdef HAVE_FORK
     print_help_line("-D","-D, --daemon [value]","fork into background and daemonize");
+#endif	
     print_help_line("-h","-h, --help","displays this help");
     print_help_line("-V","-V, --version","print version info");
     printf("\nInput:\n");

@@ -71,6 +71,7 @@ AC_CHECK_FUNCS([wattron])
 AC_CHECK_FUNCS([curs_set])
 AC_CHECK_FUNCS([usleep])
 AC_CHECK_FUNCS([strlcpy])
+AC_FUNC_FORK
 
 AC_ARG_WITH([time],AS_HELP_STRING([--with-time],[enable accurate time calculating (ARG=PATH)]),[
 AC_MSG_CHECKING([for accurate time calc])

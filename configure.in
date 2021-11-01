@@ -12,7 +12,7 @@ AC_ARG_ENABLE([debug],AS_HELP_STRING([--enable-debug],[enable debug (default: no
 echo "enable debugging info: $enableval"
 if [ test $enableval = "yes" ]; then
     if test -z ${CFLAGS}; then
-        CFLAGS="-g3 -Wall"
+        CFLAGS="-g3 -Werror=format-security -Wall"
     else
         CFLAGS="-g3 ${CFLAGS}"
     fi
@@ -20,7 +20,7 @@ if [ test $enableval = "yes" ]; then
 fi
 ],[
 if test -z "${CFLAGS}"; then
-    CFLAGS="-O2 -Wall"
+    CFLAGS="-O2 -Wall -Werror=format-security"
 fi
 ])
 

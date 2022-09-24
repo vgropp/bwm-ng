@@ -158,8 +158,8 @@ void get_disk_stats_proc (char verbose) {
 				} else {
 					/* neither new nor old /proc/partitions nor /proc/diskstats */
 					free(name);
-					free(buffer);
 					deinit(1, "wrong format of procfile. %i: %s\n",n,buffer);
+					free(buffer);
 				}
 			}
 		}

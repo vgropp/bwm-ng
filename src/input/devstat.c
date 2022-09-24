@@ -65,7 +65,13 @@ void get_iface_stats_devstat (char verbose) {
 		tmp_if_stats.packets.out=dev_ptr->operations[DEVSTAT_WRITE];
 #endif
 		tmp_if_stats.errors.in = tmp_if_stats.errors.out = 0;
-		hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, dev_ptr->device_name, current_if_num, verbose,(tmp_if_stats.bytes.in != 0 || tmp_if_stats.bytes.out != 0));
+
+		size_t needed = snprintf(NULL, 0, "%s%d", dev_ptr->device_name,dev_ptr->unit_number);
+		char  *device_fullname = malloc(needed);
+		sprintf(device_fullname,"%s%d", dev_ptr->device_name,dev_ptr->unit_number);
+
+		hidden_if = process_if_data (hidden_if, tmp_if_stats, &stats, device_fullname, current_if_num, verbose,(tmp_if_stats.bytes.in != 0 || tmp_if_stats.bytes.out != 0));
+		free(device_fullname);
 		
 	}
 	finish_iface_stats (verbose, stats, hidden_if,current_if_num);

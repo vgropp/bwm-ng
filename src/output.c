@@ -537,6 +537,7 @@ void print_values(unsigned int y,unsigned int x,const char *if_name,t_iface_spee
                     values2str(1,stats,full_stats,multiplier,buffer,49),
                     ((stats.errors.out || stats.errors.in) && output_unit!=ERRORS_OUT) ? "error" : "dummy" );
             fprintf(tmp_out_file,"%s</span></td><tr>\n",values2str(2,stats,full_stats,multiplier,buffer,49));
+			fflush(tmp_out_file);
             break;
 #endif
 #ifdef CSV
@@ -565,7 +566,6 @@ void print_values(unsigned int y,unsigned int x,const char *if_name,t_iface_spee
 #endif
                     fprintf(tmp_out_file,"%.2f%c%.2f%c%.2f%c%llu%c%llu\n",(double)(stats_csv->bytes.out*multiplier*8),csv_char,(double)(stats_csv->bytes.in*multiplier*8),
                         csv_char,(double)((stats_csv->bytes.out+stats_csv->bytes.in)*multiplier*8),csv_char,stats_csv->bytes.in*8,csv_char,stats_csv->bytes.out*8);
-                    fflush(tmp_out_file);
                 } else {
                     stats_csv = &full_stats.sum;
 #if !NETSTAT_BSD_BYTES && !NETSTAT_NETBSD && NETSTAT
@@ -576,7 +576,6 @@ void print_values(unsigned int y,unsigned int x,const char *if_name,t_iface_spee
                     /* show packets and errors */
                     fprintf(tmp_out_file,"%llu%c%llu%c%llu",stats_csv->packets.out,csv_char,stats_csv->packets.in,csv_char,(stats_csv->packets.out+stats_csv->packets.in));
                     fprintf(tmp_out_file,"%c%llu%c%llu\n",csv_char,stats_csv->errors.out,csv_char,stats_csv->errors.in);
-                fflush(tmp_out_file);
                     }
             } else { /* MAX_OUT or AVG_OUT */
                 if (output_type == MAX_OUT)
@@ -600,8 +599,8 @@ void print_values(unsigned int y,unsigned int x,const char *if_name,t_iface_spee
                 /* show packets/s and errors/s */
                 fprintf(tmp_out_file,"%.2Lf%c%.2Lf%c%.2Lf",stats_csv_d.packets.out,csv_char,stats_csv_d.packets.in,csv_char,stats_csv_d.packets.total);
                 fprintf(tmp_out_file,"%c%.2Lf%c%.2Lf\n",csv_char,stats_csv_d.errors.out,csv_char,stats_csv_d.errors.in);
-			    fflush(tmp_out_file);
 			}
+			fflush(tmp_out_file);
             break;
 #endif			
     }
